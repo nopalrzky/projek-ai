@@ -157,7 +157,7 @@ export const checkPort = async (port, special = null) => {
             running = true;
           }
         } catch {}
-        resolve({ online: running, latency: 0 });
+        resolve({ online: running, latency: running ? Date.now() - start : 0 });
       });
       return;
     }
