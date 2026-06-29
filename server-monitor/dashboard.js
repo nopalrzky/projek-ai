@@ -273,8 +273,16 @@ const server = http.createServer(async (req, res) => {
           const d = JSON.parse(data);
           const combo = d.combo ? `combo:${d.combo}` : '';
           const lat = d.latency ? `${d.latency.total}ms` : '';
-          const tok = d.tokens ? `tok:${(d.tokens.prompt_tokens||0)}/` : '';
-          return `[${timestamp}] ${provider}/${model} ${d.status || status} ${lat} ${tok}${combo}`;
+          const tok = d.tokens ? `tok:${(d.tokens.prompt_tokens||0)}/${(d.tokens.completion_tokens||0)}` : '';
+          // Convert UTC ISO → WIB (UTC+7) HH:MM:SS
+          let time = timestamp;
+          try {
+            const t = new Date(timestamp);
+            if (!isNaN(t.getTime())) {
+              time = t.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta', hour12: false });
+            }
+          } catch {}
+          return `[${time}] ${provider}/${model} ${d.status || status} ${lat} ${tok}${combo}`;
         } catch {
           return `[${timestamp}] ${provider}/${model} ${status}`;
         }
