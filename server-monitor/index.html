@@ -471,10 +471,14 @@ async function fetchGitHistory() {
     list.innerHTML = data.recentCommits.map(c => `
       <div class="px-4 py-2 border-t border-zinc-800/50 hover:bg-zinc-900/50">
         <div class="flex items-center gap-2">
-          <span class="text-xs font-mono text-zinc-500">${c.hash.slice(0,7)}</span>
+          <span class="text-xs font-mono text-zinc-500">${c.hash}</span>
+          <span class="text-xs text-zinc-600">${c.date}</span>
           <span class="text-xs text-zinc-300 truncate flex-1">${c.message}</span>
         </div>
-        <div class="text-[10px] text-zinc-600 mt-0.5">+${c.insertions} -${c.deletions} (${c.files} file)</div>
+        <div class="flex items-center gap-2 mt-0.5">
+          <span class="text-[10px] text-zinc-600">+${c.insertions} -${c.deletions} (${c.files} file)</span>
+          <span class="text-[10px] text-cyan-700">${c.projects.join(', ')}</span>
+        </div>
       </div>
     `).join('');
   } catch {}

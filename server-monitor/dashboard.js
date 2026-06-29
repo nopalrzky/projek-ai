@@ -612,36 +612,68 @@ const server = http.createServer(async (req, res) => {
       // Try pull first
       try { execSync('git pull --ff-only', { cwd: root, stdio: 'ignore', timeout: 15000 }); } catch {}
       
-      // Last 10 commits with stats
+      // Detect which project(s) changed in this commit
+      function detectProjects(filesChanged) {
+        const projects = [];
+        const known = {
+          'server-monitor': 'Server Monitor',
+          'sidomulyo-motor': 'Sidomulyo Motor',
+          'sidomulyo-attendance': 'Sidomulyo Attendance',
+          'tenggaong': 'Tenggaong Sport',
+          'laundry': 'WashWallet'
+        };
+        for (const f of filesChanged) {
+          for (const [prefix, name] of Object.entries(known)) {
+            if (f.startsWith(prefix + '/') || f === prefix) {
+              if (!projects.includes(name)) projects.push(name);
+            }
+          }
+        }
+        return projects.length ? projects : ['Lainnya'];
+      }
+
+      // Parse commits with date + project detection
       const log = execSync(
-        `git log --oneline --stat --max-count=10`,
+        `git log --max-count=10 --format="<<<%H||%ai||%s>>>" --stat`,
         { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
       ).trim();
-      
-      // Parse commits into structured data
+
       const totalCommits = execSync(
         `git rev-list --count HEAD`,
         { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
       ).trim();
-      
-      // Parse commits into structured data
+
       const commits = [];
-      let currentCommit = null;
-      log.split('\n').forEach(line => {
-        const commitMatch = line.match(/^([a-f0-9]+)\s+(.+)/);
-        if (commitMatch) {
-          if (currentCommit) commits.push(currentCommit);
-          currentCommit = { hash: commitMatch[1], message: commitMatch[2], files: 0, insertions: 0, deletions: 0 };
-        } else if (currentCommit) {
-          const statMatch = line.match(/^ (\d+) file[s]? changed(?:, (\d+) insertion[s]?\(\+\))?(?:, (\d+) deletion[s]?\(-\))?/);
+      const blocks = log.split(/\n<<</).filter(b => b.trim());
+      for (const block of blocks) {
+        const lines = block.trim().split('\n');
+        const headerLine = lines[0].replace(/^<<</, '').replace(/>>>$/, '').trim();
+        const parts = headerLine.split('||');
+        if (parts.length < 3) continue;
+        const hash = parts[0].slice(0, 7);
+        const date = parts[1].slice(0, 10); // YYYY-MM-DD
+        const message = parts.slice(2).join('||');
+
+        // Parse stat lines to get file paths and counts
+        const filesChanged = [];
+        for (let i = 1; i < lines.length; i++) {
+          const l = lines[i];
+          // Stat line:  path/to/file | N +/-...
+          const statMatch = l.match(/^\s+(.+?)\s+\|\s+(\d+)/);
           if (statMatch) {
-            currentCommit.files = parseInt(statMatch[1]) || 0;
-            currentCommit.insertions = parseInt(statMatch[2]) || 0;
-            currentCommit.deletions = parseInt(statMatch[3]) || 0;
+            filesChanged.push(statMatch[1].trim());
+          }
+          // Summary line: N files changed, ...
+          const summaryMatch = l.match(/^ (\d+) file[s]? changed(?:, (\d+) insertion[s]?\(\+\))?(?:, (\d+) deletion[s]?\(-\))?/);
+          if (summaryMatch) {
+            const files = parseInt(summaryMatch[1]) || 0;
+            const ins = parseInt(summaryMatch[2]) || 0;
+            const del = parseInt(summaryMatch[3]) || 0;
+            const projects = detectProjects(filesChanged);
+            commits.push({ hash, date, message, files, insertions: ins, deletions: del, projects });
           }
         }
-      });
-      if (currentCommit) commits.push(currentCommit);
+      }
       
       // Stats for the most recent commit (last push)
       const lastPushStats = commits.length > 0 ? commits[0] : { files: 0, insertions: 0, deletions: 0 };
