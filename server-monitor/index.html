@@ -280,7 +280,7 @@ function buildServiceCard(s) {
             <span class="name truncate">${name}</span>
           </div>
           <div class="meta truncate">${s.type || 'Service'}</div>
-          <div class="meta mt-1">${latency} | CPU ${cpu} · MEM ${mem}</div>
+          <div class="meta mt-1"><span class="latency" data-latency="${name}">${latency}</span> | CPU ${cpu} · MEM ${mem}</div>
           ${modelLine}
         </div>
         <div class="service-actions flex-shrink-0">
@@ -341,7 +341,13 @@ async function fetchTelemetry() {
       if (!el) return;
       const cpu = s.pid ? `${Number(s.cpu || 0).toFixed(1)}%` : '—';
       const mem = s.pid ? `${Number(s.mem || 0).toFixed(1)}%` : '—';
-      el.textContent = `CPU ${cpu} · MEM ${mem}`;
+      let text = `CPU ${cpu} · MEM ${mem}`;
+      // Update latency if available
+      if (s.latency > 0) {
+        const latEl = document.querySelector(`[data-latency="${CSS.escape(name)}"]`);
+        if (latEl) latEl.textContent = `${s.latency}ms`;
+      }
+      el.textContent = text;
       const model = document.querySelector(`[data-model="${CSS.escape(name)}"]`);
       if (model && s.model) model.textContent = `Model ${s.model}`;
     });
@@ -512,7 +518,7 @@ document.addEventListener('visibilitychange', () => {
     clearInterval(telemetryTimer); telemetryTimer = null;
   } else {
     if (!pollTimer) { fetchStatus(); pollTimer = setInterval(fetchStatus, 10000); }
-    if (!telemetryTimer) { fetchTelemetry(); telemetryTimer = setInterval(fetchTelemetry, 1000); }
+    if (!telemetryTimer) { fetchTelemetry(); telemetryTimer = setInterval(fetchTelemetry, 500); }
   }
 });
 
@@ -520,7 +526,7 @@ document.addEventListener('visibilitychange', () => {
 fetchStatus();
 setTimeout(fetchTelemetry, 500);
 pollTimer = setInterval(fetchStatus, 10000);
-telemetryTimer = setInterval(fetchTelemetry, 1000);
+telemetryTimer = setInterval(fetchTelemetry, 500);
 </script>
 
 <!-- ═══ SIDEBAR ═══ -->

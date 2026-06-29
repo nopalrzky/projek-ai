@@ -19,6 +19,17 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const GIT_CACHE = new Map();
 const GIT_FETCH_TTL = 5 * 60 * 1000;
 
+// Quick HTTP ping with short timeout (for telemetry latency)
+const checkFastLatency = (port) => new Promise(resolve => {
+  if (!port) return resolve(0);
+  const start = Date.now();
+  const req = http.get(`http://localhost:${port}/`, { timeout: 500 }, () => {
+    resolve(Date.now() - start);
+  });
+  req.on('error', () => resolve(0));
+  req.on('timeout', () => { req.destroy(); resolve(0); });
+});
+
 function getProcessStats(pid) {
   if (!pid) return { cpu: 0, mem: 0 };
   try {
@@ -158,7 +169,8 @@ const server = http.createServer(async (req, res) => {
         running = !!p;
       }
       const stats = getProcessStats(running ? p : null);
-      return [name, { pid: running ? p : null, cpu: stats.cpu, mem: stats.mem, model: info.workspace === 'CLI' ? getCliModel(name) : null }];
+      const lat = info.special ? 0 : await checkFastLatency(info.port);
+      return [name, { pid: running ? p : null, cpu: stats.cpu, mem: stats.mem, latency: lat, model: info.workspace === 'CLI' ? getCliModel(name) : null }];
     }));
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify(Object.fromEntries(rows)));
