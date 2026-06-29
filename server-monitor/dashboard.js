@@ -271,7 +271,10 @@ const server = http.createServer(async (req, res) => {
         const [timestamp, provider, model, status, data] = line.split('|');
         try {
           const d = JSON.parse(data);
-          return `[${timestamp}] ${provider}/${model} ${status} (combo: ${d.combo || 'N/A'})`;
+          const combo = d.combo ? `combo:${d.combo}` : '';
+          const lat = d.latency ? `${d.latency.total}ms` : '';
+          const tok = d.tokens ? `tok:${(d.tokens.prompt_tokens||0)}/` : '';
+          return `[${timestamp}] ${provider}/${model} ${d.status || status} ${lat} ${tok}${combo}`;
         } catch {
           return `[${timestamp}] ${provider}/${model} ${status}`;
         }
