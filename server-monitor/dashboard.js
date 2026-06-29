@@ -35,12 +35,31 @@ function getCliModel(name) {
     if (name === 'Hermes Agent') {
       const cfgPath = '/Users/naufalrizky/.hermes/config.yaml';
       const cfg = fs.readFileSync(cfgPath, 'utf8');
-      const model = cfg.match(/default:\s*['\"]?([^'\"\n]+)['\"]?/)?.[1] || '—';
-      const provider = cfg.match(/provider:\s*['\"]?([^'\"\n]+)['\"]?/)?.[1] || 'custom';
-      return `${provider}/${model}`;
+      // Match indented default: and provider: lines
+      const modelMatch = cfg.match(/^\s*default:\s*['"]?([^'"\n]+)['"]?/m);
+      const providerMatch = cfg.match(/^\s*provider:\s*['"]?([^'"\n]+)['"]?/m);
+      const model = modelMatch?.[1] || '—';
+      const provider = providerMatch?.[1] || 'custom';
+      
+      // Query 9Router DB for actual last used model from requestDetails
+      let actualModel = '';
+      try {
+        const dbPath = '/Users/naufalrizky/.9router/db/data.sqlite';
+        if (fs.existsSync(dbPath)) {
+          const result = execSync(`sqlite3 "${dbPath}" "SELECT provider, model FROM requestDetails ORDER BY timestamp DESC LIMIT 1;"`, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+          if (result) {
+            const [providerName, modelName] = result.split('|');
+            if (providerName && modelName) {
+              actualModel = ` (last: ${providerName}/${modelName})`;
+            }
+          }
+        }
+      } catch {}
+      
+      return `${provider}/${model}${actualModel}`;
     }
     if (name === 'OpenCode') {
-      const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, '/.config/opencode/opencode.json'), 'utf8'));
+      const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, '/.config/opencode/opencode/opencode.json'), 'utf8'));
       return cfg.model || '—';
     }
   } catch {}
@@ -163,6 +182,8 @@ const server = http.createServer(async (req, res) => {
       // Special case for Hermes Agent (different log file name)
       const logFileName = serviceName === 'Hermes Agent' 
         ? 'cron-model-switch.log' 
+        : serviceName === '9Router Gateway'
+        ? '9router.log'
         : `${serviceName.replace(/\s+/g, '_')}.log`;
       const logPath = path.join(__dirname, 'logs', logFileName);
       const logs = fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf8') : '';
@@ -231,6 +252,36 @@ const server = http.createServer(async (req, res) => {
       key: ROUTER_API_KEY,
       url: ROUTER_API_URL
     }));
+    return;
+  }
+
+  // API: Get 9Router realtime logs (from requestDetails DB)
+  if (req.url === '/api/9router-logs' && req.method === 'GET') {
+    try {
+      const dbPath = '/Users/naufalrizky/.9router/db/data.sqlite';
+      if (!fs.existsSync(dbPath)) {
+        return res.end(JSON.stringify({ logs: '9Router DB not found' }));
+      }
+      const result = execSync(`sqlite3 "${dbPath}" "SELECT timestamp, provider, model, status, data FROM requestDetails ORDER BY timestamp DESC LIMIT 20;"`, { 
+        encoding: 'utf8', 
+        stdio: ['ignore', 'pipe', 'ignore'] 
+      }).trim();
+      
+      const lines = result.split('\n').filter(l => l).map(line => {
+        const [timestamp, provider, model, status, data] = line.split('|');
+        try {
+          const d = JSON.parse(data);
+          return `[${timestamp}] ${provider}/${model} ${status} (combo: ${d.combo || 'N/A'})`;
+        } catch {
+          return `[${timestamp}] ${provider}/${model} ${status}`;
+        }
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ logs: lines.join('\n') }));
+    } catch (e) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: e.message }));
+    }
     return;
   }
 

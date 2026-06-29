@@ -304,7 +304,19 @@ function renderSystemDrawer(data) {
   };
 
   const drawer = document.getElementById('infraDrawer');
-  drawer.innerHTML = renderGroup('Infrastructure', infraKeys) + renderGroup('CLI', cliKeys);
+  drawer.innerHTML = `
+    ${renderGroup('Infrastructure', infraKeys)}
+    ${renderGroup('CLI', cliKeys)}
+    <div class="mb-3 mt-4 border-t border-zinc-800 pt-3">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="section-header">9Router Realtime Logs</span>
+      </div>
+      <pre id="routerLogContent" class="text-xs font-mono text-zinc-400 bg-black/50 p-3 rounded max-h-48 overflow-auto whitespace-pre leading-none">Memuat log 9Router...</pre>
+    </div>
+  `;
+  
+  // Start polling 9Router logs
+  setInterval(fetch9RouterLogs, 2000);
 }
 
 async function fetchStatus() {
@@ -374,6 +386,17 @@ async function refreshLog() {
       document.getElementById('logContent').textContent = data.join('\n');
     } else {
       document.getElementById('logContent').textContent = '(kosong)';
+    }
+  } catch {}
+}
+
+// Fetch 9Router realtime logs
+async function fetch9RouterLogs() {
+  try {
+    const res = await fetch('/api/9router-logs');
+    const data = await res.json();
+    if (data.logs) {
+      document.getElementById('routerLogContent').textContent = data.logs;
     }
   } catch {}
 }
