@@ -393,10 +393,20 @@ async function refreshLog() {
 // Fetch 9Router realtime logs
 async function fetch9RouterLogs() {
   try {
+    const el = document.getElementById('routerLogContent');
+    const wasAtBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 5;
+    const wasAtRight = el.scrollLeft + el.clientWidth >= el.scrollWidth - 5;
+    
     const res = await fetch('/api/9router-logs');
     const data = await res.json();
     if (data.logs) {
-      document.getElementById('routerLogContent').textContent = data.logs;
+      el.textContent = data.logs;
+      if (wasAtBottom) {
+        el.scrollTop = el.scrollHeight;
+      }
+      if (wasAtRight) {
+        el.scrollLeft = el.scrollWidth;
+      }
     }
   } catch {}
 }
