@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "567631688617",
+    "project_id": "washwalletid-f6969",
+    "storage_bucket": "washwalletid-f6969.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:567631688617:android:0a24a488a926266a2c0ab8",
+        "android_client_info": {
+          "package_name": "com.washwallet.cashier"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnABRI3txWUc2VhBpKltCQ_Y7Flqp2azA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:567631688617:android:81310ea8114b58de2c0ab8",
+        "android_client_info": {
+          "package_name": "com.washwallet.customer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnABRI3txWUc2VhBpKltCQ_Y7Flqp2azA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:567631688617:android:56a4e873dd5211362c0ab8",
+        "android_client_info": {
+          "package_name": "com.washwallet.production"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnABRI3txWUc2VhBpKltCQ_Y7Flqp2azA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

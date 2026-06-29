@@ -1,0 +1,25 @@
+name: wash_wallet_data
+description: Shared data layer implementations for WashWallet apps
+publish_to: none
+version: 0.1.0
+resolution: workspace
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  wash_wallet_core:
+    path: ../wash_wallet_core
+  wash_wallet_domain:
+    path: ../wash_wallet_domain
+  dio: ^5.9.0
+  dartz: ^0.10.1
+  flutter_secure_storage: ^9.0.0
+  shared_preferences: ^2.2.3
+  hive_flutter: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

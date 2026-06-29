@@ -1,0 +1,18 @@
+# docs
+*.jks
+*.keystore
+apps/*/android/key.properties
+
+.dart_tool/
+.idea/
+.vscode/
+build/
+*.iml
+
+*.jks
+*.keystore
+key.properties
+
+.env
+.env.*
+!.env.example

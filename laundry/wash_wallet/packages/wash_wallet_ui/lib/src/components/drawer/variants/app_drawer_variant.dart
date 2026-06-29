@@ -1,0 +1,1 @@
+enum AppDrawerVariant { standard, compact }

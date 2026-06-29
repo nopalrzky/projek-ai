@@ -1,0 +1,5 @@
+package com.washwallet.production
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity()

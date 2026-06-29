@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Console Monitor</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+tailwind.config={darkMode:'class',theme:{extend:{colors:{zinc:{950:'#0a0a0f',900:'#111118',850:'#15151d',800:'#1e1e2a'}},fontFamily:{mono:['JetBrains Mono','Fira Code','monospace']}}}}
+</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+*{font-family:'Inter',system-ui,sans-serif}
+body{background:#0a0a0f;color:#d4d4d8}
+.card{background:linear-gradient(135deg,#15151d 0%,#111118 100%);border:1px solid #1e1e2a;transition:all .2s}
+.card:hover{border-color:#2a2a3a}
+.stat-card{background:linear-gradient(135deg,#15151d 0%,#111118 100%);border:1px solid #1e1e2a}
+.stat-card .stat-value{font-size:2rem;font-weight:800;line-height:1}
+.stat-card .stat-label{font-size:.75rem;color:#71717a;margin-top:4px}
+.section-header{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:#52525b;font-weight:600}
+.pulse-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.pulse-dot.online{background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,.4)}
+.pulse-dot.offline{background:#ef4444;box-shadow:0 0 6px rgba(239,68,68,.3)}
+.pulse-dot.warning{background:#eab308;box-shadow:0 0 6px rgba(234,179,8,.3)}
+.search-input{background:#15151d;border:1px solid #1e1e2a;color:#d4d4d8;border-radius:8px;padding:8px 12px 8px 32px;font-size:.8rem;width:200px;outline:none;transition:all .2s}
+.search-input:focus{border-color:#3b3b5a;width:260px}
+.search-wrap{position:relative}
+.search-wrap .search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#52525b;font-size:.75rem}
+.filter-select{background:#15151d;border:1px solid #1e1e2a;color:#d4d4d8;border-radius:8px;padding:8px 12px;font-size:.8rem;outline:none;cursor:pointer}
+.filter-select:focus{border-color:#3b3b5a}
+.service-card{padding:10px;border-radius:8px;transition:all .2s;background:#13131e}
+.service-card.online{border-left:10px solid #22c55e;background:rgba(34,197,94,.05)}
+.service-card.offline{border-left:10px solid #ef4444;background:rgba(239,68,68,.05)}
+.service-card.unknown{border-left:10px solid #52525b}
+.service-card .name{font-size:.8rem;font-weight:600}
+.service-card .meta{font-size:.7rem;color:#71717a;margin-top:2px}
+.git-status{font-size:.65rem;margin-top:6px;padding:3px 6px;border-radius:6px;display:inline-block;background:#27272a;color:#a1a1aa}
+.git-status.clean{background:rgba(34,197,94,.12);color:#22c55e}
+.git-status.update{background:rgba(234,179,8,.12);color:#eab308}
+.git-status.dirty{background:rgba(249,115,22,.12);color:#fb923c}
+.git-status.ahead{background:rgba(59,130,246,.12);color:#60a5fa}
+.git-status.none{background:#27272a;color:#71717a}
+.infra-drawer{position:fixed;right:16px;top:96px;width:280px;max-height:calc(100vh - 120px);overflow:auto;z-index:30}
+.infra-drawer .service-card{margin-bottom:6px}
+@media(min-width:1280px){body{padding-right:320px}}
+@media(max-width:1279px){.infra-drawer{position:static;width:auto;max-height:none;margin-top:24px}}
+.service-card .latency{font-size:.7rem;font-weight:500}
+.service-card.online .latency{color:#22c55e}
+.service-card.offline .latency{color:#ef4444}
+.service-actions{display:flex;gap:3px;margin-top:6px}
+.service-actions button{padding:4px 7px;border-radius:5px;font-size:.65rem;border:none;cursor:pointer;transition:all .15s;min-width:28px}
+.btn-start{background:rgba(34,197,94,.15);color:#22c55e}
+.btn-start:hover{background:rgba(34,197,94,.25)}
+.btn-stop{background:rgba(239,68,68,.15);color:#ef4444}
+.btn-stop:hover{background:rgba(239,68,68,.25)}
+.btn-restart{background:rgba(59,130,246,.15);color:#60a5fa}
+.btn-restart:hover{background:rgba(59,130,246,.25)}
+.btn-log{background:rgba(113,113,122,.2);color:#a1a1aa}
+.btn-log:hover{background:rgba(113,113,122,.3)}
+.btn-link{background:rgba(99,102,241,.15);color:#818cf8}
+.btn-link:hover{background:rgba(99,102,241,.25)}
+.btn-graph{background:rgba(16,185,129,.15);color:#34d399}
+.btn-graph:hover{background:rgba(16,185,129,.25)}
+.btn-loading{pointer-events:none;opacity:.65;animation:btn-pulse .8s ease-in-out infinite}
+.btn-loading::after{content:'…'}
+@keyframes btn-pulse{0%,100%{opacity:.65}50%{opacity:1}}
+.filter-active .service-card.hidden-by-filter{display:none}
+.global-badge{display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:.7rem;font-weight:600}
+.global-badge.all-green{background:rgba(34,197,94,.12);color:#22c55e}
+.global-badge.some-off{background:rgba(239,68,68,.12);color:#ef4444}
+.global-badge.all-off{background:rgba(113,113,122,.12);color:#a1a1aa}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .3s ease-out forwards}
+@media(max-width:640px){
+  .search-input{width:140px}
+  .search-input:focus{width:180px}
+  .stat-card .stat-value{font-size:1.5rem}
+  .header-wrap{flex-wrap:wrap;gap:8px}
+}
+</style>
+</head>
+<body class="antialiased p-4 md:p-6 max-w-7xl mx-auto">
+
+<!-- ═══ HEADER ═══ -->
+<header class="flex items-center justify-between mb-6 header-wrap">
+  <div class="flex items-center gap-3">
+    <img src="/monitor-icon.png" alt="Console Monitor" class="w-9 h-9 rounded-xl object-cover shadow-lg shadow-cyan-500/10">
+    <div>
+      <h1 class="text-lg font-bold">Console Monitor</h1>
+      <p class="text-xs text-zinc-500">Service dashboard</p>
+    </div>
+  </div>
+  <div class="flex items-center gap-3">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="searchInput" placeholder="Cari service..." oninput="filterServices()">
+    </div>
+    <select class="filter-select" id="filterSelect" onchange="filterServices()">
+      <option value="all">Semua</option>
+      <option value="online">Online</option>
+      <option value="offline">Offline</option>
+    </select>
+    <div id="globalBadge" class="global-badge all-green">● Semua Aktif</div>
+  </div>
+</header>
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8" id="overview">
+  <div class="stat-card rounded-xl p-4 fade-in">
+    <div class="stat-value text-green-400" id="statRunning">—</div>
+    <div class="stat-label">🟢 Running</div>
+  </div>
+  <div class="stat-card rounded-xl p-4 fade-in">
+    <div class="stat-value text-red-400" id="statOffline">—</div>
+    <div class="stat-label">🔴 Offline</div>
+  </div>
+  <div class="stat-card rounded-xl p-4 fade-in">
+    <div class="stat-value text-zinc-300" id="statTotal">—</div>
+    <div class="stat-label">📦 Total Services</div>
+  </div>
+  <div class="stat-card rounded-xl p-4 fade-in">
+    <div class="stat-value text-zinc-300" id="statLatency">—</div>
+    <div class="stat-label">⚡ Rata-rata Latency</div>
+  </div>
+</div>
+
+<!-- ═══ SECTIONS (populated by JS) ═══ -->
+<div id="dashboardSections"></div>
+<aside id="infraDrawer" class="infra-drawer card rounded-xl p-3"></aside>
+
+<!-- ═══ LOG MODAL ═══ -->
+<div id="logModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm" onclick="if(event.target===this)closeLog()">
+  <div class="bg-black border border-zinc-800 rounded-xl w-full max-w-4xl max-h-[85vh] flex flex-col mx-4" onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between p-4 border-b border-zinc-800">
+      <h3 class="font-semibold text-sm" id="logTitle">Log</h3>
+      <button onclick="closeLog()" class="text-zinc-500 hover:text-zinc-300 text-lg leading-none">&times;</button>
+    </div>
+    <pre id="logContent" class="text-xs font-mono text-zinc-300 bg-black p-4 overflow-auto flex-1 whitespace-pre leading-none">Memuat...</pre>
+    <div class="p-3 border-t border-zinc-800 flex gap-2">
+      <button onclick="clearLog()" class="text-xs px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400">🗑 Hapus</button>
+      <button onclick="closeLog()" class="text-xs px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 ml-auto">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCRIPTS ═══ -->
+<script>
+const SECTIONS = [
+  { name: 'Sidomulyo', showInfra: false },
+  { name: 'Tenggaong', showInfra: false },
+  { name: 'WashWallet', showInfra: false }
+];
+
+const SECTION_KEYS = {
+  'Sidomulyo': ['Sidomulyo Motor', 'Sidomulyo Attendance'],
+  'Tenggaong': ['Tenggaong Sport Backend', 'Tenggaong Sport Frontend'],
+  'WashWallet': ['WashWallet Backend', 'WashWallet Cashier', 'WashWallet Production', 'WashWallet Customer'],
+  'Infrastructure': ['9Router Gateway', 'Monitoring Dashboard'],
+  'CLI': ['Hermes Agent', 'OpenCode']
+};
+
+let allData = {};
+let currentLogService = '';
+let logTimer = null;
+let pollTimer = null;
+let telemetryTimer = null;
+
+const GRAPHFY_MAP = {
+  'Sidomulyo Motor': 'graphify-callflow.html',
+  'Sidomulyo Attendance': 'sidomulyo-attendance-mobile-callflow.html',
+  'WashWallet Backend': 'laundry-callflow.html',
+};
+
+function renderSections(data) {
+  allData = data;
+  const container = document.getElementById('dashboardSections');
+  container.innerHTML = '';
+
+  let total = 0, running = 0, offline = 0, latencySum = 0, latencyCount = 0;
+
+  SECTIONS.forEach((sec, idx) => {
+    const keys = SECTION_KEYS[sec.name] || [];
+    const services = keys.map(k => data[k]).filter(Boolean);
+    if (services.length === 0) return;
+
+    services.forEach(s => {
+      total++;
+      if (s.online) { running++; latencySum += s.latency || 0; latencyCount++; }
+      else offline++;
+    });
+
+    const sectionDiv = document.createElement('div');
+    sectionDiv.className = `fade-in mb-5`;
+    sectionDiv.style.animationDelay = `${idx * 0.05}s`;
+
+    sectionDiv.innerHTML = `
+      <div class="flex items-center gap-2 mb-2">
+        <span class="section-header">${sec.name}</span>
+        <span class="text-xs text-zinc-600">(${services.length})</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1.5" id="grid-${sec.name.replace(/\s+/g,'')}">
+        ${services.map(s => buildServiceCard(s)).join('')}
+      </div>
+    `;
+    container.appendChild(sectionDiv);
+  });
+
+  renderSystemDrawer(data);
+  [...(SECTION_KEYS.Infrastructure || []), ...(SECTION_KEYS.CLI || [])].map(k => data[k]).filter(Boolean).forEach(s => {
+    total++;
+    if (s.online) { running++; latencySum += s.latency || 0; latencyCount++; }
+    else offline++;
+  });
+
+  document.getElementById('statRunning').textContent = running;
+  document.getElementById('statOffline').textContent = offline;
+  document.getElementById('statTotal').textContent = total;
+  const avg = latencyCount > 0 ? Math.round(latencySum / latencyCount) : 0;
+  document.getElementById('statLatency').textContent = avg > 0 ? avg + 'ms' : '—';
+
+  const badge = document.getElementById('globalBadge');
+  if (offline === 0) { badge.className = 'global-badge all-green'; badge.textContent = '● Semua Aktif'; }
+  else if (running === 0) { badge.className = 'global-badge all-off'; badge.textContent = '● Semua Offline'; }
+  else { badge.className = 'global-badge some-off'; badge.textContent = `● ${offline} Offline`; }
+}
+
+function buildServiceCard(s) {
+  const name = Object.keys(allData).find(k => allData[k] === s) || 'Unknown';
+  const statusClass = s.online ? 'online' : 'offline';
+  const latency = s.latency > 0 ? `${s.latency}ms` : '—';
+  const cpu = s.pid ? `${Number(s.cpu || 0).toFixed(1)}%` : '—';
+  const mem = s.pid ? `${Number(s.mem || 0).toFixed(1)}%` : '—';
+  const modelLine = s.model ? `<div class="meta mt-1" data-model="${name}">Model ${s.model}</div>` : '';
+  const dotClass = s.online ? 'online' : 'offline';
+  const protected_ = s.protected;
+  const port = s.port;
+  const serviceUrl = port ? `http://localhost:${port}` : null;
+  const git = s.git || { state: 'none', label: 'No repo' };
+
+  let startBtn = '', stopBtn = '', linkBtn = '', restartBtn = '', logBtn = '', graphBtn = '', terminalBtn = '';
+  if (!protected_) {
+    if (s.online) {
+      stopBtn = `<button class="btn-stop" onclick="actionService('${name}','stop',this)" title="Stop">⏹</button>`;
+    } else {
+      startBtn = `<button class="btn-start" onclick="actionService('${name}','start',this)" title="Start">▶</button>`;
+    }
+  }
+  if (serviceUrl) {
+    linkBtn = `<button class="btn-link" onclick="window.open('${serviceUrl}','_blank')" title="Buka">🔗</button>`;
+  }
+  restartBtn = `<button class="btn-restart" onclick="actionService('${name}','restart',this)" title="Restart">🔄</button>`;
+  logBtn = `<button class="btn-log" onclick="openLog('${name}')" title="Log">📋</button>`;
+  if (GRAPHFY_MAP[name]) {
+    graphBtn = `<button class="btn-graph" onclick="window.open('${GRAPHFY_MAP[name]}','_blank')" title="Graphify">◉</button>`;
+  }
+  if (s.workspace === 'CLI') {
+    terminalBtn = `<button class="btn-log" onclick="copyTerminalCommand('${name.toLowerCase().replace(/\s+/g, '')}', this)" title="Copy terminal command">⌘</button>`;
+  }
+
+  const buttons = `${startBtn}${stopBtn}${linkBtn}${restartBtn}${logBtn}${graphBtn}${terminalBtn}`;
+
+  return `
+    <div class="service-card card ${statusClass}" data-name="${name.toLowerCase()}" data-online="${s.online}">
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="pulse-dot ${dotClass}"></span>
+            <span class="name truncate">${name}</span>
+          </div>
+          <div class="meta truncate">${s.type || 'Service'}</div>
+          <div class="meta mt-1">${latency} | CPU ${cpu} · MEM ${mem}</div>
+          ${modelLine}
+        </div>
+        <div class="service-actions flex-shrink-0">
+          ${buttons}
+        </div>
+      </div>
+      <div class="git-status ${git.state} mt-2">${git.label}</div>
+    </div>
+  `;
+}
+
+function renderSystemDrawer(data) {
+  const infraKeys = SECTION_KEYS.Infrastructure || [];
+  const cliKeys = SECTION_KEYS.CLI || [];
+  const services = [...infraKeys, ...cliKeys].map(k => data[k]).filter(Boolean);
+
+  const renderGroup = (label, keys) => {
+    const svcs = keys.map(k => data[k]).filter(Boolean);
+    if (svcs.length === 0) return '';
+    return `
+      <div class="mb-3">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="section-header">${label}</span>
+          <span class="text-xs text-zinc-600">(${svcs.length})</span>
+        </div>
+        <div>${svcs.map(s => buildServiceCard(s)).join('')}</div>
+      </div>
+    `;
+  };
+
+  const drawer = document.getElementById('infraDrawer');
+  drawer.innerHTML = renderGroup('Infrastructure', infraKeys) + renderGroup('CLI', cliKeys);
+}
+
+async function fetchStatus() {
+  try {
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    renderSections(data);
+  } catch(e) {
+    document.getElementById('dashboardSections').innerHTML =
+      `<div class="text-center py-12 text-zinc-600"><p class="text-lg">Gagal</p><p class="mt-2">Gagal mengambil status: ${e.message}</p></div>`;
+  }
+}
+
+async function fetchTelemetry() {
+  try {
+    const res = await fetch('/api/telemetry');
+    const data = await res.json();
+    Object.entries(data).forEach(([name, s]) => {
+      const el = document.querySelector(`[data-telemetry="${CSS.escape(name)}"]`);
+      if (!el) return;
+      const cpu = s.pid ? `${Number(s.cpu || 0).toFixed(1)}%` : '—';
+      const mem = s.pid ? `${Number(s.mem || 0).toFixed(1)}%` : '—';
+      el.textContent = `CPU ${cpu} · MEM ${mem}`;
+      const model = document.querySelector(`[data-model="${CSS.escape(name)}"]`);
+      if (model && s.model) model.textContent = `Model ${s.model}`;
+    });
+  } catch {}
+}
+
+async function actionService(name, action, btn) {
+  if (!btn) return;
+  const originalHtml = btn.innerHTML;
+  btn.classList.add('btn-loading');
+  btn.disabled = true;
+  try {
+    await fetch('/api/action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ serviceName: name, action })
+    });
+    setTimeout(fetchStatus, 500);
+  } catch (e) {
+    console.error(e);
+    alert('Gagal: ' + e.message);
+  } finally {
+    btn.classList.remove('btn-loading');
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
+  }
+}
+
+async function openLog(name) {
+  currentLogService = name;
+  document.getElementById('logTitle').textContent = `Log — ${name}`;
+  document.getElementById('logModal').classList.remove('hidden');
+  document.getElementById('logContent').textContent = 'Memuat...';
+  await refreshLog();
+  logTimer = setInterval(refreshLog, 1000);
+}
+
+async function refreshLog() {
+  if (!currentLogService) return;
+  try {
+    const res = await fetch(`/api/logs/${encodeURIComponent(currentLogService)}`);
+    const data = await res.json();
+    if (data && data.length > 0) {
+      document.getElementById('logContent').textContent = data.join('\n');
+    } else {
+      document.getElementById('logContent').textContent = '(kosong)';
+    }
+  } catch {}
+}
+
+function closeLog() {
+  if (logTimer) clearInterval(logTimer);
+  logTimer = null;
+  currentLogService = '';
+  document.getElementById('logModal').classList.add('hidden');
+}
+
+async function clearLog() {
+  if (!currentLogService) return;
+  try {
+    await fetch(`/api/logs/${encodeURIComponent(currentLogService)}/clear`, { method: 'POST' });
+    await refreshLog();
+  } catch {}
+}
+
+function filterServices() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const filter = document.getElementById('filterSelect').value;
+  document.querySelectorAll('.service-card').forEach(card => {
+    const name = card.dataset.name.toLowerCase();
+    const online = card.dataset.online === 'true';
+    const matchSearch = name.includes(search);
+    const matchFilter = filter === 'all' || (filter === 'online' && online) || (filter === 'offline' && !online);
+    card.style.display = (matchSearch && matchFilter) ? '' : 'none';
+  });
+}
+
+function copyTerminalCommand(name, btn) {
+  const cmds = {
+    hermesagent: 'hermes',
+    opencode: 'opencode'
+  };
+  const cmd = cmds[name.toLowerCase()];
+  if (!cmd) return;
+  navigator.clipboard.writeText(cmd).then(() => {
+    const original = btn.innerHTML;
+    btn.innerHTML = '✓';
+    setTimeout(() => btn.innerHTML = original, 1000);
+  });
+}
+
+// Sidebar toggle
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('-translate-x-full');
+  document.getElementById('sidebar-overlay').classList.toggle('hidden');
+}
+
+// Init lucide icons after DOM ready
+if (typeof lucide !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
+  } else {
+    lucide.createIcons();
+  }
+}
+
+// Auto-poll:
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearInterval(pollTimer); pollTimer = null;
+    clearInterval(telemetryTimer); telemetryTimer = null;
+  } else {
+    if (!pollTimer) { fetchStatus(); pollTimer = setInterval(fetchStatus, 10000); }
+    if (!telemetryTimer) { fetchTelemetry(); telemetryTimer = setInterval(fetchTelemetry, 1000); }
+  }
+});
+
+// Initial load
+fetchStatus();
+setTimeout(fetchTelemetry, 500);
+pollTimer = setInterval(fetchStatus, 10000);
+telemetryTimer = setInterval(fetchTelemetry, 1000);
+</script>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside id="sidebar" class="fixed left-0 top-0 h-full w-56 bg-zinc-950 border-r border-zinc-800 z-40 -translate-x-full transition-transform duration-300">
+  <div class="p-4 pt-20">
+    <nav class="space-y-2">
+      <a href="/" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition bg-emerald-600/20 border border-emerald-500/30">
+        <i data-lucide="layout-dashboard" class="h-5 w-5 text-emerald-400"></i>
+        <span class="text-sm font-medium text-emerald-300">Dashboard</span>
+      </a>
+      <a href="/cek-github.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 transition">
+        <i data-lucide="shield-check" class="h-5 w-5 text-zinc-500"></i>
+        <span class="text-sm font-medium">Cek GitHub</span>
+      </a>
+    </nav>
+  </div>
+</aside>
+<button onclick="toggleSidebar()" class="fixed left-4 top-4 z-[100] p-2 bg-zinc-900 border border-zinc-800 rounded-lg hover:bg-zinc-800 transition shadow-lg">
+  <span class="text-zinc-400 text-lg leading-none">☰</span>
+</button>
+<button onclick="toggleSidebar()" id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden"></button>
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cek Keamanan GitHub - Console Monitor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;750&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0a0a0b; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .card { background: linear-gradient(145deg, #18181b 0%, #09090b 100%); }
+    .card:hover { background: linear-gradient(145deg, #1f1f23 0%, #18181b 100%); }
+  </style>
+</head>
+<body class="text-zinc-100 min-h-screen">
+  
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="fixed left-0 top-0 h-full w-56 bg-zinc-950 border-r border-zinc-800 z-40 transform -translate-x-full transition-transform duration-300">
+    <div class="p-4 pt-20">
+      <nav class="space-y-2">
+        <a href="index.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 transition">
+          <i data-lucide="layout-dashboard" class="h-5 w-5"></i>
+          <span class="text-sm font-medium">Dashboard</span>
+        </a>
+        <a href="cek-github.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition bg-emerald-600/20 border border-emerald-500/30">
+          <i data-lucide="shield-check" class="h-5 w-5 text-emerald-400"></i>
+          <span class="text-sm font-medium text-emerald-300">Cek GitHub</span>
+        </a>
+        <a href="graphify.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 transition">
+          <i data-lucide="git-branch" class="h-5 w-5"></i>
+          <span class="text-sm font-medium">Graphify</span>
+        </a>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- SIDEBAR TOGGLE -->
+  <button onclick="toggleSidebar()" class="fixed left-4 top-4 z-[100] p-2 bg-zinc-900 border border-zinc-800 rounded-lg hover:bg-zinc-800 transition shadow-lg">
+    <i data-lucide="menu" class="h-5 w-5 text-zinc-400"></i>
+  </button>
+  <button onclick="toggleSidebar()" id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden"></button>
+
+  <!-- MAIN CONTENT -->
+  <main class="max-w-4xl mx-auto px-6 py-8">
+    
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="h-16 w-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="shield-check" class="text-white h-8 w-8"></i>
+      </div>
+      <h1 class="text-2xl font-bold text-white mb-2">Cek Keamanan GitHub</h1>
+      <p class="text-zinc-400">Masukkan URL repository GitHub untuk dicek keamanannya</p>
+    </div>
+
+    <!-- Security Layer Status Indicators -->
+    <div id="layer-status" class="grid grid-cols-5 gap-3 mb-6">
+      <div class="card rounded-lg p-3 border border-zinc-800 text-center" id="status-gitleaks">
+        <div class="h-8 w-8 mx-auto bg-zinc-800 rounded-full flex items-center justify-center mb-2">
+          <i data-lucide="key" class="h-4 w-4 text-zinc-500"></i>
+        </div>
+        <p class="text-xs text-zinc-500">Gitleaks</p>
+        <p class="text-xs text-zinc-600 mt-1">○ Pending</p>
+      </div>
+      <div class="card rounded-lg p-3 border border-zinc-800 text-center" id="status-trivy">
+        <div class="h-8 w-8 mx-auto bg-zinc-800 rounded-full flex items-center justify-center mb-2">
+          <i data-lucide="shield-alert" class="h-4 w-4 text-zinc-500"></i>
+        </div>
+        <p class="text-xs text-zinc-500">Trivy</p>
+        <p class="text-xs text-zinc-600 mt-1">○ Pending</p>
+      </div>
+      <div class="card rounded-lg p-3 border border-zinc-800 text-center" id="status-scorecard">
+        <div class="h-8 w-8 mx-auto bg-zinc-800 rounded-full flex items-center justify-center mb-2">
+          <i data-lucide="clipboard-check" class="h-4 w-4 text-zinc-500"></i>
+        </div>
+        <p class="text-xs text-zinc-500">Scorecard</p>
+        <p class="text-xs text-zinc-600 mt-1">○ Pending</p>
+      </div>
+      <div class="card rounded-lg p-3 border border-zinc-800 text-center" id="status-codeql">
+        <div class="h-8 w-8 mx-auto bg-zinc-800 rounded-full flex items-center justify-center mb-2">
+          <i data-lucide="code" class="h-4 w-4 text-zinc-500"></i>
+        </div>
+        <p class="text-xs text-zinc-500">CodeQL</p>
+        <p class="text-xs text-zinc-600 mt-1">○ Pending</p>
+      </div>
+      <div class="card rounded-lg p-3 border border-zinc-800 text-center" id="status-zizmor">
+        <div class="h-8 w-8 mx-auto bg-zinc-800 rounded-full flex items-center justify-center mb-2">
+          <i data-lucide="workflow" class="h-4 w-4 text-zinc-500"></i>
+        </div>
+        <p class="text-xs text-zinc-500">zizmor</p>
+        <p class="text-xs text-zinc-600 mt-1">○ Pending</p>
+      </div>
+    </div>
+
+    <!-- Input Section -->
+    <div class="card rounded-xl p-6 border border-zinc-800 mb-6">
+      <div class="flex gap-3">
+        <input type="text" id="github-url" placeholder="https://github.com/owner/repo" 
+          class="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-emerald-500">
+        <button onclick="runSecurityCheck()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-lg font-medium transition flex items-center gap-2">
+          <i data-lucide="play" class="h-5 w-5"></i>
+          <span>Jalankan</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="security-loading" class="hidden card rounded-xl p-8 border border-zinc-800 text-center">
+      <i data-lucide="loader-2" class="animate-spin h-10 w-10 text-emerald-500 mx-auto mb-4"></i>
+      <p class="text-zinc-300 font-medium mb-2">Sedang Mengecek...</p>
+      <p class="text-zinc-500 text-sm" id="security-loading-status">Mempersiapkan</p>
+    </div>
+
+    <!-- Results -->
+    <div id="security-results" class="hidden space-y-4"></div>
+
+    <!-- Action Buttons -->
+    <div id="security-actions" class="hidden flex justify-center gap-4 mt-8">
+      <button onclick="importToFolder()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-lg font-medium transition flex items-center gap-2">
+        <i data-lucide="folder-plus" class="h-5 w-5"></i>
+        <span>Import ke Folder</span>
+      </button>
+      <button onclick="abortCheck()" class="bg-zinc-700 hover:bg-zinc-600 text-white px-6 py-3 rounded-lg font-medium transition flex items-center gap-2">
+        <i data-lucide="x" class="h-5 w-5"></i>
+        <span>Batal</span>
+      </button>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-zinc-900 bg-zinc-950/80 py-4 px-6 text-xs text-zinc-600 flex justify-between items-center max-w-4xl mx-auto">
+    <span>© 2026 Console Monitor</span>
+    <span class="flex items-center gap-1 mono">
+      <i data-lucide="clock" class="h-3.5 w-3.5"></i> Last: <span id="last-checked">-</span>
+    </span>
+  </footer>
+
+  <script>
+    let currentRepoPath = null;
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      sidebar.classList.toggle('-translate-x-full');
+      if (overlay) overlay.classList.toggle('hidden');
+    }
+
+    function updateLayerStatus(layer, status, message = '') {
+      const el = document.getElementById('status-' + layer);
+      if (!el) return;
+      
+      // Find icon (could be <i> or <svg> after lucide.createIcons)
+      const icon = el.querySelector('i, svg');
+      const statusText = el.querySelector('p:last-child');
+      
+      if (!icon || !statusText) return;
+      
+      const statusMap = {
+        pending: { color: 'text-zinc-500', text: '○ Pending' },
+        running: { color: 'text-yellow-500', text: '◐ Running' },
+        success: { color: 'text-green-500', text: '✓ Done' },
+        error: { color: 'text-red-500', text: '✗ Error' }
+      };
+      
+      const s = statusMap[status] || statusMap.pending;
+      icon.className = 'h-4 w-4 ' + s.color;
+      statusText.className = 'text-xs ' + s.color + ' mt-1';
+      statusText.textContent = s.text + (message ? ' - ' + message : '');
+    }
+
+    function updateLoadingStatus(message) {
+      const el = document.getElementById('security-loading-status');
+      if (el) el.textContent = message;
+    }
+
+    async function runSecurityCheck() {
+      const url = document.getElementById('github-url').value.trim();
+      if (!url) {
+        alert('Masukkan URL repository GitHub terlebih dahulu!');
+        return;
+      }
+
+      // Reset status
+      ['gitleaks', 'trivy', 'scorecard', 'codeql', 'zizmor'].forEach(l => updateLayerStatus(l, 'pending'));
+      
+      // Show loading
+      document.getElementById('security-loading').classList.remove('hidden');
+      document.getElementById('security-results').classList.add('hidden');
+      document.getElementById('security-actions').classList.add('hidden');
+      
+      lucide.createIcons();
+
+      try {
+        updateLoadingStatus('Mengirim permintaan ke server...');
+        
+        const res = await fetch('/api/security-check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ repoUrl: url })
+        });
+        
+        const data = await res.json();
+        
+        if (data.error) {
+          alert('Error: ' + data.error);
+          document.getElementById('security-loading').classList.add('hidden');
+          return;
+        }
+
+        // Update all layers to done
+        ['gitleaks', 'trivy', 'scorecard', 'codeql', 'zizmor'].forEach(l => updateLayerStatus(l, 'success'));
+        updateLoadingStatus('Selesai!');
+
+        // Show results immediately (9Router explanation handled separately)
+        document.getElementById('security-loading').classList.add('hidden');
+        document.getElementById('security-results').classList.remove('hidden');
+        document.getElementById('security-actions').classList.remove('hidden');
+        
+        const resultsContainer = document.getElementById('security-results');
+        
+        // Build tool status HTML
+        const toolInfo = {
+          gitleaks: {
+            label: 'Gitleaks',
+            icon: '🔑',
+            fungsi: 'Cek API key, token, password, `.env`, secret yang bocor di repo',
+            arti: { 'PASS': '✅ Tidak ditemukan secret bocor', 'FAIL': '🚨 Ditemukan secret bocor! Segera revoke key yg bocor', 'ERROR': '❌ Gitleaks gagal dijalankan' }
+          },
+          trivy: {
+            label: 'Trivy',
+            icon: '🛡️',
+            fungsi: 'Cek dependency/library punya vulnerability, misconfig, secret, license',
+            arti: { 'PASS': '✅ Tidak ditemukan vulnerability (sesuai severity yg di-scan)', 'FAIL': '🚨 Ditemukan vulnerability kritis! Segera update', 'NEEDS_REVIEW': '⚠️ Ada vulnerability HIGH, perlu direview', 'ERROR': '❌ Trivy gagal dijalankan' }
+          },
+          scorecard: {
+            label: 'Scorecard',
+            icon: '📋',
+            fungsi: 'Cek reputasi/kesehatan repo: license, branch protection, security policy, CI, dll',
+            arti: { 'SKIPPED': '⏭️ Tidak dijalankan — butuh GitHub token', 'PASS': '✅ Repo memiliki security practice yg baik', 'FAIL': '⚠️ Repo memiliki risiko', 'ERROR': '❌ Scorecard gagal' }
+          },
+          codeql: {
+            label: 'CodeQL',
+            icon: '🔬',
+            fungsi: 'Scan source code: injection, XSS, command injection, path traversal',
+            arti: { 'SKIPPED': '⏭️ Wajar — CodeQL paling cocok di GitHub Actions', 'PASS': '✅ Tidak ditemukan security issue kritis', 'FAIL': '🚨 Ditemukan security issue kritis', 'ERROR': '❌ CodeQL gagal' }
+          },
+          zizmor: {
+            label: 'zizmor',
+            icon: '🔍',
+            fungsi: 'Audit keamanan GitHub Actions workflow di `.github/workflows`',
+            arti: { 'PASS': '✅ Workflow aman / tidak ada temuan berbahaya', 'FAIL': '⚠️ Workflow memiliki risiko keamanan', 'NEEDS_REVIEW': '🔍 Ada temuan yg perlu dicek', 'ERROR': '❌ zizmor gagal dijalankan' }
+          }
+        };
+
+        const toolsHtml = Object.entries(data.tools || {}).map(([tool, t]) => {
+          const info = toolInfo[tool] || { label: tool, icon: '🔧', fungsi: '', arti: {} };
+          const statusDesc = info.arti[t.status] || t.status;
+          const statusColor = t.status === 'PASS' ? 'text-green-400' : t.status === 'FAIL' ? 'text-red-400' : t.status === 'NEEDS_REVIEW' ? 'text-yellow-400' : 'text-zinc-400';
+          return `<tr class="border-b border-zinc-800/60">
+            <td class="py-2 pr-3 font-medium text-sm text-zinc-300">${info.icon} ${info.label}</td>
+            <td class="py-2 pr-3 text-xs text-zinc-400">${info.fungsi}</td>
+            <td class="py-2 text-right text-xs ${statusColor}">${statusDesc}</td>
+          </tr>`;
+        }).join('');
+        
+        resultsContainer.innerHTML = `
+          <div class="card rounded-xl p-6 border border-zinc-800 mb-4">
+            <div class="flex items-center gap-4 mb-4">
+              <span class="text-2xl font-bold ${data.status === 'PASS' ? 'text-green-400' : 'text-yellow-400'}">${data.status}</span>
+              <div>
+                <h3 class="font-bold text-lg">${data.repoInfo?.full_name || data.repo}</h3>
+                <p class="text-sm text-zinc-400">${data.repoInfo?.description || ''}</p>
+                <div class="flex gap-4 mt-1 text-xs text-zinc-500">
+                  <span>⭐ ${data.repoInfo?.stars || 0}</span>
+                  <span>🍴 ${data.repoInfo?.forks || 0}</span>
+                  <span>💻 ${data.repoInfo?.language || 'N/A'}</span>
+                </div>
+              </div>
+            </div>
+                        <table class="w-full text-xs">
+                          <thead><tr class="text-zinc-500 border-b border-zinc-800">
+                            <th class="py-1 pr-3 text-left font-medium">Tool</th>
+                            <th class="py-1 pr-3 text-left font-medium">Fungsi</th>
+                            <th class="py-1 text-right font-medium">Arti Status</th>
+                          </tr></thead>
+                          <tbody>${toolsHtml}</tbody>
+                        </table>
+            ${data.recommendation ? `<div class="mt-4 p-3 bg-zinc-900 rounded-lg"><p class="text-sm text-zinc-300">💡 ${data.recommendation}</p></div>` : ''}
+          </div>
+          <div class="card rounded-xl p-6 border border-zinc-800">
+            <h3 class="font-bold text-lg mb-4">📋 Detail Teknis</h3>
+            <pre class="text-xs text-zinc-400 whitespace-pre-wrap font-mono overflow-auto max-h-64">${JSON.stringify(data.tools, null, 2)}</pre>
+          </div>
+        `;
+        
+        // Update last scan time
+        document.getElementById('last-checked').textContent = new Date().toLocaleTimeString('id-ID');
+        
+        // Translate description via local 9Router proxy
+        (async () => {
+          try {
+            const desc = data.repoInfo?.description;
+            if (!desc || desc.length === 0) return;
+            const trRes = await fetch('/api/translate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ text: desc })
+            });
+            const trData = await trRes.json();
+            const translation = trData.translation || desc;
+            const tokens = trData.tokens || 0;
+            const card = document.querySelector('#security-results .card:first-child');
+            if (!card) return;
+            const info = document.createElement('div');
+            info.className = 'mt-3 p-3 bg-zinc-900/70 rounded-lg border border-zinc-800';
+            info.innerHTML = `<p class="text-sm text-zinc-300"><strong>🇮🇩 Terjemahan:</strong> ${translation}</p>
+<div class="mt-2 pt-2 border-t border-zinc-800/60">
+  <p class="text-xs text-zinc-400"><strong>📊 Total Token Keseluruhan:</strong></p>
+  <table class="text-xs text-zinc-500 mt-1 w-full">
+    <tr><td class="pr-4">Clone + 5 tools scan</td><td class="text-right">—</td><td class="pl-2 text-zinc-600">(lokal, 0 token)</td></tr>
+    <tr><td class="pr-4">GitHub API</td><td class="text-right">—</td><td class="pl-2 text-zinc-600">(REST, 0 token)</td></tr>
+    <tr><td class="pr-4">9Router translate</td><td class="text-right">${tokens}</td><td class="pl-2 text-zinc-600">token</td></tr>
+    <tr class="border-t border-zinc-800/40"><td class="pr-4 font-semibold text-zinc-300">Total</td><td class="text-right font-semibold text-zinc-300">${tokens}</td><td class="pl-2 text-zinc-400">token</td></tr>
+  </table>
+</div>`;
+            card.querySelector('.flex').after(info);
+          } catch(e) { console.log('Translate skipped:', e.message); }
+        })();
+
+        // Summarize README via 9Router
+        (async () => {
+          try {
+            const repoPath = data.repoPath;
+            if (!repoPath) return;
+            const rsRes = await fetch('/api/readme-summary', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ repoPath })
+            });
+            const rsData = await rsRes.json();
+            if (!rsData.summary) return;
+            // Add readme summary row to token table
+            const table = document.querySelector('#security-results tbody, #security-results table');
+            if (table) {
+              const row = document.createElement('tr');
+              row.innerHTML = `<td class="pr-4">9Router baca README</td><td class="text-right">${rsData.tokens}</td><td class="pl-2 text-zinc-600">token</td>`;
+              // Insert before the total row
+              const totalRow = table.querySelector('.border-t');
+              totalRow?.parentNode?.insertBefore(row, totalRow);
+              // Update total
+              const totalCell = totalRow?.querySelector('.text-right:nth-child(2)');
+              if (totalCell) {
+                const oldTotal = parseInt(totalCell.textContent) || 0;
+                totalCell.textContent = oldTotal + (rsData.tokens || 0);
+              }
+            }
+            // Show README summary card
+            const card = document.querySelector('#security-results .card:first-child');
+            if (!card) return;
+            const div = document.createElement('div');
+            div.className = 'mt-3 p-3 bg-zinc-900/70 rounded-lg border border-zinc-800';
+            div.innerHTML = `<p class="text-sm text-zinc-300"><strong>📖 Ringkasan README:</strong></p><p class="text-xs text-zinc-400 mt-1">${rsData.summary}</p>`;
+            card.appendChild(div);
+          } catch(e) { console.log('README summary skipped:', e.message); }
+        })();
+
+      } catch (e) {
+        alert('Error: ' + e.message);
+        document.getElementById('security-loading').classList.add('hidden');
+      }
+    }
+
+    function importToFolder() {
+      alert('Fitur import ke folder belum tersedia.');
+    }
+
+    function abortCheck() {
+      document.getElementById('security-results').classList.add('hidden');
+      document.getElementById('security-actions').classList.add('hidden');
+      document.getElementById('github-url').value = '';
+      ['gitleaks', 'trivy', 'scorecard', 'codeql', 'zizmor'].forEach(l => updateLayerStatus(l, 'pending'));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

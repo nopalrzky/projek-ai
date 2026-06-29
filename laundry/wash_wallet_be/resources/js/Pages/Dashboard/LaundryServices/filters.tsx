@@ -1,0 +1,100 @@
+import { FilterConfig } from "@/Components/Filters";
+import { Outlet, Category, Unit } from "@/types";
+
+export const createLaundryServiceFilters = (
+    outlets: Outlet[],
+    categories: Category[],
+    units: Unit[],
+): FilterConfig[] => [
+    {
+        type: "select",
+        key: "outletId",
+        label: "Outlet",
+        placeholder: "Semua Outlet",
+        options: outlets.map((outlet) => ({
+            value: outlet.id,
+            label: `${outlet.name} (${outlet.code})`,
+        })),
+        clearable: true,
+        searchable: true,
+    },
+    {
+        type: "select",
+        key: "categoryId",
+        label: "Kategori",
+        placeholder: "Semua Kategori",
+        options: categories.map((category) => ({
+            value: category.id,
+            label: category.name,
+        })),
+        clearable: true,
+        searchable: true,
+    },
+    {
+        type: "select",
+        key: "unitId",
+        label: "Unit",
+        placeholder: "Semua Unit",
+        options: units.map((unit) => ({
+            value: unit.id,
+            label: `${unit.name} (${unit.symbol})`,
+        })),
+        clearable: true,
+        searchable: true,
+    },
+    {
+        type: "select",
+        key: "isActive",
+        label: "Status",
+        placeholder: "Semua Status",
+        options: [
+            { value: true, label: "Aktif" },
+            { value: false, label: "Tidak Aktif" },
+        ],
+        clearable: true,
+    },
+    {
+        type: "number",
+        key: "minPrice",
+        label: "Range Harga",
+        placeholder: "Rp 0",
+        min: 0,
+        max: 10000000,
+        step: 1000,
+    },
+    {
+        type: "number",
+        key: "maxPrice",
+        label: "s/d",
+        placeholder: "Rp 10.000.000",
+        min: 0,
+        max: 10000000,
+        step: 1000,
+    },
+    {
+        type: "number",
+        key: "minDurationHours",
+        label: "Durasi (Jam)",
+        placeholder: "1 - 720 jam",
+        min: 1,
+        max: 720,
+        step: 1,
+    },
+    {
+        type: "number",
+        key: "maxDurationHours",
+        label: "s/d",
+        placeholder: "1 - 720 jam",
+        min: 1,
+        max: 720,
+        step: 1,
+    },
+    {
+        type: "number",
+        key: "minQuantity",
+        label: "Minimal Quantity",
+        placeholder: "Min. quantity",
+        min: 1,
+        step: 1,
+    },
+];

@@ -1,0 +1,24 @@
+name: wash_wallet_domain
+description: Shared domain models and entities for WashWallet apps
+publish_to: none
+version: 0.1.0
+resolution: workspace
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  wash_wallet_core:
+    path: ../wash_wallet_core
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+  equatable: ^2.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner: ^2.5.4
+  freezed: ^2.4.7
+  json_serializable: ^6.9.0

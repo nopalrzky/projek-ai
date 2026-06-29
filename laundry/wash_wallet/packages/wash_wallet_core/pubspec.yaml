@@ -1,0 +1,31 @@
+name: wash_wallet_core
+description: Shared core infrastructure for WashWallet apps
+publish_to: none
+version: 0.1.0
+resolution: workspace
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dio: ^5.9.0
+  dartz: ^0.10.1
+  equatable: ^2.0.8
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+  flutter_secure_storage: ^9.0.0
+  shared_preferences: ^2.2.3
+  hive_flutter: ^1.1.0
+  intl: ^0.20.2
+  permission_handler: ^11.3.1
+  print_bluetooth_thermal: ^1.1.9
+  uuid: ^4.5.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner: ^2.5.4
+  freezed: ^2.4.7
+  json_serializable: ^6.9.0

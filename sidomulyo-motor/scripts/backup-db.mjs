@@ -1,0 +1,15 @@
+import { copyFileSync, existsSync, mkdirSync, statSync, readdirSync, unlinkSync } from 'node:fs';
+import { join, basename } from 'node:path';
+const dbPath = process.env.DB_PATH || 'data/bengkel.db';
+const backupDir = process.env.BACKUP_DIR || 'backups';
+const keep = Number(process.env.BACKUP_KEEP || 30);
+if (!existsSync(dbPath)) throw new Error(`DB tidak ditemukan: ${dbPath}`);
+mkdirSync(backupDir, { recursive: true });
+const ts = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').slice(0, 19);
+const out = join(backupDir, `bengkel.${ts}.db`);
+copyFileSync(dbPath, out);
+const files = readdirSync(backupDir).filter(f => /^bengkel\..*\.db$/.test(f)).map(f => ({ f, t: statSync(join(backupDir, f)).mtimeMs })).sort((a,b)=>b.t-a.t);
+for (const old of files.slice(keep)) unlinkSync(join(backupDir, old.f));
+console.log(`Backup OK: ${out}`);
+console.log(`Source: ${dbPath} (${statSync(dbPath).size} bytes)`);
+console.log(`Kept: ${Math.min(files.length, keep)} file(s)`);

@@ -1,0 +1,27 @@
+node_modules/
+.DS_Store
+*.log
+
+# SQLite runtime sidecars
+data/*.db-shm
+data/*.db-wal
+
+# Generated files
+exports/*.xlsx
+pdfs/*.pdf
+uploads/*
+
+# OpenClaw local/session files
+openclaw-workspace-state.json
+BOOTSTRAP.md
+HEARTBEAT.md
+
+# Local DB backups
+backups/*.db
+!backups/.gitkeep
+
+# Runtime database (local/private)
+data/*.db
+!data/.gitkeep
+
+graphify-out/
