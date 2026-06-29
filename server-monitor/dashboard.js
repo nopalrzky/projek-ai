@@ -424,8 +424,6 @@ const server = http.createServer(async (req, res) => {
             resolve(err ? (stderr || err.message) : stdout);
           });
         });
-
-        // === 1. Gitleaks ===
         let gitleaksSummary = { status: 'PASS', leaks_found: 0 };
         try {
           const gitleaksPath = execSync('which gitleaks', { stdio: 'pipe' }).toString().trim();
@@ -603,6 +601,69 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // API: Git history
+  if (req.url === '/api/git-history' && req.method === 'GET') {
+    try {
+      const root = execSync('git rev-parse --show-toplevel', { cwd: __dirname, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+      if (GIT_HISTORY_CACHE.data && Date.now() - GIT_HISTORY_CACHE.at < GIT_HISTORY_TTL) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify(GIT_HISTORY_CACHE.data));
+      }
+      // Try pull first
+      try { execSync('git pull --ff-only', { cwd: root, stdio: 'ignore', timeout: 15000 }); } catch {}
+      
+      // Last 10 commits with stats
+      const log = execSync(
+        `git log --oneline --stat --max-count=10`,
+        { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
+      ).trim();
+      
+      // Parse commits into structured data
+      const totalCommits = execSync(
+        `git rev-list --count HEAD`,
+        { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
+      ).trim();
+      
+      // Parse commits into structured data
+      const commits = [];
+      let currentCommit = null;
+      log.split('\n').forEach(line => {
+        const commitMatch = line.match(/^([a-f0-9]+)\s+(.+)/);
+        if (commitMatch) {
+          if (currentCommit) commits.push(currentCommit);
+          currentCommit = { hash: commitMatch[1], message: commitMatch[2], files: 0, insertions: 0, deletions: 0 };
+        } else if (currentCommit) {
+          const statMatch = line.match(/^ (\d+) file[s]? changed(?:, (\d+) insertion[s]?\(\+\))?(?:, (\d+) deletion[s]?\(-\))?/);
+          if (statMatch) {
+            currentCommit.files = parseInt(statMatch[1]) || 0;
+            currentCommit.insertions = parseInt(statMatch[2]) || 0;
+            currentCommit.deletions = parseInt(statMatch[3]) || 0;
+          }
+        }
+      });
+      if (currentCommit) commits.push(currentCommit);
+      
+      // Stats for the most recent commit (last push)
+      const lastPushStats = commits.length > 0 ? commits[0] : { files: 0, insertions: 0, deletions: 0 };
+      
+      const result = {
+        totalCommits: parseInt(totalCommits) || 0,
+        lastCommit: commits[0] || null,
+        lastPush: lastPushStats,
+        recentCommits: commits.slice(0, 10)
+      };
+      
+      GIT_HISTORY_CACHE.data = result;
+      GIT_HISTORY_CACHE.at = Date.now();
+      
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify(result));
+    } catch (e) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ error: e.message }));
+    }
+  }
+
   // Serve static files
   let filePath = req.url === '/' ? '/index.html' : req.url;
   const fullPath = path.join(__dirname, filePath);
@@ -635,6 +696,11 @@ const server = http.createServer(async (req, res) => {
 });
 
 const PORT = 9000;
+
+// Cache for git history — defined before createServer so handler can access it
+const GIT_HISTORY_CACHE = { data: null, at: 0 };
+const GIT_HISTORY_TTL = 60000; // 1 minute
+
 server.listen(PORT, () => {
   console.log(`Dashboard running on http://localhost:${PORT}`);
 });
