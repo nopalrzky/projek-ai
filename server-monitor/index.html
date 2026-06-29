@@ -321,6 +321,17 @@ function renderSystemDrawer(data) {
   setInterval(fetch9RouterLogs, 2000);
 }
 
+async function fetchStatus() {
+  try {
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    renderSections(data);
+  } catch(e) {
+    document.getElementById('dashboardSections').innerHTML =
+      `<div class="text-center py-12 text-zinc-600"><p class="text-lg">Gagal</p><p class="mt-2">Gagal mengambil status: ${e.message}</p></div>`;
+  }
+}
+
 async function fetchTelemetry() {
   try {
     const res = await fetch('/api/telemetry');
