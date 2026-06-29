@@ -518,7 +518,7 @@ document.addEventListener('visibilitychange', () => {
     clearInterval(telemetryTimer); telemetryTimer = null;
   } else {
     if (!pollTimer) { fetchStatus(); pollTimer = setInterval(fetchStatus, 10000); }
-    if (!telemetryTimer) { fetchTelemetry(); telemetryTimer = setInterval(fetchTelemetry, 500); }
+    if (!telemetryTimer) { fetchTelemetry(); telemetryTimer = setInterval(fetchTelemetry, 1000); }
   }
 });
 
@@ -526,7 +526,7 @@ document.addEventListener('visibilitychange', () => {
 fetchStatus();
 setTimeout(fetchTelemetry, 500);
 pollTimer = setInterval(fetchStatus, 10000);
-telemetryTimer = setInterval(fetchTelemetry, 500);
+telemetryTimer = setInterval(fetchTelemetry, 1000);
 </script>
 
 <!-- ═══ SIDEBAR ═══ -->
