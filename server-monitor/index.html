@@ -132,6 +132,14 @@ body{background:#0a0a0f;color:#d4d4d8}
 <div id="dashboardSections"></div>
 <aside id="infraDrawer" class="infra-drawer card rounded-xl p-3"></aside>
 
+<!-- ═══ 9Router Realtime Logs (bottom of main page) ═══ -->
+<div id="routerLogPanel" class="card rounded-xl p-4 mt-4">
+  <div class="flex items-center gap-2 mb-2">
+    <span class="section-header">9Router Realtime Logs</span>
+  </div>
+  <pre id="routerLogContent" class="text-xs font-mono text-zinc-400 bg-black/50 p-3 rounded max-h-64 overflow-auto whitespace-pre leading-none">Memuat log 9Router...</pre>
+</div>
+
 <!-- ═══ LOG MODAL ═══ -->
 <div id="logModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm" onclick="if(event.target===this)closeLog()">
   <div class="bg-black border border-zinc-800 rounded-xl w-full max-w-4xl max-h-[85vh] flex flex-col mx-4" onclick="event.stopPropagation()">
@@ -307,27 +315,10 @@ function renderSystemDrawer(data) {
   drawer.innerHTML = `
     ${renderGroup('Infrastructure', infraKeys)}
     ${renderGroup('CLI', cliKeys)}
-    <div class="mb-3 mt-4 border-t border-zinc-800 pt-3">
-      <div class="flex items-center gap-2 mb-1">
-        <span class="section-header">9Router Realtime Logs</span>
-      </div>
-      <pre id="routerLogContent" class="text-xs font-mono text-zinc-400 bg-black/50 p-3 rounded max-h-48 overflow-auto whitespace-pre leading-none">Memuat log 9Router...</pre>
-    </div>
   `;
   
   // Start polling 9Router logs
   setInterval(fetch9RouterLogs, 2000);
-}
-
-async function fetchStatus() {
-  try {
-    const res = await fetch('/api/status');
-    const data = await res.json();
-    renderSections(data);
-  } catch(e) {
-    document.getElementById('dashboardSections').innerHTML =
-      `<div class="text-center py-12 text-zinc-600"><p class="text-lg">Gagal</p><p class="mt-2">Gagal mengambil status: ${e.message}</p></div>`;
-  }
 }
 
 async function fetchTelemetry() {
