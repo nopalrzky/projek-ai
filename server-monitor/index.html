@@ -471,9 +471,9 @@ async function fetchGitHistory() {
     list.innerHTML = data.recentCommits.map(c => `
       <div class="px-4 py-2 border-t border-zinc-800/50 hover:bg-zinc-900/50">
         <div class="flex items-center gap-2">
-          <span class="text-xs font-mono text-zinc-500">${c.hash}</span>
-          <span class="text-xs text-zinc-600">${c.date}</span>
-          <span class="text-xs text-zinc-300 truncate flex-1">${c.message}</span>
+          <span class="text-xs font-mono text-zinc-500 shrink-0">${c.hash}</span>
+          <span class="text-xs text-zinc-600 shrink-0">${c.date}</span>
+          <span class="text-xs text-zinc-300 truncate flex-1 min-w-0 overflow-x-auto whitespace-nowrap">${c.message}</span>
         </div>
         <div class="flex items-center gap-2 mt-0.5">
           <span class="text-[10px] text-zinc-600">+${c.insertions} -${c.deletions} (${c.files} file)</span>
@@ -512,7 +512,7 @@ telemetryTimer = setInterval(fetchTelemetry, 1000);
 </script>
 
 <!-- ═══ SIDEBAR ═══ -->
-<aside id="sidebar" class="fixed left-0 top-0 h-full w-56 bg-zinc-950 border-r border-zinc-800 z-40 -translate-x-full transition-transform duration-300">
+<aside id="sidebar" class="fixed left-0 top-0 h-full w-72 bg-zinc-950 border-r border-zinc-800 z-40 -translate-x-full transition-transform duration-300">
   <div class="p-4 pt-20">
     <nav class="space-y-2">
       <a href="/" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition bg-emerald-600/20 border border-emerald-500/30">

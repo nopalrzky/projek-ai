@@ -651,7 +651,7 @@ const server = http.createServer(async (req, res) => {
         const parts = headerLine.split('||');
         if (parts.length < 3) continue;
         const hash = parts[0].slice(0, 7);
-        const date = parts[1].slice(0, 10); // YYYY-MM-DD
+        const date = parts[1].slice(0, 19).replace('T', ' '); // YYYY-MM-DD HH:MM:SS
         const message = parts.slice(2).join('||');
 
         // Parse stat lines to get file paths and counts
