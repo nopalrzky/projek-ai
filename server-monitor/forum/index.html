@@ -61,6 +61,9 @@
             <button id="context-detach-btn" type="button" style="display:none;width:100%;padding:10px;background:#ef4444;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;margin-top:8px;">
               Detach context
             </button>
+            <button id="context-check-btn" type="button" style="display:none;width:100%;padding:10px;background:#0f766e;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;margin-top:8px;">
+              Check changes
+            </button>
             <button id="context-refresh-btn" type="button" style="display:none;width:100%;padding:10px;background:#6366f1;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;margin-top:8px;">
               Refresh context
             </button>
@@ -77,6 +80,7 @@
         const statusEl = document.getElementById('context-status');
         const attachBtn = document.getElementById('context-attach-btn');
         const detachBtn = document.getElementById('context-detach-btn');
+        const checkBtn = document.getElementById('context-check-btn');
         const refreshBtn = document.getElementById('context-refresh-btn');
         
         // Restore UI state if context was auto-loaded
@@ -85,6 +89,7 @@
           statusEl.innerHTML = `<span style="color:#10b981;">✓ Attached (restored)</span><br><small>${data.files.length} files · ${new Date(data.timestamp).toLocaleTimeString('id-ID')}</small>`;
           attachBtn.style.display = 'none';
           detachBtn.style.display = 'block';
+          checkBtn.style.display = 'block';
           refreshBtn.style.display = 'block';
         }
         
@@ -111,6 +116,7 @@
             statusEl.innerHTML = `<span style="color:#10b981;">✓ Attached</span><br><small>${data.files.length} files · ${new Date(data.timestamp).toLocaleTimeString('id-ID')}</small>`;
             attachBtn.style.display = 'none';
             detachBtn.style.display = 'block';
+            checkBtn.style.display = 'block';
             refreshBtn.style.display = 'block';
           } catch (e) {
             statusEl.innerHTML = `<span style="color:#ef4444;">✗ Error: ${e.message}</span>`;
@@ -135,7 +141,36 @@
           attachBtn.disabled = false;
           attachBtn.textContent = 'Attach server-monitor context';
           detachBtn.style.display = 'none';
+          checkBtn.style.display = 'none';
           refreshBtn.style.display = 'none';
+        };
+        
+        checkBtn.onclick = async () => {
+          if (!window.__FORUM_CONTEXT__) return;
+          try {
+            checkBtn.disabled = true;
+            checkBtn.textContent = 'Checking...';
+            statusEl.textContent = 'Checking latest files...';
+            const res = await fetch('/api/forum/context/server-monitor');
+            const latest = await res.json();
+            if (!res.ok) throw new Error(latest.error || 'Failed to check context');
+            const changed = latest.hash !== window.__FORUM_CONTEXT__.hash;
+            if (changed) {
+              const oldByPath = new Map((window.__FORUM_CONTEXT__.files || []).map(f => [f.path, f.hash]));
+              const changedFiles = (latest.files || [])
+                .filter(f => oldByPath.get(f.path) !== f.hash)
+                .map(f => f.path);
+              statusEl.innerHTML = `<span style="color:#f59e0b;">Changes detected</span><br><small>${changedFiles.slice(0, 3).join(', ')}${changedFiles.length > 3 ? ` +${changedFiles.length - 3} more` : ''}</small>`;
+            } else {
+              statusEl.innerHTML = `<span style="color:#10b981;">No changes</span><br><small>${(window.__FORUM_CONTEXT__.files || []).length} files still up to date</small>`;
+            }
+            checkBtn.disabled = false;
+            checkBtn.textContent = 'Check changes';
+          } catch (e) {
+            statusEl.innerHTML = `<span style="color:#ef4444;">✗ Error: ${e.message}</span>`;
+            checkBtn.disabled = false;
+            checkBtn.textContent = 'Check changes';
+          }
         };
         
         refreshBtn.onclick = async () => {

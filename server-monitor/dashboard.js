@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { execSync, exec } from 'child_process';
+import crypto from 'crypto';
 import {
   SERVICE_CONFIG,
   LOG_BUFFERS,
@@ -676,21 +677,32 @@ const server = http.createServer(async (req, res) => {
           const content = fs.readFileSync(fullPath, 'utf8');
           const excerpt = content.slice(0, 12000); // max 12KB per file
           
+          const hash = crypto.createHash('sha256').update(content).digest('hex');
+          const mtime = fs.statSync(fullPath).mtime.toISOString();
+          
           files.push({
             path: relativePath,
             size: content.length,
             excerpt: excerpt,
-            truncated: content.length > 12000
+            truncated: content.length > 12000,
+            hash,
+            mtime
           });
         } catch (fileErr) {
           // skip file on error
         }
       }
       
+      const projectHash = crypto
+        .createHash('sha256')
+        .update(files.map(f => `${f.path}:${f.hash}`).join('|'))
+        .digest('hex');
+      
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         project: 'server-monitor',
         files: files,
+        hash: projectHash,
         timestamp: new Date().toISOString()
       }));
     } catch (e) {
