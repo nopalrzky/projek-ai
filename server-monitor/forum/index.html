@@ -20,5 +20,95 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+    // Context bridge: attach server-monitor context to agent prompts
+    window.__FORUM_CONTEXT__ = null;
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        const sidebar = document.querySelector('.right-panel-scroll');
+        if (!sidebar) return;
+        
+        const section = document.createElement('section');
+        section.className = 'right-section';
+        section.innerHTML = `
+          <div class="right-title">PROJECT CONTEXT</div>
+          <div class="panel-card context-card">
+            <div id="context-status" style="margin-bottom:12px;font-size:13px;color:#94a3b8;">
+              Not attached
+            </div>
+            <button id="context-attach-btn" type="button" style="width:100%;padding:10px;background:#3b82f6;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">
+              Attach server-monitor context
+            </button>
+            <button id="context-detach-btn" type="button" style="display:none;width:100%;padding:10px;background:#ef4444;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;margin-top:8px;">
+              Detach context
+            </button>
+          </div>
+        `;
+        
+        const insightCard = sidebar.querySelector('.insight-card');
+        if (insightCard && insightCard.parentElement) {
+          insightCard.parentElement.parentElement.insertBefore(section, insightCard.parentElement);
+        } else {
+          sidebar.appendChild(section);
+        }
+        
+        const statusEl = document.getElementById('context-status');
+        const attachBtn = document.getElementById('context-attach-btn');
+        const detachBtn = document.getElementById('context-detach-btn');
+        
+        attachBtn.onclick = async () => {
+          try {
+            attachBtn.disabled = true;
+            attachBtn.textContent = 'Loading...';
+            statusEl.textContent = 'Fetching context...';
+            
+            const res = await fetch('/api/forum/context/server-monitor');
+            const data = await res.json();
+            
+            if (!res.ok) throw new Error(data.error || 'Failed to fetch context');
+            
+            window.__FORUM_CONTEXT__ = data;
+            statusEl.innerHTML = `<span style="color:#10b981;">✓ Attached</span><br><small>${data.files.length} files · ${new Date(data.timestamp).toLocaleTimeString('id-ID')}</small>`;
+            attachBtn.style.display = 'none';
+            detachBtn.style.display = 'block';
+          } catch (e) {
+            statusEl.innerHTML = `<span style="color:#ef4444;">✗ Error: ${e.message}</span>`;
+            attachBtn.disabled = false;
+            attachBtn.textContent = 'Attach server-monitor context';
+          }
+        };
+        
+        detachBtn.onclick = () => {
+          window.__FORUM_CONTEXT__ = null;
+          statusEl.textContent = 'Not attached';
+          statusEl.style.color = '#94a3b8';
+          attachBtn.style.display = 'block';
+          attachBtn.disabled = false;
+          attachBtn.textContent = 'Attach server-monitor context';
+          detachBtn.style.display = 'none';
+        };
+        
+        // Intercept fetch to inject context into agent prompts
+        const originalFetch = window.fetch;
+        window.fetch = async (...args) => {
+          const [url, options] = args;
+          if (url === '/api/agent-forum/turn' && options?.method === 'POST' && window.__FORUM_CONTEXT__) {
+            try {
+              const body = JSON.parse(options.body);
+              const contextText = window.__FORUM_CONTEXT__.files.map(f => 
+                `--- FILE: ${f.path} (${f.size} bytes)\n${f.excerpt}${f.truncated ? '\n[... truncated]' : ''}`
+              ).join('\n\n');
+              
+              body.prompt = `[CONTEXT: server-monitor project files attached]\n\n${contextText}\n\n---\n\nUser prompt:\n${body.prompt}`;
+              options.body = JSON.stringify(body);
+            } catch (e) {
+              console.warn('Failed to inject context:', e);
+            }
+          }
+          return originalFetch(...args);
+        };
+      }, 1000);
+    });
+    </script>
   </body>
 </html>

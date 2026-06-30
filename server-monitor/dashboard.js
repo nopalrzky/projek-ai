@@ -646,6 +646,60 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // API: Get server-monitor context (read-only, allowlist files)
+  if (req.url === '/api/forum/context/server-monitor' && req.method === 'GET') {
+    try {
+      const allowlist = [
+        'dashboard.js',
+        'index.html',
+        'services.js',
+        'forum/index.html',
+        'forum/assets/index-B6O75w3Q.js',
+        'forum/assets/index-DNUToBxF.css'
+      ];
+      const baseDir = __dirname;
+      const files = [];
+      
+      for (const relativePath of allowlist) {
+        try {
+          const fullPath = path.join(baseDir, relativePath);
+          
+          // Safety: ensure path is within server-monitor
+          if (!fullPath.startsWith(baseDir)) {
+            continue;
+          }
+          
+          if (!fs.existsSync(fullPath)) {
+            continue;
+          }
+          
+          const content = fs.readFileSync(fullPath, 'utf8');
+          const excerpt = content.slice(0, 12000); // max 12KB per file
+          
+          files.push({
+            path: relativePath,
+            size: content.length,
+            excerpt: excerpt,
+            truncated: content.length > 12000
+          });
+        } catch (fileErr) {
+          // skip file on error
+        }
+      }
+      
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        project: 'server-monitor',
+        files: files,
+        timestamp: new Date().toISOString()
+      }));
+    } catch (e) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: e.message }));
+    }
+    return;
+  }
+
   // API: Translate text via local 9Router
   if (req.url === '/api/translate' && req.method === 'POST') {
     let body = '';
