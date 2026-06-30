@@ -61,6 +61,9 @@
             <button id="context-detach-btn" type="button" style="display:none;width:100%;padding:10px;background:#ef4444;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;margin-top:8px;">
               Detach context
             </button>
+            <button id="context-refresh-btn" type="button" style="display:none;width:100%;padding:10px;background:#6366f1;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;margin-top:8px;">
+              Refresh context
+            </button>
           </div>
         `;
         
@@ -74,6 +77,7 @@
         const statusEl = document.getElementById('context-status');
         const attachBtn = document.getElementById('context-attach-btn');
         const detachBtn = document.getElementById('context-detach-btn');
+        const refreshBtn = document.getElementById('context-refresh-btn');
         
         // Restore UI state if context was auto-loaded
         if (window.__FORUM_CONTEXT__) {
@@ -81,6 +85,7 @@
           statusEl.innerHTML = `<span style="color:#10b981;">✓ Attached (restored)</span><br><small>${data.files.length} files · ${new Date(data.timestamp).toLocaleTimeString('id-ID')}</small>`;
           attachBtn.style.display = 'none';
           detachBtn.style.display = 'block';
+          refreshBtn.style.display = 'block';
         }
         
         attachBtn.onclick = async () => {
@@ -106,6 +111,7 @@
             statusEl.innerHTML = `<span style="color:#10b981;">✓ Attached</span><br><small>${data.files.length} files · ${new Date(data.timestamp).toLocaleTimeString('id-ID')}</small>`;
             attachBtn.style.display = 'none';
             detachBtn.style.display = 'block';
+            refreshBtn.style.display = 'block';
           } catch (e) {
             statusEl.innerHTML = `<span style="color:#ef4444;">✗ Error: ${e.message}</span>`;
             attachBtn.disabled = false;
@@ -129,6 +135,38 @@
           attachBtn.disabled = false;
           attachBtn.textContent = 'Attach server-monitor context';
           detachBtn.style.display = 'none';
+          refreshBtn.style.display = 'none';
+        };
+        
+        refreshBtn.onclick = async () => {
+          if (!window.__FORUM_CONTEXT__) return;
+          try {
+            refreshBtn.disabled = true;
+            refreshBtn.textContent = 'Refreshing...';
+            statusEl.textContent = 'Fetching latest context...';
+            
+            const res = await fetch('/api/forum/context/server-monitor');
+            const data = await res.json();
+            
+            if (!res.ok) throw new Error(data.error || 'Failed to fetch context');
+            
+            window.__FORUM_CONTEXT__ = data;
+            
+            // Update localStorage
+            try {
+              localStorage.setItem('__FORUM_CONTEXT__', JSON.stringify(data));
+            } catch (e) {
+              console.warn('Failed to save context to localStorage:', e);
+            }
+            
+            statusEl.innerHTML = `<span style="color:#10b981;">✓ Attached</span><br><small>${data.files.length} files · ${new Date(data.timestamp).toLocaleTimeString('id-ID')} (refreshed)</small>`;
+            refreshBtn.disabled = false;
+            refreshBtn.textContent = 'Refresh context';
+          } catch (e) {
+            statusEl.innerHTML = `<span style="color:#ef4444;">✗ Error: ${e.message}</span>`;
+            refreshBtn.disabled = false;
+            refreshBtn.textContent = 'Refresh context';
+          }
         };
         
         // Intercept fetch to inject context into agent prompts
