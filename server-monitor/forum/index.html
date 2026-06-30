@@ -24,6 +24,14 @@
     // Context bridge: attach server-monitor context to agent prompts
     window.__FORUM_CONTEXT__ = null;
     
+    // Reset old max-rounds preference once after default changed from 8 to 3
+    try {
+      if (localStorage.getItem('__FORUM_MAX_ROUNDS_VERSION__') !== '2') {
+        localStorage.setItem('__FORUM_MAX_ROUNDS__', '3');
+        localStorage.setItem('__FORUM_MAX_ROUNDS_VERSION__', '2');
+      }
+    } catch {}
+
     // Auto-restore context from localStorage on page load
     try {
       const saved = localStorage.getItem('__FORUM_CONTEXT__');

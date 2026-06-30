@@ -103,7 +103,7 @@ function cleanAgentReply(text, agentName) {
     .replace(/^\s*(Hermes|OpenClaw)\s*:\s*/i, '')
     .replace(/\n\s*(Hermes|OpenClaw)\s*:\s*/gi, '\n')
     .trim();
-  return cleaned || `${agentName} belum memberi jawaban.`;
+  return cleaned;
 }
 
 function resolveComboModel(alias) {
@@ -358,8 +358,9 @@ const server = http.createServer(async (req, res) => {
           ], model);
           out.text = cleanAgentReply(out.text, 'Hermes');
         }
+        out.empty = !String(out.text || '').trim();
         const agentLabel = turn === 'openclaw' ? 'OpenClaw' : 'Hermes';
-        const forumLog = `[forum] [${agentLabel}] alias=${model} resolved=${out.resolvedModel || '-'} tokens=${out.tokens || 0}`;
+        const forumLog = `[forum] [${agentLabel}] alias=${model} resolved=${out.resolvedModel || '-'} tokens=${out.tokens || 0}${out.empty ? ' empty=true' : ''}`;
         console.log(forumLog);
         try { fs.appendFileSync(path.join(__dirname, 'logs', 'forum-agent.log'), `${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} ${forumLog}\n`); } catch {}
         res.writeHead(200, { 'Content-Type': 'application/json' });
