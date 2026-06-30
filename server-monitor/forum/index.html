@@ -169,6 +169,31 @@
           }
         };
         
+        // Max rounds control for discussion/debate loop
+        try {
+          const composerActions = document.querySelector('.composer-actions');
+          if (composerActions && !document.getElementById('max-rounds-select')) {
+            const wrap = document.createElement('div');
+            wrap.style.cssText = 'display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:#94a3b8;';
+            wrap.innerHTML = `
+              <label for="max-rounds-select">Max rounds</label>
+              <select id="max-rounds-select" style="background:#0f172a;color:#e5e7eb;border:1px solid #334155;border-radius:8px;padding:6px 8px;">
+                <option value="3">3</option>
+                <option value="5">5</option>
+                <option value="8">8</option>
+              </select>
+              <span style="opacity:.75;">safety cap, auto-stop tetap aktif</span>
+            `;
+            composerActions.parentElement.appendChild(wrap);
+            const select = document.getElementById('max-rounds-select');
+            select.value = localStorage.getItem('__FORUM_MAX_ROUNDS__') || '3';
+            localStorage.setItem('__FORUM_MAX_ROUNDS__', select.value);
+            select.onchange = () => localStorage.setItem('__FORUM_MAX_ROUNDS__', select.value);
+          }
+        } catch (e) {
+          console.warn('Failed to mount max rounds control:', e);
+        }
+        
         // Intercept fetch to inject context into agent prompts
         const originalFetch = window.fetch;
         window.fetch = async (...args) => {
