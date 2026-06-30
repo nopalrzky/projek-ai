@@ -23,6 +23,25 @@
     <script>
     // Context bridge: attach server-monitor context to agent prompts
     window.__FORUM_CONTEXT__ = null;
+    
+    // Auto-restore context from localStorage on page load
+    try {
+      const saved = localStorage.getItem('__FORUM_CONTEXT__');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Check if saved context is still fresh (< 1 hour old)
+        const age = Date.now() - new Date(parsed.timestamp).getTime();
+        if (age < 3600000) {
+          window.__FORUM_CONTEXT__ = parsed;
+          console.log('Context auto-restored from localStorage');
+        } else {
+          localStorage.removeItem('__FORUM_CONTEXT__');
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to restore context:', e);
+    }
+    
     window.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         const sidebar = document.querySelector('.right-panel-scroll');
@@ -56,6 +75,14 @@
         const attachBtn = document.getElementById('context-attach-btn');
         const detachBtn = document.getElementById('context-detach-btn');
         
+        // Restore UI state if context was auto-loaded
+        if (window.__FORUM_CONTEXT__) {
+          const data = window.__FORUM_CONTEXT__;
+          statusEl.innerHTML = `<span style="color:#10b981;">✓ Attached (restored)</span><br><small>${data.files.length} files · ${new Date(data.timestamp).toLocaleTimeString('id-ID')}</small>`;
+          attachBtn.style.display = 'none';
+          detachBtn.style.display = 'block';
+        }
+        
         attachBtn.onclick = async () => {
           try {
             attachBtn.disabled = true;
@@ -68,6 +95,14 @@
             if (!res.ok) throw new Error(data.error || 'Failed to fetch context');
             
             window.__FORUM_CONTEXT__ = data;
+            
+            // Save to localStorage for auto-restore
+            try {
+              localStorage.setItem('__FORUM_CONTEXT__', JSON.stringify(data));
+            } catch (e) {
+              console.warn('Failed to save context to localStorage:', e);
+            }
+            
             statusEl.innerHTML = `<span style="color:#10b981;">✓ Attached</span><br><small>${data.files.length} files · ${new Date(data.timestamp).toLocaleTimeString('id-ID')}</small>`;
             attachBtn.style.display = 'none';
             detachBtn.style.display = 'block';
@@ -80,6 +115,14 @@
         
         detachBtn.onclick = () => {
           window.__FORUM_CONTEXT__ = null;
+          
+          // Remove from localStorage
+          try {
+            localStorage.removeItem('__FORUM_CONTEXT__');
+          } catch (e) {
+            console.warn('Failed to remove context from localStorage:', e);
+          }
+          
           statusEl.textContent = 'Not attached';
           statusEl.style.color = '#94a3b8';
           attachBtn.style.display = 'block';
