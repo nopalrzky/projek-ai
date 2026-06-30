@@ -38,6 +38,7 @@ export const SERVICE_CONFIG = {
     port: 3000,
     workspace: 'Sidomulyo',
     type: 'Web Service',
+    pm2: 'sidomulyo-motor',
     cwd: '/Users/naufalrizky/projek ai/sidomulyo-motor',
     command: 'node',
     args: ['server.js'],
@@ -46,6 +47,7 @@ export const SERVICE_CONFIG = {
     port: 8081,
     workspace: 'Sidomulyo',
     type: 'Expo Metro',
+    pm2: 'sidomulyo-attendance',
     cwd: '/Users/naufalrizky/projek ai/sidomulyo-attendance-mobile',
     command: 'npm',
     args: ['start']
@@ -119,22 +121,37 @@ export const SERVICE_CONFIG = {
     port: 9000,
     workspace: 'Infrastructure',
     type: 'Dashboard',
+    protected: true,
     matchPort: true
   },
   'Hermes Agent': {
     port: null,
     workspace: 'CLI',
     type: 'AI Agent',
-    special: 'node'
+    protected: true,
+    special: 'node',
+    webUrl: 'http://localhost:20128/dashboard'
   },
   'OpenCode': {
-    port: null,
+    port: 3002,
     workspace: 'CLI',
     type: 'AI Coding CLI',
     special: 'opencode',
     command: 'opencode',
-    args: []
-  }
+    args: ['web', '--port', '3002'],
+    webUrl: 'http://localhost:3002',
+    matchPort: true
+  },
+  'OpenClaw': {
+    port: 18789,
+    workspace: 'CLI',
+    type: 'AI Gateway CLI',
+    special: 'openclaw',
+    command: 'openclaw',
+    args: ['gateway', 'start'],
+    webUrl: 'dashboard:openclaw',
+    matchPort: true
+  },
 };
 
 // Ensure PID directory exists
@@ -146,17 +163,43 @@ export const checkPort = async (port, special = null) => {
   const start = Date.now();
   return new Promise((resolve) => {
     if (!port) {
+      // Hermes Agent: special='node' → check PID file + pgrep hermes
+      if (special === 'node') {
+        // PID file adalah source of truth
+        let hPid = null;
+        try { hPid = parseInt(fs.readFileSync(path.join(PID_DIR, 'Hermes_Agent'), 'utf8'), 10); } catch {}
+        if (hPid) {
+          try {
+            execSync(`kill -0 ${hPid}`, { stdio: 'ignore' });
+            return resolve({ online: true, latency: Date.now() - start });
+          } catch {}
+        }
+        // fallback: pgrep hermes (python process)
+        exec('pgrep -f "[h]ermes" 2>/dev/null', (err, stdout) => {
+          const running = !err && stdout.trim().length > 0;
+          resolve({ online: running, latency: running ? Date.now() - start : 0 });
+        });
+        return;
+      }
+      if (special === 'openclaw') {
+        const req = http.get('http://localhost:18789/', { timeout: 1000 }, () => {
+          resolve({ online: true, latency: Date.now() - start });
+        });
+        req.on('error', () => resolve({ online: false, latency: Date.now() - start }));
+        req.on('timeout', () => { req.destroy(); resolve({ online: false, latency: Date.now() - start }); });
+        return;
+      }
+      if (special === 'opencode') {
+        const req = http.get('http://localhost:3002/', { timeout: 1000 }, () => {
+          resolve({ online: true, latency: Date.now() - start });
+        });
+        req.on('error', () => resolve({ online: false, latency: Date.now() - start }));
+        req.on('timeout', () => { req.destroy(); resolve({ online: false, latency: Date.now() - start }); });
+        return;
+      }
       const pattern = special === 'opencode' ? 'opencode' : 'node';
       exec(`pgrep -f "${pattern}" 2>/dev/null`, (err, stdout) => {
         const running = !err && stdout.trim().length > 0;
-        let hermesPid = null;
-        try {
-          const buf = fs.readFileSync(path.join(PID_DIR, 'Hermes_Agent'), 'utf8');
-          hermesPid = parseInt(buf, 10);
-          if (hermesPid && execSync(`kill -0 ${hermesPid} 2>/dev/null`, { stdio: 'ignore' }) === 0) {
-            running = true;
-          }
-        } catch {}
         resolve({ online: running, latency: running ? Date.now() - start : 0 });
       });
       return;
@@ -201,7 +244,10 @@ export async function findPID(serviceName) {
       return pid ? parseInt(pid, 10) : null;
     }
     if (!service?.special) return null;
-    const pattern = service.special === 'opencode' ? '[o]pencode' : '[H]ermes|[h]ermes';
+    let pattern;
+    if (service.special === 'opencode') pattern = '[o]pencode';
+    else if (service.special === 'openclaw') pattern = '[o]penclaw';
+    else pattern = '[H]ermes|[h]ermes';
     const pid = execSync(`ps -axo pid=,command= | egrep '${pattern}' | awk 'NR==1{print $1}'`, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
     return pid ? parseInt(pid, 10) : null;
   } catch {
@@ -233,6 +279,8 @@ export async function killPort(port) {
   });
 }
 
+const OPENCLAW_PLIST = '/Users/naufalrizky/Library/LaunchAgents/ai.openclaw.gateway.plist';
+
 export async function startService(serviceName) {
   const service = SERVICE_CONFIG[serviceName];
   if (!service) throw new Error('Service not found');
@@ -244,11 +292,41 @@ export async function startService(serviceName) {
   const logFile = path.join(logDir, `${serviceName.replace(/\s+/g, '_')}.log`);
   const logFd = fs.openSync(logFile, 'a');
 
+  // PM2-managed services
+  if (service.pm2) {
+    return new Promise((resolve, reject) => {
+      exec(`pm2 start ${service.pm2} 2>&1`, { cwd: service.cwd }, (err, stdout) => {
+        if (err) reject(new Error(`PM2 start failed: ${err.message}`));
+        else resolve();
+      });
+    });
+  }
+
+  // Special: openclaw
+  if (service.special === 'openclaw') {
+    return new Promise((resolve, reject) => {
+      // Spawn openclaw gateway binary directly
+      const child = spawn(service.command, ['gateway', '--port', '18789'], {
+        stdio: ['ignore', logFd, logFd],
+        detached: true
+      });
+      child.on('error', (err) => reject(new Error(`OpenClaw start failed: ${err.message}`)));
+      child.unref();
+      setTimeout(() => resolve(null), 3000);
+    });
+  }
+
   if (service.special === 'opencode') {
-    return new Promise(async (resolve, reject) => {
-      const cmd = `${service.command}`;
-      const env = { PATH: process.env.PATH };
+    // Pre-kill port to avoid conflict
+    execSync(`lsof -ti:3002 | xargs kill -9 2>/dev/null`, { stdio: 'ignore' });
+    return new Promise((resolve, reject) => {
+      const env = { ...process.env, PATH: process.env.PATH };
       const opts = { cwd: service.cwd || process.cwd(), env, stdio: ['ignore', logFd, logFd], detached: true };
+      try {
+        // Clean up old PID file if any
+        const pidFile = path.join(PID_DIR, `${serviceName.replace(/\s+/g, '_')}.pid`);
+        if (fs.existsSync(pidFile)) fs.unlinkSync(pidFile);
+      } catch {}
       const child = spawn(service.command, service.args, opts);
       
       child.on('error', (err) => {
@@ -256,8 +334,27 @@ export async function startService(serviceName) {
       });
       
       child.unref();
-      await savePID(serviceName, child.pid);
-      resolve(child.pid);
+      
+      // Save PID immediately so dashboard can track it
+      savePID(serviceName, child.pid).catch(() => {});
+      
+      // Wait for port to be ready (up to 10s) before resolving
+      let waited = 0;
+      const iv = setInterval(() => {
+        waited += 500;
+        try {
+          const out = execSync(`lsof -iTCP:3002 -sTCP:LISTEN 2>/dev/null`, { encoding: 'utf8' });
+          if (out.trim()) {
+            clearInterval(iv);
+            resolve(child.pid);
+          }
+        } catch {}
+        if (waited >= 10000) {
+          clearInterval(iv);
+          // Resolve anyway — server might still start
+          resolve(child.pid);
+        }
+      }, 500);
     });
   }
 
@@ -278,10 +375,32 @@ export async function startService(serviceName) {
   });
 }
 
+
 export async function stopService(serviceName) {
   const service = SERVICE_CONFIG[serviceName];
-  // Aggressive stop: try PID first, then fallback to port
-  const pid = await getPID(serviceName);
+  
+  // PM2-managed: use pm2 stop
+  if (service?.pm2) {
+    return new Promise((resolve) => {
+      exec(`pm2 stop ${service.pm2} 2>&1`, () => resolve());
+    });
+  }
+
+  // OpenClaw: use launchctl unload (disables auto-restart)
+  if (service?.special === 'openclaw') {
+    return new Promise((resolve) => {
+      // openclaw gateway stop unloads LaunchAgent, then kill leftover
+      exec(`${service.command} gateway stop 2>&1`, () => {
+        exec('lsof -ti:18789 | xargs kill -9 2>/dev/null; pkill -f openclaw 2>/dev/null', () => resolve());
+      });
+    });
+  }
+  
+  // Aggressive stop: try PID file first, then fallback to findPID for CLI tools
+  let pid = await getPID(serviceName);
+  if (!pid && service?.special) {
+    pid = await findPID(serviceName);
+  }
   if (pid) {
     exec(`kill -9 ${pid} 2>/dev/null`);
     await removePID(serviceName);

@@ -70,11 +70,111 @@ function getCliModel(name) {
       return `${provider}/${model}${actualModel}`;
     }
     if (name === 'OpenCode') {
-      const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, '/.config/opencode/opencode/opencode.json'), 'utf8'));
+      const cfg = JSON.parse(fs.readFileSync(path.join(process.env.HOME, '.config/opencode/opencode.json'), 'utf8'));
       return cfg.model || '—';
+    }
+    if (name === 'OpenClaw') {
+      const cfg = JSON.parse(fs.readFileSync(path.join(process.env.HOME, '.openclaw/openclaw.json'), 'utf8'));
+      return cfg.agents?.defaults?.model?.primary || '—';
     }
   } catch {}
   return '—';
+}
+
+function getOpenClawToken() {
+  try {
+    const cfg = JSON.parse(fs.readFileSync(path.join(process.env.HOME, '.openclaw/openclaw.json'), 'utf8'));
+    return cfg.gateway?.auth?.token || '';
+  } catch { return ''; }
+}
+function getOpenClawChatUrl(session = 'main') {
+  const token = getOpenClawToken();
+  if (!token) throw new Error('OpenClaw token not found');
+  return `http://127.0.0.1:18789/chat?session=${encodeURIComponent(session)}#token=${encodeURIComponent(token)}`;
+}
+
+function cleanAgentReply(text, agentName) {
+  const other = agentName === 'Hermes' ? 'OpenClaw' : 'Hermes';
+  const cleaned = String(text || '')
+    .split('\n')
+    .filter(line => !new RegExp(`^\\s*${other}\\s*[:→-]`, 'i').test(line))
+    .join('\n')
+    .replace(/^\s*(Hermes|OpenClaw)\s*:\s*/i, '')
+    .replace(/\n\s*(Hermes|OpenClaw)\s*:\s*/gi, '\n')
+    .trim();
+  return cleaned || `${agentName} belum memberi jawaban.`;
+}
+
+function resolveComboModel(alias) {
+  // Read-only query of 9Router DB to find the actual model(s) configured for a combo alias.
+  // Returns the first model ID (fallback strategy) or null if alias not found / DB error.
+  const dbPath = '/Users/naufalrizky/.9router/db/data.sqlite';
+  if (!fs.existsSync(dbPath)) return null;
+  try {
+    const result = execSync(`sqlite3 -json "${dbPath}" "SELECT models FROM combos WHERE name = '${alias.replace(/'/g, "''")}' LIMIT 1;"`, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    if (!result) return null;
+    const rows = JSON.parse(result);
+    if (!rows || !rows.length) return null;
+    const models = JSON.parse(rows[0].models);
+    if (!models || !models.length) return null;
+    return models[0]; // first model (fallback strategy)
+  } catch {
+    return null;
+  }
+}
+
+function normalize9RouterModel(model) {
+  // Do NOT remap aliases here. 9Router owns combo resolution, so Forum logs must show
+  // alias=<UI alias> and resolved=<actual model from 9Router combo definition>.
+  return String(model || '').trim() || 'chattan-biasa';
+}
+
+async function call9Router(messages, model = 'chattan-biasa') {
+  const resolvedRequestModel = normalize9RouterModel(model);
+  const comboModel = resolveComboModel(resolvedRequestModel); // read-only, no DB mutation
+  const resp = await fetch('http://localhost:20128/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: resolvedRequestModel, messages, max_tokens: 800 })
+  });
+  const raw = await resp.text();
+  if (!resp.ok) throw new Error(raw.slice(0, 240));
+
+  // 9Router combo may return nonstandard hybrid SSE: a single JSON line followed by 'data: [DONE]' on SAME line.
+  // Normalise first: extract any trailing SSE suffix before parsing.
+  let sseText = raw;
+  const doneIdx = sseText.lastIndexOf('data: [DONE]');
+  if (doneIdx !== -1) sseText = sseText.slice(0, doneIdx);
+
+  let text = '', tokens = 0, resolvedModel = '';
+  let sseFound = false;
+  for (const line of sseText.split('\n')) {
+    const trimmed = line.trim();
+    const payload = line.startsWith('data:') ? line.slice(5).trim() : (trimmed.startsWith('data:') ? trimmed.slice(5).trim() : '');
+    if (!payload) continue;
+    sseFound = true;
+    try {
+      const chunk = JSON.parse(payload);
+      resolvedModel = chunk.model || resolvedModel;
+      const choice = chunk.choices?.[0];
+      text += choice?.delta?.content || choice?.message?.content || '';
+      tokens = chunk.usage?.total_tokens || tokens;
+    } catch {}
+  }
+  if (sseFound) return { text: text.trim(), tokens, resolvedModel: comboModel || resolvedModel };
+
+  // Plain JSON response (or single-chunk hybrid already cleaned)
+  const clean = raw.replace(/data:\s*\[DONE\].*$/s, '').trim();
+  try {
+    const data = JSON.parse(clean);
+    return {
+      text: data.choices?.[0]?.message?.content?.trim() || '',
+      tokens: data.usage?.total_tokens || 0,
+      resolvedModel: comboModel || data.model || ''
+    };
+  } catch (e) {
+    throw new Error('Failed to parse 9Router response: ' + e.message + '\nraw[:500]: ' + raw.slice(0, 500));
+  }
 }
 
 function getGitStatus(cwd) {
@@ -138,6 +238,7 @@ const server = http.createServer(async (req, res) => {
         p = await findPID(name);
         running = !!p;
       }
+      if (name === 'Hermes Agent' && running) online = true;
       const stats = getProcessStats(running ? p : null);
       
       return [name, {
@@ -151,6 +252,7 @@ const server = http.createServer(async (req, res) => {
         mem: stats.mem,
         model: getCliModel(name),
         protected: info.protected || false,
+        webUrl: info.webUrl || null,
         hasLogs: LOG_BUFFERS[name] && LOG_BUFFERS[name].length > 0,
         git: info.github ? getGitStatus(info.cwd) : { state: 'none', label: 'No GitHub' }
       }];
@@ -174,6 +276,19 @@ const server = http.createServer(async (req, res) => {
     }));
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify(Object.fromEntries(rows)));
+  }
+
+  if (req.url === '/api/agent-readiness') {
+    const hermesPid = await findPID('Hermes Agent');
+    const openclaw = await checkPort(18789);
+    const hermesReady = !!hermesPid;
+    const openclawReady = !!openclaw.online;
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({
+      hermes: { ready: hermesReady, label: hermesReady ? 'Hermes siap' : 'Hermes offline', pid: hermesPid || null },
+      openclaw: { ready: openclawReady, label: openclawReady ? 'OpenClaw siap' : 'OpenClaw offline', latency: openclaw.latency || 0 },
+      allReady: hermesReady && openclawReady
+    }));
   }
 
   // API: Get or clear logs
@@ -207,6 +322,166 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  if (req.url === '/api/agent-forum/turn' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', async () => {
+      try {
+        const { turn = 'hermes', prompt = '', context = '', transcript = [], hermesText = '', openclawText = '', model = 'koding' } = JSON.parse(body || '{}');
+        console.log(`[AGENT-FORUM] turn=${turn} model=${model}`);
+        const text = String(prompt).trim();
+        if (!text) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({ error: 'Prompt kosong' }));
+        }
+        const history = Array.isArray(transcript) ? transcript.slice(-8).map(m => `${m.agentName || m.agent}: ${m.text}`).join('\n') : '';
+        const base = `Konteks:\n${String(context || '').trim() || '-'}\n\nRiwayat:\n${history || '-'}\n\nUser:\n${text}`;
+        const chatRules = 'Kamu sedang tampil di UI Agent Forum, bukan terminal coding. Jawab natural dalam Bahasa Indonesia santai. Jangan pakai format kode/command/backtick kecuali user minta kode. Kalau user hanya mengetik tes/test/halo, jawab sapaan pendek normal. Jangan pakai pola "skipped/add when".';
+        let out;
+        if (turn === 'openclaw') {
+          out = await call9Router([
+            { role: 'system', content: `${chatRules} Kamu OpenClaw. Baca pesan user dan jawaban Hermes. Jawab sebagai execution/coding agent. Boleh setuju, beda sudut pandang, atau sanggah. Jangan ulang mentah jawaban Hermes. Jangan jawab untuk Hermes. Kalau diskusi sudah cukup/siap dieksekusi, awali jawaban dengan [FINAL].` },
+            { role: 'user', content: `${base}\n\nJawaban Hermes:\n${hermesText}` }
+          ], model);
+          out.text = cleanAgentReply(out.text, 'OpenClaw');
+        } else if (turn === 'hermesFinal') {
+          out = await call9Router([
+            { role: 'system', content: `${chatRules} Kamu Hermes. Lanjutkan debat natural. Baca jawaban OpenClaw, lalu respons seperlunya seperti diskusi biasa. Jangan pakai format wajib Keputusan/Tradeoff/Next kecuali user minta. Kalau diskusi sudah selesai/keputusan jelas/konteks habis, awali jawaban dengan [FINAL]. Kalau belum, ajukan sanggahan/pertanyaan/lanjutan singkat.` },
+            { role: 'user', content: `${base}\n\nJawaban Hermes awal:\n${hermesText}\n\nJawaban OpenClaw:\n${openclawText}` }
+          ], model);
+          out.text = cleanAgentReply(out.text, 'Hermes');
+        } else {
+          out = await call9Router([
+            { role: 'system', content: `${chatRules} Kamu Hermes. Giliran 1. Jawab langsung sebagai partner diskusi. Ringkas. Jangan jawab untuk OpenClaw.` },
+            { role: 'user', content: base }
+          ], model);
+          out.text = cleanAgentReply(out.text, 'Hermes');
+        }
+        const agentLabel = turn === 'openclaw' ? 'OpenClaw' : 'Hermes';
+        const forumLog = `[forum] [${agentLabel}] alias=${model} resolved=${out.resolvedModel || '-'} tokens=${out.tokens || 0}`;
+        console.log(forumLog);
+        try { fs.appendFileSync(path.join(__dirname, 'logs', 'forum-agent.log'), `${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} ${forumLog}\n`); } catch {}
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(out));
+      } catch (e) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: e.message }));
+      }
+    });
+    return;
+  }
+
+  if (req.url === '/api/agent-forum/chat' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', async () => {
+      try {
+        const { prompt = '', context = '', transcript = [] } = JSON.parse(body || '{}');
+        const text = String(prompt).trim();
+        if (!text) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({ error: 'Prompt kosong' }));
+        }
+        const history = Array.isArray(transcript) ? transcript.slice(-8).map(m => `${m.agentName || m.agent}: ${m.text}`).join('\n') : '';
+        const base = `Konteks:\n${String(context || '').trim() || '-'}\n\nRiwayat:\n${history || '-'}\n\nUser:\n${text}`;
+        const hermes = await call9Router([
+          { role: 'system', content: 'Kamu Hermes. Giliran 1. Jawab langsung sebagai partner teknis. Bahasa Indonesia santai, ringkas. Jangan jawab untuk OpenClaw.' },
+          { role: 'user', content: base }
+        ], 'koding');
+        hermes.text = cleanAgentReply(hermes.text, 'Hermes');
+
+        const openclaw = await call9Router([
+          { role: 'system', content: 'Kamu OpenClaw. Giliran 2. Baca pesan user dan jawaban Hermes. Jawab sebagai execution/coding agent. Boleh setuju, beda sudut pandang, atau sanggah. Jangan ulang mentah jawaban Hermes. Jangan jawab untuk Hermes.' },
+          { role: 'user', content: `${base}\n\nJawaban Hermes:\n${hermes.text}` }
+        ], 'koding');
+        openclaw.text = cleanAgentReply(openclaw.text, 'OpenClaw');
+
+        const hermesFinal = await call9Router([
+          { role: 'system', content: 'Kamu Hermes. Giliran 3/rebuttal. Baca jawaban OpenClaw, lalu beri final singkat: keputusan, tradeoff, langkah berikutnya. Jangan jawab untuk OpenClaw.' },
+          { role: 'user', content: `${base}\n\nJawaban Hermes awal:\n${hermes.text}\n\nJawaban OpenClaw:\n${openclaw.text}` }
+        ], 'koding');
+        hermesFinal.text = cleanAgentReply(hermesFinal.text, 'Hermes');
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ hermes, openclaw, hermesFinal }));
+      } catch (e) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: e.message }));
+      }
+    });
+    return;
+  }
+
+  // API: Prepare an Agent Forum prompt for OpenClaw (clipboard + direct chat URL)
+  if (req.url.startsWith('/api/openclaw/prepare') && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', () => {
+      try {
+        const { prompt = '', session = 'main' } = JSON.parse(body || '{}');
+        if (!String(prompt).trim()) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({ error: 'Prompt kosong' }));
+        }
+        const url = getOpenClawChatUrl(session);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, url, prompt: String(prompt) }));
+      } catch (e) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: e.message }));
+      }
+    });
+    return;
+  }
+
+  // API: Open terminal for CLI services (also handles OpenClaw dashboard link)
+  if (req.url.startsWith('/api/open-terminal') && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', async () => {
+      try {
+        const { serviceName } = JSON.parse(body);
+        const service = SERVICE_CONFIG[serviceName];
+        if (!service || service.workspace !== 'CLI') {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({ error: 'Not a CLI service' }));
+        }
+
+        if (serviceName === 'OpenClaw') {
+          const url = getOpenClawChatUrl('main');
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({ ok: true, url }));
+        }
+
+        let cmd = '';
+        if (serviceName === 'Hermes Agent') cmd = 'hermes';
+        else if (serviceName === 'OpenCode') cmd = 'opencode';
+        else {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({ error: 'Unknown CLI service' }));
+        }
+
+        // Use osascript to open Terminal.app and run command — fallback to 'open' if osascript fails
+        try {
+          const script = `tell application "Terminal" to do script "${cmd}"`;
+          execSync(`osascript -e ${JSON.stringify(script)}`, { stdio: 'ignore', timeout: 5000 });
+        } catch {
+          // Fallback: create temp .command file and open it
+          const tmpScript = `/tmp/${serviceName.replace(/\\s+/g, '_')}.command`;
+          fs.writeFileSync(tmpScript, `#!/bin/bash\n${cmd}\n`);
+          execSync(`chmod +x "${tmpScript}" && open "${tmpScript}"`, { stdio: 'ignore' });
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true }));
+      } catch (e) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: e.message }));
+      }
+    });
+    return;
+  }
+
   // API: Action (start/stop/restart)
   if (req.url.startsWith('/api/action') && req.method === 'POST') {
     let body = '';
@@ -222,13 +497,19 @@ const server = http.createServer(async (req, res) => {
           return res.end(JSON.stringify({ error: 'Service not found' }));
         }
 
-        if (service.protected && action !== 'restart') {
+        if (service.protected) {
+          // Protected services: no start/stop/restart
           res.writeHead(403, { 'Content-Type': 'application/json' });
           return res.end(JSON.stringify({ error: 'Service is protected' }));
         }
 
         if (action === 'start') {
           await startService(serviceName);
+          // For CLI services with web UI, return webUrl so browser can open it
+          if (service.webUrl) {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ ok: true, webUrl: service.webUrl }));
+          }
         } else if (action === 'stop') {
           await stopService(serviceName);
         } else if (action === 'restart') {
@@ -274,19 +555,38 @@ const server = http.createServer(async (req, res) => {
       if (!fs.existsSync(dbPath)) {
         return res.end(JSON.stringify({ logs: '9Router DB not found' }));
       }
-      const result = execSync(`sqlite3 "${dbPath}" "SELECT timestamp, provider, model, status, data FROM requestDetails ORDER BY timestamp DESC LIMIT 20;"`, { 
-        encoding: 'utf8', 
-        stdio: ['ignore', 'pipe', 'ignore'] 
+      const result = execSync(`sqlite3 -json "${dbPath}" "SELECT timestamp, provider, model, connectionId, status, substr(data,1,3000) AS data FROM requestDetails ORDER BY timestamp DESC LIMIT 50;"`, {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'ignore'],
+        maxBuffer: 24 * 1024 * 1024
       }).trim();
       
-      const lines = result.split('\n').filter(l => l).map(line => {
-        const [timestamp, provider, model, status, data] = line.split('|');
+      const sourceByConn = new Map();
+      try {
+        const conns = execSync(`sqlite3 -json "${dbPath}" "SELECT id, provider, name, data FROM providerConnections;"`, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+        for (const c of JSON.parse(conns || '[]')) sourceByConn.set(c.id, c.name || c.provider || 'unknown');
+      } catch {}
+
+      const guessSource = (d, connectionId, provider) => {
+        const txt = JSON.stringify(d.request || d.providerRequest || '').toLowerCase();
+        if (txt.includes('hermes agent')) return 'Hermes';
+        if (txt.includes('openclaw')) return 'OpenClaw';
+        if (txt.includes('opencode') || provider === 'opencode') return 'OpenCode';
+        return sourceByConn.get(connectionId) || 'unknown';
+      };
+
+      const rows = JSON.parse(result || '[]');
+      const entries = rows.map(row => {
+        const { timestamp, provider, model, connectionId, status, data } = row;
         try {
           const d = JSON.parse(data);
-          const combo = d.combo ? `combo:${d.combo}` : '';
+          let source = guessSource(d, connectionId, provider);
+          if (source.includes('@')) {
+            source = source.split('@')[0];
+          }
+          const combo = d.combo ? ` combo:${d.combo}` : '';
           const lat = d.latency ? `${d.latency.total}ms` : '';
           const tok = d.tokens ? `tok:${(d.tokens.prompt_tokens||0)}/${(d.tokens.completion_tokens||0)}` : '';
-          // Convert UTC ISO → WIB (UTC+7) HH:MM:SS
           let time = timestamp;
           try {
             const t = new Date(timestamp);
@@ -294,13 +594,51 @@ const server = http.createServer(async (req, res) => {
               time = t.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta', hour12: false });
             }
           } catch {}
-          return `[${time}] ${provider}/${model} ${d.status || status} ${lat} ${tok}${combo}`;
+          return { at: new Date(timestamp).getTime() || 0, line: `[${time}] [${source}] ${provider}/${model} ${d.status || status} ${lat} ${tok}${combo}` };
         } catch {
-          return `[${timestamp}] ${provider}/${model} ${status}`;
+          return { at: new Date(timestamp).getTime() || 0, line: `[${timestamp}] [${provider === 'opencode' ? 'OpenCode' : (sourceByConn.get(connectionId) || 'unknown')}] ${provider}/${model} ${status}` };
         }
       });
+      const parseForumAt = (line) => {
+        const m = line.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4}),\s+(\d{1,2})\.(\d{2})\.(\d{2})/);
+        return m ? new Date(+m[3], +m[2] - 1, +m[1], +m[4], +m[5], +m[6]).getTime() : 0;
+      };
+      const forumLogPath = path.join(__dirname, 'logs', 'forum-agent.log');
+      const forumEntries = fs.existsSync(forumLogPath)
+        ? fs.readFileSync(forumLogPath, 'utf8').trim().split('\n').filter(Boolean).slice(-20).map(line => ({ at: parseForumAt(line), line }))
+        : [];
+      const merged = [...forumEntries, ...entries].sort((a, b) => b.at - a.at).map(item => item.line);
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ logs: lines.join('\n') }));
+      res.end(JSON.stringify({ logs: merged.join('\n') }));
+    } catch (e) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: e.message }));
+    }
+    return;
+  }
+
+  // API: Get 9Router combos (read-only, from DB combos table)
+  if (req.url === '/api/9router-combos' && req.method === 'GET') {
+    try {
+      const dbPath = '/Users/naufalrizky/.9router/db/data.sqlite';
+      if (!fs.existsSync(dbPath)) {
+        return res.end(JSON.stringify({ combos: [] }));
+      }
+      const result = execSync(`sqlite3 -json "${dbPath}" "SELECT name, models FROM combos ORDER BY name;"`, {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'ignore']
+      }).trim();
+      const rows = JSON.parse(result || '[]');
+      const combos = rows.map(r => {
+        const models = JSON.parse(r.models || '[]');
+        return {
+          value: r.name,
+          label: r.name,
+          detail: models.join(', ')
+        };
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ combos }));
     } catch (e) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: e.message }));

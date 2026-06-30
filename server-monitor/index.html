@@ -44,9 +44,9 @@ body{background:#0a0a0f;color:#d4d4d8}
 .git-status.dirty{background:rgba(249,115,22,.12);color:#fb923c}
 .git-status.ahead{background:rgba(59,130,246,.12);color:#60a5fa}
 .git-status.none{background:#27272a;color:#71717a}
-.infra-drawer{position:fixed;right:16px;top:96px;width:280px;max-height:calc(100vh - 120px);overflow:auto;z-index:30}
+.infra-drawer{position:fixed;right:16px;top:96px;width:340px;max-height:calc(100vh - 110px);overflow:auto;z-index:30}
 .infra-drawer .service-card{margin-bottom:6px}
-@media(min-width:1280px){body{padding-right:320px}}
+@media(min-width:1280px){body{padding-right:380px}}
 @media(max-width:1279px){.infra-drawer{position:static;width:auto;max-height:none;margin-top:24px}}
 .service-card .latency{font-size:.7rem;font-weight:500}
 .service-card.online .latency{color:#22c55e}
@@ -137,7 +137,8 @@ body{background:#0a0a0f;color:#d4d4d8}
   <div class="flex items-center gap-2 mb-2">
     <span class="section-header">9Router Realtime Logs</span>
   </div>
-  <pre id="routerLogContent" class="text-xs font-mono text-zinc-400 bg-black/50 p-3 rounded max-h-64 overflow-auto whitespace-pre leading-none">Memuat log 9Router...</pre>
+  <pre id="routerLogContent" class="text-xs font-mono text-zinc-400 bg-black/50 p-3 rounded h-[28rem] max-h-[60vh] overflow-auto whitespace-pre leading-none">Memuat log 9Router...</pre>
+  <button id="scrollLogBottomBtn" class="fixed bottom-6 right-6 z-50 hidden w-10 h-10 rounded-full bg-indigo-600/80 hover:bg-indigo-500 text-white text-lg shadow-lg items-center justify-center" onclick="scrollLogToBottom()" title="Scroll ke bawah">↓</button>
 </div>
 
 <!-- ═══ LOG MODAL ═══ -->
@@ -168,7 +169,7 @@ const SECTION_KEYS = {
   'Tenggaong': ['Tenggaong Sport Backend', 'Tenggaong Sport Frontend'],
   'WashWallet': ['WashWallet Backend', 'WashWallet Cashier', 'WashWallet Production', 'WashWallet Customer'],
   'Infrastructure': ['9Router Gateway', 'Monitoring Dashboard'],
-  'CLI': ['Hermes Agent', 'OpenCode']
+  'CLI': ['Hermes Agent', 'OpenCode', 'OpenClaw']
 };
 
 let allData = {};
@@ -257,17 +258,24 @@ function buildServiceCard(s) {
       startBtn = `<button class="btn-start" onclick="actionService('${name}','start',this)" title="Start">▶</button>`;
     }
   }
-  if (serviceUrl) {
+  if (serviceUrl && s.workspace !== 'CLI') {
     linkBtn = `<button class="btn-link" onclick="window.open('${serviceUrl}','_blank')" title="Buka">🔗</button>`;
   }
   restartBtn = `<button class="btn-restart" onclick="actionService('${name}','restart',this)" title="Restart">🔄</button>`;
+  if (protected_) { restartBtn = ''; }
   logBtn = `<button class="btn-log" onclick="openLog('${name}')" title="Log">📋</button>`;
   if (GRAPHFY_MAP[name]) {
     graphBtn = `<button class="btn-graph" onclick="window.open('${GRAPHFY_MAP[name]}','_blank')" title="Graphify">◉</button>`;
   }
   if (s.workspace === 'CLI') {
-    terminalBtn = `<button class="btn-log" onclick="copyTerminalCommand('${name.toLowerCase().replace(/\s+/g, '')}', this)" title="Copy terminal command">⌘</button>`;
-  }
+      if (s.webUrl && s.webUrl.startsWith('http')) {
+        terminalBtn = `<button class="btn-link" onclick="window.open('${s.webUrl}','_blank')" title="Buka Web UI">🔗</button>`;
+      } else if (s.webUrl === 'dashboard:openclaw') {
+        terminalBtn = `<button class="btn-link" onclick="openTerminal('${name}', this)" title="Buka Web UI">🔗</button>`;
+      } else {
+        terminalBtn = `<button class="btn-log" onclick="openTerminal('${name}', this)" title="Buka terminal">⌨</button>`;
+      }
+    }
 
   const buttons = `${startBtn}${stopBtn}${linkBtn}${restartBtn}${logBtn}${graphBtn}${terminalBtn}`;
 
@@ -326,6 +334,7 @@ async function fetchStatus() {
     const res = await fetch('/api/status');
     const data = await res.json();
     renderSections(data);
+    renderSystemDrawer(data);
   } catch(e) {
     document.getElementById('dashboardSections').innerHTML =
       `<div class="text-center py-12 text-zinc-600"><p class="text-lg">Gagal</p><p class="mt-2">Gagal mengambil status: ${e.message}</p></div>`;
@@ -360,11 +369,26 @@ async function actionService(name, action, btn) {
   btn.classList.add('btn-loading');
   btn.disabled = true;
   try {
-    await fetch('/api/action', {
+    const res = await fetch('/api/action', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ serviceName: name, action })
     });
+    const data = await res.json();
+    if (!res.ok) { alert('Gagal: ' + JSON.stringify(data)); return; }
+    // Auto-open web UI for CLI services after start
+    if (action === 'start' && data.webUrl) {
+      if (data.webUrl.startsWith('terminal:') || data.webUrl === 'dashboard:openclaw') {
+        fetch('/api/open-terminal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ serviceName: name })
+        }).catch(() => {});
+      } else {
+        // Small delay to let server bind
+        setTimeout(() => window.open(data.webUrl, '_blank'), 3000);
+      }
+    }
     setTimeout(fetchStatus, 500);
   } catch (e) {
     console.error(e);
@@ -399,25 +423,83 @@ async function refreshLog() {
 }
 
 // Fetch 9Router realtime logs
+let lastLogsString = '';
+let userScrolledUp = false;
+
 async function fetch9RouterLogs() {
   try {
     const el = document.getElementById('routerLogContent');
-    const wasAtBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 5;
-    const wasAtRight = el.scrollLeft + el.clientWidth >= el.scrollWidth - 5;
+    if (!el) return;
     
     const res = await fetch('/api/9router-logs');
     const data = await res.json();
-    if (data.logs) {
-      el.textContent = data.logs;
-      if (wasAtBottom) {
-        el.scrollTop = el.scrollHeight;
+    if (!data.logs) return;
+
+    // Only update DOM if content actually changed
+    if (data.logs === lastLogsString) {
+      // Still check scroll position for the floating button
+      updateScrollBtn(el);
+      return;
+    }
+    lastLogsString = data.logs;
+
+    const prevHeight = el.scrollHeight;
+    el.textContent = data.logs;
+
+    if (userScrolledUp) {
+      // User is reading history — keep their relative scroll position
+      const newHeight = el.scrollHeight;
+      if (newHeight > prevHeight) {
+        // New content added above? adjust scroll to keep same viewport content
+        // (9Router logs are newest-first descending, so new entries appear at top)
+        el.scrollTop += newHeight - prevHeight;
       }
-      if (wasAtRight) {
-        el.scrollLeft = el.scrollWidth;
-      }
+      updateScrollBtn(el);
+    } else {
+      // Auto-scroll to bottom (latest logs)
+      el.scrollTop = el.scrollHeight;
+      document.getElementById('scrollLogBottomBtn').classList.add('hidden');
     }
   } catch {}
 }
+
+function scrollLogToBottom() {
+  const el = document.getElementById('routerLogContent');
+  if (!el) return;
+  userScrolledUp = false;
+  el.scrollTop = el.scrollHeight;
+  document.getElementById('scrollLogBottomBtn').classList.add('hidden');
+}
+
+function updateScrollBtn(el) {
+  const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 10;
+  const btn = document.getElementById('scrollLogBottomBtn');
+  if (atBottom) {
+    btn.classList.add('hidden');
+    userScrolledUp = false;
+  } else {
+    btn.classList.remove('hidden');
+    btn.style.display = 'flex';
+  }
+}
+
+// Detect user scroll — if they scroll up, pause auto-scroll
+document.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('routerLogContent');
+  if (!el) return;
+  el.addEventListener('scroll', () => {
+    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 10;
+    if (!atBottom) {
+      userScrolledUp = true;
+      const btn = document.getElementById('scrollLogBottomBtn');
+      if (btn) { btn.classList.remove('hidden'); btn.style.display = 'flex'; }
+    } else {
+      userScrolledUp = false;
+      const btn = document.getElementById('scrollLogBottomBtn');
+      if (btn) btn.classList.add('hidden');
+    }
+  });
+});
 
 function closeLog() {
   if (logTimer) clearInterval(logTimer);
@@ -446,10 +528,34 @@ function filterServices() {
   });
 }
 
+async function openTerminal(name, btn) {
+  if (!btn) return;
+  const originalHtml = btn.innerHTML;
+  btn.classList.add('btn-loading');
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/open-terminal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ serviceName: name })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (data.url) window.open(data.url, '_blank');
+  } catch (e) {
+    console.error(e);
+    alert('Gagal: ' + e.message);
+  } finally {
+    btn.classList.remove('btn-loading');
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
+  }
+}
+
 function copyTerminalCommand(name, btn) {
   const cmds = {
     hermesagent: 'hermes',
-    opencode: 'opencode'
+    opencode: 'opencode',
+    openclaw: 'openclaw'
   };
   const cmd = cmds[name.toLowerCase()];
   if (!cmd) return;
@@ -527,6 +633,12 @@ fetchStatus();
 setTimeout(fetchTelemetry, 500);
 pollTimer = setInterval(fetchStatus, 10000);
 telemetryTimer = setInterval(fetchTelemetry, 1000);
+setTimeout(() => {
+  fetch9RouterLogs();
+  // Scroll to bottom on first load
+  const el = document.getElementById('routerLogContent');
+  if (el) setTimeout(() => el.scrollTop = el.scrollHeight, 100);
+}, 500);
 </script>
 
 <!-- ═══ SIDEBAR ═══ -->
@@ -534,8 +646,12 @@ telemetryTimer = setInterval(fetchTelemetry, 1000);
   <div class="p-4 pt-20">
     <nav class="space-y-2">
       <a href="/" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition bg-emerald-600/20 border border-emerald-500/30">
-        <i data-lucide="layout-dashboard" class="h-5 w-5 text-emerald-400"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="layout-dashboard" aria-hidden="true" class="lucide lucide-layout-dashboard h-5 w-5 text-emerald-400"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
         <span class="text-sm font-medium text-emerald-300">Dashboard</span>
+      </a>
+      <a href="/forum/index.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="users" aria-hidden="true" class="lucide lucide-users h-5 w-5 text-zinc-500"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span class="text-sm font-medium">Agent Forum</span>
       </a>
       <a href="/cek-github.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 transition">
         <i data-lucide="shield-check" class="h-5 w-5 text-zinc-500"></i>

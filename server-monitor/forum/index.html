@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agent Forum</title>
+    <script>
+    // Blocking: fetch combos from 9Router before module loads
+    try {
+      var x = new XMLHttpRequest();
+      x.open('GET', '/api/9router-combos', false);
+      x.send();
+      if (x.status === 200) {
+        window.__FORUM_COMBOS__ = JSON.parse(x.responseText).combos;
+      }
+    } catch(e) { console.warn('combo fetch failed:', e); }
+    </script>
+    <script type="module" crossorigin src="./assets/index-B6O75w3Q.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-DNUToBxF.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
