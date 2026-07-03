@@ -17,17 +17,28 @@ test('GET /api/permissions/catalog returns 12 permission keys', function () {
             'success',
             'data' => [
                 '*' => [
-                    'key',
-                    'label',
+                    'group',
+                    'permissions' => [
+                        '*' => [
+                            'key',
+                            'label',
+                        ],
+                    ],
                 ]
             ],
             'message'
         ]);
 
     $data = $response->json('data');
-    expect(count($data))->toBe(12);
-    expect($data[0]['key'])->toBe('order.create');
-    expect($data[0]['label'])->toBe('Buat Order');
+    $flatPermissions = collect($data)
+        ->flatMap(fn (array $group) => $group['permissions'])
+        ->values();
+
+    expect($flatPermissions)->toHaveCount(50);
+    expect($flatPermissions->pluck('key'))->toContain('cashier_dashboard.view');
+    expect($flatPermissions->pluck('key'))->toContain('order.print');
+    expect($flatPermissions->pluck('key'))->not->toContain('order.manage');
+    expect($data[0]['group'])->toBe('Dashboard Kasir');
 });
 
 test('unauthenticated request is rejected 401', function () {

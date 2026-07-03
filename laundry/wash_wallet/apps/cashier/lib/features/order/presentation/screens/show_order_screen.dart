@@ -69,7 +69,9 @@ class _ShowOrderScreenState extends State<ShowOrderScreen> {
         _isLoading = true;
         _error = null;
       });
-      final order = await context.read<OrderCubit>().fetchOrderSilently(widget.orderId);
+      final order = await context.read<OrderCubit>().fetchOrderSilently(
+        widget.orderId,
+      );
       if (mounted) {
         setState(() {
           _localOrder = order;
@@ -159,10 +161,7 @@ class _ShowOrderScreenState extends State<ShowOrderScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Tolak Pesanan',
-              style: Theme.of(ctx).textTheme.titleLarge,
-            ),
+            Text('Tolak Pesanan', style: Theme.of(ctx).textTheme.titleLarge),
             SizedBox(height: context.space.md),
             AppTextField(
               controller: reasonController,
@@ -276,13 +275,13 @@ class _ShowOrderScreenState extends State<ShowOrderScreen> {
               child: _isLoading
                   ? const AppLoadingIndicator()
                   : _error != null
-                      ? AppErrorState(
-                          message: _error!,
-                          onRetry: _loadOrderDetail,
-                        )
-                      : _localOrder != null
-                          ? _buildDetailContent(_localOrder!, context.watch<OrderCubit>().state is OrderLoading)
-                          : const SizedBox.shrink(),
+                  ? AppErrorState(message: _error!, onRetry: _loadOrderDetail)
+                  : _localOrder != null
+                  ? _buildDetailContent(
+                      _localOrder!,
+                      context.watch<OrderCubit>().state is OrderLoading,
+                    )
+                  : const SizedBox.shrink(),
             ),
           ],
         ),
@@ -338,26 +337,28 @@ class _ShowOrderScreenState extends State<ShowOrderScreen> {
           breadcrumbs: [
             const BreadcrumbItem(label: 'Pesanan'),
             BreadcrumbItem(
-                label: 'Detail Pesanan',
-                onTap: () => Navigator.pop(context)),
+              label: 'Detail Pesanan',
+              onTap: () => Navigator.pop(context),
+            ),
           ],
           actions: [actionsBuilder],
         ),
-        Expanded(
-          child: ContentConstraint(
-            child: content,
-          ),
-        ),
+        Expanded(child: ContentConstraint(child: content)),
       ],
     );
   }
 
   Widget _buildEmbeddedHeader() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: context.space.md, vertical: context.space.sm),
+      padding: EdgeInsets.symmetric(
+        horizontal: context.space.md,
+        vertical: context.space.sm,
+      ),
       decoration: BoxDecoration(
         color: context.colors.surface,
-        border: Border(bottom: BorderSide(color: context.colors.outlineVariant)),
+        border: Border(
+          bottom: BorderSide(color: context.colors.outlineVariant),
+        ),
       ),
       child: Row(
         children: [
@@ -511,17 +512,17 @@ class _ShowOrderScreenState extends State<ShowOrderScreen> {
             children: [
               OrderDetailHeader(order: order),
               SizedBox(height: context.space.md),
-              
+
               if (order.customer != null) ...[
                 OrderCustomerCard(customer: order.customer!),
                 SizedBox(height: context.space.md),
               ],
-              
+
               if (order.orderItems != null && order.orderItems!.isNotEmpty) ...[
                 OrderItemsList(items: order.orderItems!),
                 SizedBox(height: context.space.md),
               ],
-              
+
               if (order.notes != null && order.notes!.isNotEmpty) ...[
                 OrderNotesCard(notes: order.notes!),
                 SizedBox(height: context.space.md),
@@ -537,10 +538,10 @@ class _ShowOrderScreenState extends State<ShowOrderScreen> {
             children: [
               OrderTimeline(order: order),
               SizedBox(height: context.space.md),
-              
+
               OrderFinancialSummary(order: order),
               SizedBox(height: context.space.xl),
-              
+
               OrderActionButtons(
                 onPrintReceipt: () => _handlePrintReceipt(order),
                 onSendWaNotification: () => _handleSendWaNotification(order),
@@ -558,7 +559,7 @@ class _ShowOrderScreenState extends State<ShowOrderScreen> {
                 showWaButton: order.status != 'requested',
                 isProcessing: isProcessing,
               ),
-              
+
               SizedBox(height: context.space.xxl),
             ],
           ),

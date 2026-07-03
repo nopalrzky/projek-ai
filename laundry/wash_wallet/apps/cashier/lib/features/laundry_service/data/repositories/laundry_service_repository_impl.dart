@@ -10,7 +10,7 @@ class LaundryServiceRepositoryImpl implements LaundryServiceRepository {
   LaundryServiceRepositoryImpl(this._remoteDatasource);
 
   @override
-  Future<Result<List<LaundryService>>> getAll({
+  Future<Result<PaginatedData<LaundryService>>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -22,7 +22,7 @@ class LaundryServiceRepositoryImpl implements LaundryServiceRepository {
     String sortDirection = 'desc',
   }) async {
     try {
-      final models = await _remoteDatasource.getAll(
+      final paginatedData = await _remoteDatasource.getAll(
         page: page,
         perPage: perPage,
         search: search,
@@ -33,7 +33,12 @@ class LaundryServiceRepositoryImpl implements LaundryServiceRepository {
         sortBy: sortBy,
         sortDirection: sortDirection,
       );
-      return Result.success(models.map((e) => e.toEntity()).toList());
+      return Result.success(PaginatedData<LaundryService>(
+        items: paginatedData.items.map((m) => m.toEntity()).toList(),
+        currentPage: paginatedData.currentPage, lastPage: paginatedData.lastPage,
+        perPage: paginatedData.perPage, total: paginatedData.total,
+        from: paginatedData.from, to: paginatedData.to,
+      ));
     } catch (e) {
       return Result.failure(_handleError(e));
     }

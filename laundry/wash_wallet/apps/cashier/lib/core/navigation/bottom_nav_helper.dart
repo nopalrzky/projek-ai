@@ -19,6 +19,11 @@ const cashierBottomNavItems = [
     label: 'Transaksi',
   ),
   AppBottomBarItem(
+    icon: Icons.dashboard_customize_outlined,
+    activeIcon: Icons.dashboard_customize,
+    label: 'Manajemen',
+  ),
+  AppBottomBarItem(
     icon: Icons.settings_outlined,
     activeIcon: Icons.settings,
     label: 'Setting',

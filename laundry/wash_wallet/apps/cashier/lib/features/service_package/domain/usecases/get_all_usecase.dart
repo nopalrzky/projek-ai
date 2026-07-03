@@ -8,7 +8,7 @@ class GetAllUsecase {
 
   GetAllUsecase(this._repository);
 
-  Future<Result<List<ServicePackage>>> call(GetAllParams params) {
+  Future<Result<PaginatedData<ServicePackage>>> call(GetAllParams params) {
     return _repository.getAll(
       page: params.page,
       perPage: params.perPage,

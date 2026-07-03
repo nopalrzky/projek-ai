@@ -43,7 +43,7 @@ class OrderDetailDialog extends StatelessWidget {
       insetPadding: EdgeInsets.all(context.space.lg),
       shape: RoundedRectangleBorder(borderRadius: context.radius.all.lg),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 500),
+        constraints: BoxConstraints(maxWidth: AppDialogLayout.detailMaxWidth(context)),
         child: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.all(context.space.lg),
@@ -353,4 +353,3 @@ class OrderDetailDialog extends StatelessWidget {
     }
   }
 }
-

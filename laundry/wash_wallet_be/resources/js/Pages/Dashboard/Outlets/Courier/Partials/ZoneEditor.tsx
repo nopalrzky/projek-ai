@@ -5,6 +5,7 @@ import { Search, Loader2 } from "lucide-react";
 import axios from "axios";
 import ZoneDistrictItem from "./ZoneDistrictItem";
 import ZoneActivePanel from "./ZoneActivePanel";
+import { useLatestAsync } from "@/Hooks/useLatestAsync";
 
 interface VillageNode {
     villageId: string;
@@ -57,21 +58,30 @@ const ZoneEditor = ({
         new Set(),
     );
 
+    const { runLatest: runLatestDistricts } = useLatestAsync();
+
     useEffect(() => {
-        const fetchDistricts = async () => {
-            try {
-                const { data } = await axios.get(
-                    route("outlets.courier-settings.zone-options", outletId),
-                );
-                setDistricts(data.districts || []);
-            } catch (error) {
-                console.error("Failed to fetch zone options", error);
-            } finally {
-                setIsLoading(false);
+        setIsLoading(true);
+        setDistricts([]);
+        
+        runLatestDistricts(
+            outletId,
+            async () => await axios.get(
+                route("outlets.courier-settings.zone-options", outletId),
+            ),
+            {
+                onSuccess: (response) => {
+                    setDistricts(response.data.districts || []);
+                },
+                onError: (error) => {
+                    console.error("Failed to fetch zone options", error);
+                },
+                onFinally: () => {
+                    setIsLoading(false);
+                }
             }
-        };
-        fetchDistricts();
-    }, [outletId]);
+        );
+    }, [outletId, runLatestDistricts]);
 
     useEffect(() => {
         if (isLoading) return;

@@ -23,7 +23,6 @@ const ApproveExpenseModal: React.FC<ApproveExpenseModalProps> = ({
         }
     }, [isOpen]);
 
-    // Prepare account options for SelectInput
     const accountOptions = useMemo(() => {
         return [
             { value: "", label: "Gunakan akun saat ini" },

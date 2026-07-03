@@ -2,7 +2,7 @@ import 'package:wash_wallet_core/wash_wallet_core.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 
 abstract class MembershipPlanRepository {
-  Future<Result<List<MembershipPlan>>> getAll({
+  Future<Result<PaginatedData<MembershipPlan>>> getAll({
     int page,
     int perPage,
     String? search,

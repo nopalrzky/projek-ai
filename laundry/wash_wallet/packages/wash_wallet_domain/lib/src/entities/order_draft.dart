@@ -33,14 +33,14 @@ class OrderDraftItem extends Equatable {
 
   @override
   List<Object?> get props => [
-        laundryServiceId,
-        priceId,
-        serviceName,
-        quantity,
-        unitPrice,
-        subtotal,
-        notes,
-      ];
+    laundryServiceId,
+    priceId,
+    serviceName,
+    quantity,
+    unitPrice,
+    subtotal,
+    notes,
+  ];
 }
 
 class OrderDraft extends Equatable {
@@ -138,20 +138,20 @@ class OrderDraft extends Equatable {
 
   @override
   List<Object?> get props => [
-        outletId,
-        customerId,
-        employeeId,
-        items,
-        notes,
-        estimatedCompletion,
-        paymentStatus,
-        paymentMethod,
-        paymentAccountId,
-        paidAmount,
-        status,
-        clientRequestId,
-        lastError,
-        updatedAt,
-        version,
-      ];
+    outletId,
+    customerId,
+    employeeId,
+    items,
+    notes,
+    estimatedCompletion,
+    paymentStatus,
+    paymentMethod,
+    paymentAccountId,
+    paidAmount,
+    status,
+    clientRequestId,
+    lastError,
+    updatedAt,
+    version,
+  ];
 }

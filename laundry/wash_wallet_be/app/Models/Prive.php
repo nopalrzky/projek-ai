@@ -35,11 +35,15 @@ class Prive extends Model
     protected function casts(): array
     {
         return [
-            'amount'     => 'decimal:2',
-            'date'       => 'date',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-            'deleted_at' => 'datetime',
+            'outlet_id'         => 'integer',
+            'user_id'           => 'integer',
+            'source_account_id' => 'integer',
+            'equity_account_id' => 'integer',
+            'amount'            => 'decimal:2',
+            'date'              => 'date',
+            'created_at'        => 'datetime',
+            'updated_at'        => 'datetime',
+            'deleted_at'        => 'datetime',
         ];
     }
 

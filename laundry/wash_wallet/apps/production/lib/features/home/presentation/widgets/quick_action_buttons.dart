@@ -14,7 +14,7 @@ class QuickActionButtons extends StatelessWidget {
             Container(
               padding: context.space.insetsAll.sm,
               decoration: BoxDecoration(
-                color: context.colors.primary.withOpacity(0.1),
+                color: context.colors.primary.withValues(alpha: 0.1),
                 borderRadius: context.radius.all.md,
               ),
               child: Icon(
@@ -42,7 +42,7 @@ class QuickActionButtons extends StatelessWidget {
                 label: 'Cari Order',
                 gradientColors: [
                   AppColors.info500,
-                  AppColors.info500.withOpacity(0.8),
+                  AppColors.info500.withValues(alpha: 0.8),
                 ],
                 onTap: () {
                   // TODO: Navigate to search
@@ -56,7 +56,7 @@ class QuickActionButtons extends StatelessWidget {
                 label: 'Scan Invoice',
                 gradientColors: [
                   AppColors.teal600,
-                  AppColors.teal600.withOpacity(0.8),
+                  AppColors.teal600.withValues(alpha: 0.8),
                 ],
                 onTap: () {},
               ),
@@ -71,7 +71,7 @@ class QuickActionButtons extends StatelessWidget {
             label: 'Lihat Semua Order',
             gradientColors: [
               AppColors.success500,
-              AppColors.success500.withOpacity(0.8),
+              AppColors.success500.withValues(alpha: 0.8),
             ],
             onTap: () {
               // TODO: Navigate to all orders
@@ -108,12 +108,12 @@ class _QuickActionButton extends StatelessWidget {
             color: context.colors.surface,
             borderRadius: context.radius.all.lg,
             border: Border.all(
-              color: gradientColors[0].withOpacity(0.2),
+              color: gradientColors[0].withValues(alpha: 0.2),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.03),
+                color: Colors.black.withValues(alpha: 0.03),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -136,7 +136,7 @@ class _QuickActionButton extends StatelessWidget {
                     borderRadius: context.radius.all.md,
                     boxShadow: [
                       BoxShadow(
-                        color: gradientColors[0].withOpacity(0.3),
+                        color: gradientColors[0].withValues(alpha: 0.3),
                         blurRadius: 12,
                         offset: const Offset(0, 6),
                       ),
@@ -164,4 +164,3 @@ class _QuickActionButton extends StatelessWidget {
     );
   }
 }
-

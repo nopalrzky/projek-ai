@@ -76,7 +76,6 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
             ? "warning"
             : status;
 
-        // Generate time options based on interval
         const generatedTimeOptions = useMemo(() => {
             if (timeOptions) return timeOptions;
 
@@ -210,8 +209,8 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
         const baseClasses = cn(
             "transition-all duration-200 ease-in-out",
             "focus:outline-none focus:ring-2 focus:ring-offset-0",
-            "placeholder:text-gray-400 dark:placeholder:text-gray-500",
-            "text-gray-900 dark:text-gray-100",
+            "placeholder-[var(--color-text-tertiary)]",
+            "text-[var(--color-text-primary)]",
             disabled && "cursor-not-allowed opacity-60",
             readOnly && "cursor-default",
             fullWidth ? "w-full" : "w-auto"
@@ -220,65 +219,65 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
         const variantClasses = {
             default: cn(
                 "border rounded-lg",
-                "bg-white dark:bg-gray-800",
-                "border-gray-300 dark:border-gray-600",
-                "focus:border-blue-500 dark:focus:border-blue-400",
-                "focus:ring-blue-500/20 dark:focus:ring-blue-400/20",
+                "bg-[var(--color-surface)]",
+                "border-[var(--color-border)]",
+                "focus:border-[var(--color-primary-500)]",
+                "focus:ring-[var(--color-primary-500)]/20",
                 actualStatus === "error" && [
-                    "border-red-500 dark:border-red-400",
-                    "focus:border-red-500 dark:focus:border-red-400",
-                    "focus:ring-red-500/20 dark:focus:ring-red-400/20",
-                    "bg-red-50/50 dark:bg-red-900/10",
+                    "border-[var(--color-error-500)]",
+                    "focus:border-[var(--color-error-500)]",
+                    "focus:ring-[var(--color-error-500)]/20",
+                    "bg-[var(--color-error-500)]/5",
                 ],
                 actualStatus === "success" && [
-                    "border-green-500 dark:border-green-400",
-                    "focus:border-green-500 dark:focus:border-green-400",
-                    "focus:ring-green-500/20 dark:focus:ring-green-400/20",
-                    "bg-green-50/50 dark:bg-green-900/10",
+                    "border-[var(--color-success-500)]",
+                    "focus:border-[var(--color-success-500)]",
+                    "focus:ring-[var(--color-success-500)]/20",
+                    "bg-[var(--color-success-500)]/5",
                 ],
                 actualStatus === "warning" && [
-                    "border-yellow-500 dark:border-yellow-400",
-                    "focus:border-yellow-500 dark:focus:border-yellow-400",
-                    "focus:ring-yellow-500/20 dark:focus:ring-yellow-400/20",
-                    "bg-yellow-50/50 dark:bg-yellow-900/10",
+                    "border-[var(--color-warning-500)]",
+                    "focus:border-[var(--color-warning-500)]",
+                    "focus:ring-[var(--color-warning-500)]/20",
+                    "bg-[var(--color-warning-500)]/5",
                 ],
                 disabled && [
-                    "bg-gray-50 dark:bg-gray-900/50",
-                    "border-gray-200 dark:border-gray-700",
-                    "text-gray-400 dark:text-gray-500",
+                    "bg-[var(--color-gray-100)]",
+                    "border-[var(--color-border-light)]",
+                    "text-[var(--color-text-tertiary)]",
                 ]
             ),
             outline: cn(
                 "border-2 rounded-lg bg-transparent",
-                "border-gray-300 dark:border-gray-600",
-                "focus:border-blue-500 dark:focus:border-blue-400",
-                "focus:ring-blue-500/20 dark:focus:ring-blue-400/20",
+                "border-[var(--color-border)]",
+                "focus:border-[var(--color-primary-500)]",
+                "focus:ring-[var(--color-primary-500)]/20",
                 actualStatus === "error" && [
-                    "border-red-500 dark:border-red-400",
-                    "focus:border-red-500 dark:focus:border-red-400",
-                    "focus:ring-red-500/20 dark:focus:ring-red-400/20",
+                    "border-[var(--color-error-500)]",
+                    "focus:border-[var(--color-error-500)]",
+                    "focus:ring-[var(--color-error-500)]/20",
                 ],
-                disabled && "border-gray-200 dark:border-gray-700"
+                disabled && "border-[var(--color-border-light)]"
             ),
             filled: cn(
                 "border border-transparent rounded-lg",
-                "bg-gray-100 dark:bg-gray-800",
-                "focus:bg-white dark:focus:bg-gray-700",
-                "focus:border-blue-500 dark:focus:border-blue-400",
-                "focus:ring-blue-500/20 dark:focus:ring-blue-400/20",
-                disabled && "bg-gray-50 dark:bg-gray-900/50"
+                "bg-[var(--color-gray-100)]",
+                "focus:bg-[var(--color-surface)]",
+                "focus:border-[var(--color-primary-500)]",
+                "focus:ring-[var(--color-primary-500)]/20",
+                disabled && "bg-[var(--color-gray-100)]/50"
             ),
             underline: cn(
                 "border-0 border-b-2 rounded-none bg-transparent",
-                "border-gray-300 dark:border-gray-600",
-                "focus:border-blue-500 dark:focus:border-blue-400 focus:ring-0",
-                disabled && "border-gray-200 dark:border-gray-700"
+                "border-[var(--color-border)]",
+                "focus:border-[var(--color-primary-500)] focus:ring-0",
+                disabled && "border-[var(--color-border-light)]"
             ),
             ghost: cn(
                 "border border-transparent rounded-lg bg-transparent",
-                "hover:bg-gray-50 dark:hover:bg-gray-800",
-                "focus:bg-white dark:focus:bg-gray-700",
-                "focus:border-gray-300 dark:focus:border-gray-600",
+                "hover:bg-[var(--color-gray-100)]",
+                "focus:bg-[var(--color-surface)]",
+                "focus:border-[var(--color-border)]",
                 disabled && "hover:bg-transparent"
             ),
         };
@@ -346,7 +345,7 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
         const handleBlur = useCallback(
             (e: React.FocusEvent<HTMLInputElement>) => {
                 setIsFocused(false);
-                setIsPickerOpen(false);
+                setTimeout(() => setIsPickerOpen(false), 200);
                 onBlur?.(e);
             },
             [onBlur]
@@ -407,20 +406,20 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
                             "block font-medium mb-1.5",
                             labelSizeClasses[size],
                             actualStatus === "error"
-                                ? "text-red-700 dark:text-red-400"
-                                : "text-gray-700 dark:text-gray-300",
-                            disabled && "text-gray-400 dark:text-gray-500",
+                                ? "text-[var(--color-error-600)]"
+                                : "text-[var(--color-text-secondary)]",
+                            disabled && "text-[var(--color-text-tertiary)]",
                             labelClassName
                         )}
                     >
                         {label}
                         {required && showRequiredIndicator && (
-                            <span className="text-red-500 dark:text-red-400 ml-1">
+                            <span className="text-[var(--color-error-500)] ml-1">
                                 *
                             </span>
                         )}
                         {optional && showOptionalText && !required && (
-                            <span className="text-gray-400 dark:text-gray-500 text-sm ml-1">
+                            <span className="text-[var(--color-text-tertiary)] text-sm ml-1">
                                 (optional)
                             </span>
                         )}
@@ -431,7 +430,7 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
                 <div className="relative">
                     {/* Clock Icon */}
                     <div className="absolute left-0 top-0 h-full flex items-center pl-3 pointer-events-none">
-                        <div className="text-gray-400 dark:text-gray-500">
+                        <div className="text-[var(--color-text-tertiary)]">
                             {leftIcon || <Clock size={iconSizeClasses[size]} />}
                         </div>
                     </div>
@@ -450,6 +449,19 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
                         readOnly={readOnly}
                         required={required}
                         className={inputClasses}
+                        style={{
+                            backgroundColor: "var(--color-surface)",
+                            borderColor: isFocused
+                                ? actualStatus === "error"
+                                    ? "var(--color-error-500)"
+                                    : actualStatus === "success"
+                                      ? "var(--color-success-500)"
+                                      : actualStatus === "warning"
+                                        ? "var(--color-warning-500)"
+                                        : "var(--color-primary-500)"
+                                : "var(--color-border)",
+                            color: "var(--color-text-primary)",
+                        }}
                         aria-invalid={actualStatus === "error"}
                         aria-describedby={cn(
                             error && `${inputId}-error`,
@@ -463,7 +475,7 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
                     <div className="absolute right-0 top-0 h-full flex items-center pr-3 gap-1">
                         {/* Loading Spinner */}
                         {loading && (
-                            <div className="animate-spin text-gray-400 dark:text-gray-500">
+                            <div className="animate-spin text-[var(--color-text-tertiary)]">
                                 <svg
                                     width={iconSizeClasses[size]}
                                     height={iconSizeClasses[size]}
@@ -494,7 +506,7 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
                                 size="xs"
                                 onClick={handleClear}
                                 disabled={disabled}
-                                className="p-0 h-auto min-h-0 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                                className="p-0 h-auto min-h-0 text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]"
                                 leftIcon={<X size={iconSizeClasses[size]} />}
                             />
                         )}
@@ -506,7 +518,7 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
                                 size="xs"
                                 onClick={togglePicker}
                                 disabled={disabled}
-                                className="p-0 h-auto min-h-0 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                                className="p-0 h-auto min-h-0 text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]"
                                 leftIcon={
                                     <ChevronDown size={iconSizeClasses[size]} />
                                 }
@@ -515,7 +527,7 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
 
                         {/* Right Icon */}
                         {rightIcon && !clearable && !showPicker && !loading && (
-                            <div className="text-gray-400 dark:text-gray-500">
+                            <div className="text-[var(--color-text-tertiary)]">
                                 {React.isValidElement(rightIcon)
                                     ? React.cloneElement(rightIcon, {
                                           size: iconSizeClasses[size],
@@ -527,18 +539,20 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
 
                     {/* Time Picker Dropdown */}
                     {showPicker && isPickerOpen && (
-                        <div className="absolute top-full left-0 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                        <div className="absolute top-full left-0 mt-1 w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
                             {generatedTimeOptions.map((option) => (
                                 <button
                                     key={option.value}
                                     type="button"
-                                    onClick={() =>
-                                        handleTimeSelect(option.value)
-                                    }
+                                    onMouseDown={(e) => {
+                                        // prevent input blur before we can handle click
+                                        e.preventDefault();
+                                        handleTimeSelect(option.value);
+                                    }}
                                     className={cn(
-                                        "w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150",
+                                        "w-full px-3 py-2 text-left text-sm hover:bg-[var(--color-gray-100)] transition-colors duration-150 text-[var(--color-text-primary)]",
                                         inputValue === option.value &&
-                                            "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+                                            "bg-[var(--color-primary-50)] text-[var(--color-primary-700)] hover:bg-[var(--color-primary-50)]"
                                     )}
                                 >
                                     {option.label}
@@ -555,7 +569,7 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
                         <p
                             id={`${inputId}-error`}
                             className={cn(
-                                "text-sm text-red-600 dark:text-red-400 flex items-start gap-1",
+                                "text-sm text-[var(--color-error-600)] flex items-start gap-1",
                                 errorClassName
                             )}
                         >
@@ -578,7 +592,7 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
 
                     {/* Success Message */}
                     {success && !error && (
-                        <p className="text-sm text-green-600 dark:text-green-400 flex items-start gap-1">
+                        <p className="text-sm text-[var(--color-success-600)] flex items-start gap-1">
                             <svg
                                 className="w-4 h-4 mt-0.5 flex-shrink-0"
                                 fill="currentColor"
@@ -596,7 +610,7 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
 
                     {/* Warning Message */}
                     {warning && !error && !success && (
-                        <p className="text-sm text-yellow-600 dark:text-yellow-400 flex items-start gap-1">
+                        <p className="text-sm text-[var(--color-warning-600)] flex items-start gap-1">
                             <svg
                                 className="w-4 h-4 mt-0.5 flex-shrink-0"
                                 fill="currentColor"
@@ -616,7 +630,7 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
                     {helperText && !error && !success && !warning && (
                         <p
                             id={`${inputId}-helper`}
-                            className="text-sm text-gray-500 dark:text-gray-400"
+                            className="text-sm text-[var(--color-text-secondary)]"
                         >
                             {helperText}
                         </p>
@@ -626,7 +640,7 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>(
                     {hint && (
                         <p
                             id={`${inputId}-hint`}
-                            className="text-xs text-gray-400 dark:text-gray-500"
+                            className="text-xs text-[var(--color-text-tertiary)]"
                         >
                             {hint}
                         </p>

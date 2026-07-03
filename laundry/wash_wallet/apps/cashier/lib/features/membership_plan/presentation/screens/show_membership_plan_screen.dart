@@ -59,7 +59,10 @@ class _ShowMembershipPlanScreenState extends State<ShowMembershipPlanScreen> {
         }
 
         if (state is MembershipPlanFailure) {
-          return AppErrorState(message: state.failure.message, onRetry: _loadData);
+          return AppErrorState(
+            message: state.failure.message,
+            onRetry: _loadData,
+          );
         }
 
         if (state is MembershipPlanLoaded) {
@@ -83,7 +86,8 @@ class _ShowMembershipPlanScreenState extends State<ShowMembershipPlanScreen> {
                   title: 'Informasi Membership',
                   children: [
                     _buildInfoRow(context, 'Nama Plan', plan.name),
-                    if (plan.description != null && plan.description!.isNotEmpty)
+                    if (plan.description != null &&
+                        plan.description!.isNotEmpty)
                       _buildInfoRow(context, 'Deskripsi', plan.description!),
                     _buildInfoRow(
                       context,
@@ -171,15 +175,14 @@ class _ShowMembershipPlanScreenState extends State<ShowMembershipPlanScreen> {
           title: 'Detail Membership',
           breadcrumbs: [
             const BreadcrumbItem(label: 'Pengaturan'),
-            BreadcrumbItem(label: 'Membership', onTap: () => Navigator.pop(context)),
+            BreadcrumbItem(
+              label: 'Membership',
+              onTap: () => Navigator.pop(context),
+            ),
             const BreadcrumbItem(label: 'Detail Membership'),
           ],
         ),
-        Expanded(
-          child: ContentConstraint(
-            child: content,
-          ),
-        ),
+        Expanded(child: ContentConstraint(child: content)),
       ],
     );
   }

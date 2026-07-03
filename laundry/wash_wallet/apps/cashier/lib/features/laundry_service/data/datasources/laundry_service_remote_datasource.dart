@@ -3,7 +3,7 @@ import 'package:wash_wallet_core/wash_wallet_core.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 
 abstract class LaundryServiceRemoteDatasource {
-  Future<List<LaundryServiceModel>> getAll({
+  Future<PaginatedData<LaundryServiceModel>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -51,7 +51,7 @@ class LaundryServiceRemoteDatasourceImpl
   LaundryServiceRemoteDatasourceImpl(this._dio, this._endpoints);
 
   @override
-  Future<List<LaundryServiceModel>> getAll({
+  Future<PaginatedData<LaundryServiceModel>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -83,7 +83,12 @@ class LaundryServiceRemoteDatasourceImpl
       final body = _validateResponse(response);
 
       final List data = body['data'] as List? ?? [];
-      return data.map((e) => LaundryServiceModel.fromJson(e)).toList();
+      final meta = body['meta'] as Map<String, dynamic>? ?? {};
+      final items = data.map((e) => LaundryServiceModel.fromJson(e)).toList();
+      return PaginatedData<LaundryServiceModel>.fromMeta(
+        items: items, meta: meta,
+        requestedPage: page, requestedPerPage: perPage,
+      );
     } catch (e) {
       throw _handleError(e);
     }

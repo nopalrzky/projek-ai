@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 import '../bloc/order_cubit.dart';
 import '../bloc/order_state.dart';
-import 'order_item_card.dart';
+import 'order_grid_list.dart';
 import 'order_detail_dialog.dart';
 
 class OrderQueuedTab extends StatelessWidget {
@@ -16,7 +16,9 @@ class OrderQueuedTab extends StatelessWidget {
       builder: (context, state) {
         if (state is OrderLoading) {
           return const Center(
-            child: AppLoadingIndicator(message: 'Memuat order siap dikerjakan...'),
+            child: AppLoadingIndicator(
+              message: 'Memuat order siap dikerjakan...',
+            ),
           );
         }
 
@@ -38,12 +40,17 @@ class OrderQueuedTab extends StatelessWidget {
             return const Center(
               child: AppEmptyState.order(
                 title: 'Tidak Ada Order Siap Dikerjakan',
-                description: 'Semua order sedang dikerjakan atau belum ada antrian baru',
+                description:
+                    'Semua order sedang dikerjakan atau belum ada antrian baru',
               ),
             );
           }
 
-          return RefreshIndicator(
+          final isTablet = !AppBreakpoints.isCompact(context);
+
+          Widget listWidget = OrderGridList(
+            orders: state.orders,
+            showProcessButton: true,
             onRefresh: () async {
               context.read<OrderCubit>().getAll(
                 status: 'ready_to_process',
@@ -51,26 +58,47 @@ class OrderQueuedTab extends StatelessWidget {
                 perPage: 15,
               );
             },
-            child: ListView.separated(
-              padding: EdgeInsets.all(context.space.md),
-              itemCount: state.orders.length,
-              separatorBuilder: (context, index) =>
-                  SizedBox(height: context.space.md),
-              itemBuilder: (context, index) {
-                final order = state.orders[index];
-                return OrderItemCard(
-                  order: order,
-                  showProcessButton: true,
-                  onDetail: () {
-                    context.push('/orders/${order.id}');
-                  },
-                  onProcess: () {
-                    _showProcessConfirmation(context, order);
-                  },
-                );
-              },
-            ),
+            onDetail: (order) {
+              context.push('/orders/${order.id}');
+            },
+            onProcess: (order) {
+              _showProcessConfirmation(context, order);
+            },
           );
+
+          if (isTablet) {
+            return Column(
+              children: [
+                Expanded(child: listWidget),
+                Container(
+                  decoration: BoxDecoration(
+                    color: context.colors.surface,
+                    border: Border(
+                      top: BorderSide(
+                        color: context.colors.outlineVariant.withValues(alpha: 0.85),
+                      ),
+                    ),
+                  ),
+                  child: AppPagination(
+                    currentPage: state.currentPage,
+                    lastPage: state.lastPage,
+                    total: state.total,
+                    from: state.from,
+                    to: state.to,
+                    isLoading: state.isPageLoading,
+                    onPageChanged: (page) {
+                      context.read<OrderCubit>().changePage(
+                        page,
+                        status: 'ready_to_process',
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          }
+
+          return listWidget;
         }
 
         return const SizedBox.shrink();

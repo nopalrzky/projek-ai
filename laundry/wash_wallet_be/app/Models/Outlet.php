@@ -56,6 +56,7 @@ class Outlet extends Model
     protected function casts(): array
     {
         return [
+            'owner_id'     => 'integer',
             'status'       => 'string',
             'coin_balance' => 'integer',
             'latitude'     => 'double',
@@ -395,7 +396,7 @@ class Outlet extends Model
 
     public function isOwner(User $user): bool
     {
-        return $this->owner_id === $user->id;
+        return (int) $this->owner_id === (int) $user->id;
     }
 
     /** Get account by role */

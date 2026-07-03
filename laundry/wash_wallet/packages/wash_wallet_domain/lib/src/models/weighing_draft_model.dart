@@ -101,8 +101,12 @@ class WeighingDraftModel extends WeighingDraft {
       orderId: json['orderId'] as int,
       employeeId: json['employeeId'] as int,
       weight: (json['weight'] as num?)?.toDouble() ?? 0.0,
-      additionalItems: (json['additionalItems'] as List<dynamic>?)
-              ?.map((e) => WeighingDraftItemModel.fromJson(e as Map<String, dynamic>))
+      additionalItems:
+          (json['additionalItems'] as List<dynamic>?)
+              ?.map(
+                (e) =>
+                    WeighingDraftItemModel.fromJson(e as Map<String, dynamic>),
+              )
               .toList() ??
           [],
       paymentMethod: json['paymentMethod'] as String?,

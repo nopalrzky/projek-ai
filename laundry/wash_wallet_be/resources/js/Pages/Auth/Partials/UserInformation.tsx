@@ -127,7 +127,6 @@ const UserInformation: React.FC<RegisterStepProps> = ({ onBack, data }) => {
 
     const allRequirementsMet = passwordRequirements.every((r) => r.met);
 
-    // Shared toggle button style helper
     const toggleBtnStyle = {
         color: "var(--color-text-tertiary)",
     };

@@ -23,24 +23,24 @@ class OrderReviewModel with _$OrderReviewModel {
       _$OrderReviewModelFromJson(json);
 
   factory OrderReviewModel.fromEntity(OrderReview entity) => OrderReviewModel(
-        id: entity.id,
-        orderId: entity.orderId,
-        outletId: entity.outletId,
-        rating: entity.rating,
-        comment: entity.comment,
-        maskedName: entity.maskedName,
-        createdAt: entity.createdAt,
-        formattedCreatedAt: entity.formattedCreatedAt,
-      );
+    id: entity.id,
+    orderId: entity.orderId,
+    outletId: entity.outletId,
+    rating: entity.rating,
+    comment: entity.comment,
+    maskedName: entity.maskedName,
+    createdAt: entity.createdAt,
+    formattedCreatedAt: entity.formattedCreatedAt,
+  );
 
   OrderReview toEntity() => OrderReview(
-        id: id,
-        orderId: orderId,
-        outletId: outletId,
-        rating: rating,
-        comment: comment,
-        maskedName: maskedName,
-        createdAt: createdAt,
-        formattedCreatedAt: formattedCreatedAt,
-      );
+    id: id,
+    orderId: orderId,
+    outletId: outletId,
+    rating: rating,
+    comment: comment,
+    maskedName: maskedName,
+    createdAt: createdAt,
+    formattedCreatedAt: formattedCreatedAt,
+  );
 }

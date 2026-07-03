@@ -57,7 +57,7 @@ class _SelectLaundryServiceForOrderScreenState
       outletId: widget.outletId,
       isActive: true,
     );
-    
+
     final authState = context.read<AuthCubit>().state;
     if (authState is Authenticated) {
       context.read<OrderCubit>().loadDraft(
@@ -161,9 +161,11 @@ class _SelectLaundryServiceForOrderScreenState
                 context: context,
                 barrierDismissible: false,
                 builder: (ctx) => AlertDialog(
-                  title: Text(draft.status == 'submit_failed' 
-                      ? 'Pesanan Gagal Terkirim' 
-                      : 'Draft Pesanan Ditemukan'),
+                  title: Text(
+                    draft.status == 'submit_failed'
+                        ? 'Pesanan Gagal Terkirim'
+                        : 'Draft Pesanan Ditemukan',
+                  ),
                   content: Text(
                     draft.status == 'submit_failed'
                         ? 'Pesanan sebelumnya untuk ${widget.customer.name} gagal terkirim (Error: ${draft.lastError ?? 'Unknown'}). Ingin mencoba mengirim ulang, mengedit, atau hapus draft?'
@@ -185,7 +187,11 @@ class _SelectLaundryServiceForOrderScreenState
                           _cartItems = [];
                         });
                       },
-                      child: Text(draft.status == 'submit_failed' ? 'Hapus Draft' : 'Mulai Baru'),
+                      child: Text(
+                        draft.status == 'submit_failed'
+                            ? 'Hapus Draft'
+                            : 'Mulai Baru',
+                      ),
                     ),
                     ElevatedButton(
                       onPressed: () {
@@ -194,7 +200,11 @@ class _SelectLaundryServiceForOrderScreenState
                           _cartItems = List.from(draft.items);
                         });
                       },
-                      child: Text(draft.status == 'submit_failed' ? 'Lanjutkan / Retry' : 'Lanjutkan Draft'),
+                      child: Text(
+                        draft.status == 'submit_failed'
+                            ? 'Lanjutkan / Retry'
+                            : 'Lanjutkan Draft',
+                      ),
                     ),
                   ],
                 ),
@@ -223,22 +233,22 @@ class _SelectLaundryServiceForOrderScreenState
           child: Column(
             children: [
               LaundryServiceSearchBar(
-              controller: _searchController,
-              onChanged: (_) => setState(() {}),
-              onClear: () => setState(() {}),
-            ),
-
-            Expanded(
-              child: LaundryServiceListView(
-                searchQuery: _searchController.text,
-                cartItems: _cartItems,
-                onServiceTap: _openInputQtyScreen,
-                onRetry: _loadInitialData,
+                controller: _searchController,
+                onChanged: (_) => setState(() {}),
+                onClear: () => setState(() {}),
               ),
-            ),
-          ],
+
+              Expanded(
+                child: LaundryServiceListView(
+                  searchQuery: _searchController.text,
+                  cartItems: _cartItems,
+                  onServiceTap: _openInputQtyScreen,
+                  onRetry: _loadInitialData,
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

@@ -12,7 +12,7 @@ class OrderRepositoryImpl implements OrderRepository {
   OrderRepositoryImpl(this._remoteDatasource, this._localDatasource);
 
   @override
-  Future<Result<List<Order>>> getAll({
+  Future<Result<PaginatedData<Order>>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -31,7 +31,7 @@ class OrderRepositoryImpl implements OrderRepository {
     String sortDirection = 'desc',
   }) async {
     try {
-      final models = await _remoteDatasource.getAll(
+      final paginatedData = await _remoteDatasource.getAll(
         page: page,
         perPage: perPage,
         search: search,
@@ -49,7 +49,15 @@ class OrderRepositoryImpl implements OrderRepository {
         sortBy: sortBy,
         sortDirection: sortDirection,
       );
-      return Result.success(models.map((e) => e.toEntity()).toList());
+      return Result.success(PaginatedData<Order>(
+        items: paginatedData.items.map((e) => e.toEntity()).toList(),
+        currentPage: paginatedData.currentPage,
+        lastPage: paginatedData.lastPage,
+        perPage: paginatedData.perPage,
+        total: paginatedData.total,
+        from: paginatedData.from,
+        to: paginatedData.to,
+      ));
     } on ApiException catch (e) {
       return Result.failure(_mapApiExceptionToFailure(e));
     } on NetworkException catch (e) {
@@ -113,9 +121,15 @@ class OrderRepositoryImpl implements OrderRepository {
   }
 
   @override
-  Future<Result<Order>> complete({required int id, required String clientRequestId}) async {
+  Future<Result<Order>> complete({
+    required int id,
+    required String clientRequestId,
+  }) async {
     try {
-      final model = await _remoteDatasource.complete(id: id, clientRequestId: clientRequestId);
+      final model = await _remoteDatasource.complete(
+        id: id,
+        clientRequestId: clientRequestId,
+      );
       return Result.success(model.toEntity());
     } on ApiException catch (e) {
       return Result.failure(_mapApiExceptionToFailure(e));
@@ -129,9 +143,15 @@ class OrderRepositoryImpl implements OrderRepository {
   }
 
   @override
-  Future<Result<Order>> accept({required int id, required String clientRequestId}) async {
+  Future<Result<Order>> accept({
+    required int id,
+    required String clientRequestId,
+  }) async {
     try {
-      final model = await _remoteDatasource.accept(id: id, clientRequestId: clientRequestId);
+      final model = await _remoteDatasource.accept(
+        id: id,
+        clientRequestId: clientRequestId,
+      );
       return Result.success(model.toEntity());
     } on ApiException catch (e) {
       return Result.failure(_mapApiExceptionToFailure(e));
@@ -151,7 +171,11 @@ class OrderRepositoryImpl implements OrderRepository {
     required String clientRequestId,
   }) async {
     try {
-      final model = await _remoteDatasource.reject(id: id, reason: reason, clientRequestId: clientRequestId);
+      final model = await _remoteDatasource.reject(
+        id: id,
+        reason: reason,
+        clientRequestId: clientRequestId,
+      );
       return Result.success(model.toEntity());
     } on ApiException catch (e) {
       return Result.failure(_mapApiExceptionToFailure(e));
@@ -189,9 +213,15 @@ class OrderRepositoryImpl implements OrderRepository {
   }
 
   @override
-  Future<Result<Order>> start({required int id, required String clientRequestId}) async {
+  Future<Result<Order>> start({
+    required int id,
+    required String clientRequestId,
+  }) async {
     try {
-      final model = await _remoteDatasource.start(id: id, clientRequestId: clientRequestId);
+      final model = await _remoteDatasource.start(
+        id: id,
+        clientRequestId: clientRequestId,
+      );
       return Result.success(model.toEntity());
     } on ApiException catch (e) {
       return Result.failure(_mapApiExceptionToFailure(e));

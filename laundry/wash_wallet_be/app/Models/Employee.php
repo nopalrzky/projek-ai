@@ -54,6 +54,7 @@ class Employee extends Authenticatable
     protected function casts(): array
     {
         return [
+            'outlet_id'     => 'integer',
             'is_active'     => 'boolean',
             'start_date'    => 'date',
             'date_of_birth' => 'date',
@@ -557,22 +558,26 @@ class Employee extends Authenticatable
             throw new \InvalidArgumentException("Position ID {$positionId} not found.");
         }
 
-        if (!$position->hasCourierPermission() && $position->outlet_id !== $this->outlet_id) {
+        $positionOutletId = (int) $position->outlet_id;
+        $employeeOutletId = (int) $this->outlet_id;
+
+        if (!$position->hasCourierPermission() && $positionOutletId !== $employeeOutletId) {
             throw new \InvalidArgumentException(
                 "Position tanpa permission kurir hanya boleh diberikan pada outlet utama employee."
             );
         }
 
-        if ($position->hasCourierPermission() && $position->outlet_id !== $this->outlet_id) {
-            $ownerId = Outlet::where('id', $this->outlet_id)->value('owner_id');
+        if ($position->hasCourierPermission() && $positionOutletId !== $employeeOutletId) {
+            $ownerId = Outlet::where('id', $employeeOutletId)->value('owner_id');
 
             if ($ownerId === null) {
                 throw new \InvalidArgumentException('Employee outlet not found.');
             }
 
-            $ownerOutletIds = Outlet::where('owner_id', $ownerId)->pluck('id')->toArray();
+            $ownerId = (int) $ownerId;
+            $ownerOutletIds = Outlet::where('owner_id', $ownerId)->pluck('id')->map(fn($id) => (int) $id)->toArray();
 
-            if (!in_array($position->outlet_id, $ownerOutletIds, true)) {
+            if (!in_array($positionOutletId, $ownerOutletIds, true)) {
                 throw new \InvalidArgumentException(
                     "Position kurir harus berasal dari outlet milik owner yang sama."
                 );

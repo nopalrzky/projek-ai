@@ -4,10 +4,7 @@ import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 class OutletOperationalInfoWidget extends StatelessWidget {
   final String? message;
 
-  const OutletOperationalInfoWidget({
-    super.key,
-    this.message,
-  });
+  const OutletOperationalInfoWidget({super.key, this.message});
 
   @override
   Widget build(BuildContext context) {

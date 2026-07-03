@@ -40,7 +40,8 @@ class _WaNotificationSheetState extends State<_WaNotificationSheet> {
   @override
   void initState() {
     super.initState();
-    _clientRequestId = 'wa_${DateTime.now().millisecondsSinceEpoch}_${widget.orderId}';
+    _clientRequestId =
+        'wa_${DateTime.now().millisecondsSinceEpoch}_${widget.orderId}';
   }
 
   @override
@@ -58,7 +59,10 @@ class _WaNotificationSheetState extends State<_WaNotificationSheet> {
         } else if (state is WaNotificationError && state.preview == null) {
         } else if (state is WaNotificationError && state.preview != null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.failure.message), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text(state.failure.message),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       },
@@ -199,8 +203,9 @@ class _WaNotificationSheetState extends State<_WaNotificationSheet> {
             ),
             SizedBox(height: context.space.lg),
             ElevatedButton.icon(
-              onPressed: () =>
-                  context.read<WaNotificationCubit>().getPreview(widget.orderId),
+              onPressed: () => context.read<WaNotificationCubit>().getPreview(
+                widget.orderId,
+              ),
               icon: const Icon(Icons.refresh),
               label: const Text('Coba Lagi'),
             ),
@@ -450,10 +455,10 @@ class _WaNotificationSheetState extends State<_WaNotificationSheet> {
           child: ElevatedButton.icon(
             onPressed: canSend && !isSending
                 ? () => context.read<WaNotificationCubit>().sendNotification(
-                      widget.orderId,
-                      preview,
-                      clientRequestId: _clientRequestId,
-                    )
+                    widget.orderId,
+                    preview,
+                    clientRequestId: _clientRequestId,
+                  )
                 : null,
             icon: isSending
                 ? const SizedBox(
@@ -492,4 +497,3 @@ class _WaNotificationSheetState extends State<_WaNotificationSheet> {
     );
   }
 }
-

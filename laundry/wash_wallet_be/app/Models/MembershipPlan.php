@@ -39,7 +39,9 @@ class MembershipPlan extends Model
     protected function casts(): array
     {
         return [
+            'outlet_id'                   => 'integer',
             'price'                       => 'decimal:2',
+            'level'                       => 'integer',
             'duration_days'               => 'integer',
             'is_active'                   => 'boolean',
             'discount_percentage'         => 'decimal:2',

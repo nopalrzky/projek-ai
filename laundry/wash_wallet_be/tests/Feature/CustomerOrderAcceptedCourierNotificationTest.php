@@ -75,7 +75,7 @@ test('accepting requested customer pickup order dispatches customer and courier 
     $outlet = Outlet::factory()->create();
     /** @var Employee $cashier */
     $cashier = Employee::factory()->create(['outlet_id' => $outlet->id]);
-    acceptedNotificationAttachPosition($cashier, $outlet, ['order.manage']);
+    acceptedNotificationAttachPosition($cashier, $outlet, ['order.manage', 'order.accept']);
     $order = acceptedNotificationCustomerPickupOrder($outlet);
 
     actingAs($cashier, 'sanctum');
@@ -103,7 +103,7 @@ test('accepting customer order without courier pickup schedule does not dispatch
     $outlet = Outlet::factory()->create();
     /** @var Employee $cashier */
     $cashier = Employee::factory()->create(['outlet_id' => $outlet->id]);
-    acceptedNotificationAttachPosition($cashier, $outlet, ['order.manage']);
+    acceptedNotificationAttachPosition($cashier, $outlet, ['order.manage', 'order.accept']);
     $order = acceptedNotificationCustomerPickupOrder($outlet, [
         'pickup_schedule' => null,
         'pickup_address' => null,

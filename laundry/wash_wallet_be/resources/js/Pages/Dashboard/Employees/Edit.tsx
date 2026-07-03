@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Head, useForm } from "@inertiajs/react";
 import {
     Save,
@@ -11,6 +11,7 @@ import {
     Info,
     UserCog,
     CheckSquare,
+    KeyRound,
 } from "lucide-react";
 import { withAuthenticatedLayout } from "@/Layouts/AuthenticatedLayout";
 import { Form } from "@/Components/Form";
@@ -30,8 +31,10 @@ import PageHeader from "@/Components/Page/PageHeader";
 import employeeService from "@/Services/employee.service";
 import { EmployeeEditProps } from "./types";
 import { EmployeeEditFormData } from "@/types";
+import ChangeEmployeePasswordModal from "./Partials/ChangeEmployeePasswordModal";
 
 const EmployeeEdit = ({ employee, flash }: EmployeeEditProps) => {
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const { data, setData, post, processing, errors, clearErrors, transform } =
         useForm<EmployeeEditFormData>({
             name: employee.name,
@@ -106,13 +109,34 @@ const EmployeeEdit = ({ employee, flash }: EmployeeEditProps) => {
                         subtitle={`Perbarui data karyawan: ${employee.name}`}
                         icon={UserCog}
                         actions={
-                            <Button
-                                onClick={() => employeeService.goToIndex()}
-                                variant="outline"
-                                leftIcon={<ArrowLeft className="w-4 h-4" />}
-                            >
-                                Kembali
-                            </Button>
+                            <div className="flex flex-wrap items-center gap-3">
+                                <Button
+                                    onClick={() =>
+                                        setIsPasswordModalOpen(true)
+                                    }
+                                    variant="outline"
+                                    leftIcon={
+                                        <KeyRound className="w-4 h-4" />
+                                    }
+                                    disabled={!employee.isActive}
+                                    tooltip={
+                                        !employee.isActive
+                                            ? "Karyawan tidak aktif"
+                                            : undefined
+                                    }
+                                >
+                                    Ganti Password
+                                </Button>
+                                <Button
+                                    onClick={() => employeeService.goToIndex()}
+                                    variant="outline"
+                                    leftIcon={
+                                        <ArrowLeft className="w-4 h-4" />
+                                    }
+                                >
+                                    Kembali
+                                </Button>
+                            </div>
                         }
                     />
 
@@ -233,10 +257,10 @@ const EmployeeEdit = ({ employee, flash }: EmployeeEditProps) => {
                                                     color: "var(--color-warning-600)",
                                                 }}
                                             >
-                                                Untuk keamanan, password tidak
-                                                dapat diubah melalui halaman
-                                                ini. Silakan reset password
-                                                melalui menu pengaturan akun.
+                                                Password karyawan diganti lewat
+                                                tombol Ganti Password agar tidak
+                                                tercampur dengan perubahan data
+                                                profil.
                                             </p>
                                         </div>
                                     </div>
@@ -474,8 +498,8 @@ const EmployeeEdit = ({ employee, flash }: EmployeeEditProps) => {
                                                 • Username tidak dapat diubah
                                             </li>
                                             <li>
-                                                • Password tidak dapat diubah
-                                                melalui halaman ini
+                                                • Password diganti melalui
+                                                tombol Ganti Password
                                             </li>
                                             <li>
                                                 • Foto profil maksimal 2MB (JPG,
@@ -531,6 +555,12 @@ const EmployeeEdit = ({ employee, flash }: EmployeeEditProps) => {
                     </Card>
                 </div>
             </div>
+
+            <ChangeEmployeePasswordModal
+                isOpen={isPasswordModalOpen}
+                employee={employee}
+                onClose={() => setIsPasswordModalOpen(false)}
+            />
         </>
     );
 };

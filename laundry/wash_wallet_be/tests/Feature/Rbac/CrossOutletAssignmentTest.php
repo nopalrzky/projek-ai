@@ -22,6 +22,11 @@ test('courier assignment across same owner outlets is allowed', function () {
     'is_active' => true,
   ]);
 
+  \App\Models\PositionPermission::create([
+    'position_id' => $courierPosition->id,
+    'permission_key' => \App\Enums\Permission::CourierView->value,
+  ]);
+
   $employee->assignPosition($courierPosition->id, true);
 
   $this->assertDatabaseHas('employee_positions', [

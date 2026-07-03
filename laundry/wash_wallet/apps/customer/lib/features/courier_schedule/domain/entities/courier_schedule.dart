@@ -5,7 +5,7 @@ class CourierSchedule extends Equatable {
   final int outletId;
   final String dayOfWeek;
   final String dayLabel;
-  final String type; 
+  final String type;
   final String typeLabel;
   final String startTime;
   final String endTime;
@@ -37,22 +37,22 @@ class CourierSchedule extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        outletId,
-        dayOfWeek,
-        dayLabel,
-        type,
-        typeLabel,
-        startTime,
-        endTime,
-        isActive,
-        isBookable,
-        availabilityStatus,
-        availabilityLabel,
-        unavailableReason,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    outletId,
+    dayOfWeek,
+    dayLabel,
+    type,
+    typeLabel,
+    startTime,
+    endTime,
+    isActive,
+    isBookable,
+    availabilityStatus,
+    availabilityLabel,
+    unavailableReason,
+    createdAt,
+    updatedAt,
+  ];
 }
 
 class CourierScheduleData extends Equatable {

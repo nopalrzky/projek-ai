@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -38,10 +39,7 @@ class _CreateCustomerSubscriptionScreenState
     _purchaseDateController.text = DateFormat('dd/MM/yyyy').format(today);
     _selectedDateBackendFormat = DateFormat('yyyy-MM-dd').format(today);
 
-    context.read<ServicePackageCubit>().getAll(
-      isActive: true,
-      perPage: 100,
-    );
+    context.read<ServicePackageCubit>().getAll(isActive: true, perPage: 100);
   }
 
   @override
@@ -123,102 +121,101 @@ class _CreateCustomerSubscriptionScreenState
     final isCompact = sizeClass == WindowSizeClass.compact;
 
     final content = BlocConsumer<CustomerCubit, CustomerState>(
-        listener: (context, state) {
-          if (state is CustomerActionSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.check_circle_rounded, color: Colors.white),
-                    SizedBox(width: context.space.sm),
-                    const Text('Deposit berhasil ditambahkan'),
-                  ],
-                ),
-                backgroundColor: context.colors.success,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(context.radius.md),
-                ),
+      listener: (context, state) {
+        if (state is CustomerActionSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle_rounded, color: Colors.white),
+                  SizedBox(width: context.space.sm),
+                  const Text('Deposit berhasil ditambahkan'),
+                ],
               ),
-            );
-            Navigator.pop(context, true);
-          }
-          if (state is CustomerFailure) {
-            setState(() => _isSubmitting = false);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.error_rounded, color: Colors.white),
-                    SizedBox(width: context.space.sm),
-                    Expanded(child: Text(state.failure.message)),
-                  ],
-                ),
-                backgroundColor: context.colors.error,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(context.radius.md),
-                ),
+              backgroundColor: context.colors.success,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(context.radius.md),
               ),
-            );
-          }
-        },
-        builder: (context, state) {
-          return Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildFormSection(),
-                SizedBox(height: context.space.xl),
-                _buildSubmitButton(state),
-              ],
             ),
           );
-        },
-    );
-
-    if (isCompact) {
-      return AppLayout(
-        header: AppHeader(
-          title: 'Tambah Deposit',
-          subtitle: widget.customer.name,
-          backgroundColor: context.colors.surface,
-          onBackPressed: () => Navigator.pop(context),
-        ),
-        scrollable: true,
-        padding: EdgeInsets.symmetric(
-          horizontal: context.space.lg,
-          vertical: context.space.md,
-        ),
-        body: content,
-      );
-    }
-
-    return Column(
-      children: [
-        PageContentHeader(
-          title: 'Tambah Deposit',
-          subtitle: widget.customer.name,
-          breadcrumbs: [
-            const BreadcrumbItem(label: 'Pelanggan'),
-            BreadcrumbItem(label: 'Detail Pelanggan', onTap: () => Navigator.pop(context)),
-            const BreadcrumbItem(label: 'Tambah Deposit'),
-          ],
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(
-              horizontal: context.space.lg,
-              vertical: context.space.md,
+          Navigator.pop(context, true);
+        }
+        if (state is CustomerFailure) {
+          setState(() => _isSubmitting = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.error_rounded, color: Colors.white),
+                  SizedBox(width: context.space.sm),
+                  Expanded(child: Text(state.failure.message)),
+                ],
+              ),
+              backgroundColor: context.colors.error,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(context.radius.md),
+              ),
             ),
-            child: ContentConstraint(
-              child: content,
-            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        return Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildFormSection(),
+              SizedBox(height: context.space.xl),
+              _buildSubmitButton(state),
+            ],
           ),
-        ),
-      ],
+        );
+      },
     );
+
+    return isCompact
+          ? AppLayout(
+              header: AppHeader(
+                title: 'Tambah Deposit',
+                subtitle: widget.customer.name,
+                backgroundColor: context.colors.surface,
+                onBackPressed: () => Navigator.pop(context),
+              ),
+              scrollable: true,
+              padding: EdgeInsets.symmetric(
+                horizontal: context.space.lg,
+                vertical: context.space.md,
+              ),
+              body: content,
+            )
+          : Column(
+              children: [
+                PageContentHeader(
+                  title: 'Tambah Deposit',
+                  subtitle: widget.customer.name,
+                  breadcrumbs: [
+                    const BreadcrumbItem(label: 'Pelanggan'),
+                    BreadcrumbItem(
+                      label: 'Detail Pelanggan',
+                      onTap: () => Navigator.pop(context),
+                    ),
+                    const BreadcrumbItem(label: 'Tambah Deposit'),
+                  ],
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: context.space.lg,
+                      vertical: context.space.md,
+                    ),
+                    child: ContentConstraint(child: content),
+                  ),
+                ),
+              ],
+            );
   }
 
   Widget _buildFormSection() {
@@ -357,7 +354,7 @@ class _CreateCustomerSubscriptionScreenState
                 _pricePaidController.text = NumberFormat(
                   '#,###',
                   'id_ID',
-                ).format(package.price);
+                ).format(package?.price ?? 0);
               });
             },
             errorText: _servicePackageError,

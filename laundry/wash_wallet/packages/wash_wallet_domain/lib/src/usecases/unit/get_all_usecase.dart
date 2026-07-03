@@ -26,7 +26,7 @@ class GetAllUsecase {
 
   GetAllUsecase(this._repository);
 
-  Future<Result<List<Unit>>> call(GetAllParams params) async {
+  Future<Result<PaginatedData<Unit>>> call(GetAllParams params) async {
     return await _repository.getAll(
       page: params.page,
       perPage: params.perPage,

@@ -144,10 +144,7 @@ class OrderCubit extends Cubit<OrderState> {
 
   void normalizeOrderStateForOutlet(Outlet outlet) {
     if (!outlet.isCourierEnabled) {
-      emit(state.copyWith(
-        pickupType: 'self_dropoff',
-        deliveryType: 'pickup',
-      ));
+      emit(state.copyWith(pickupType: 'self_dropoff', deliveryType: 'pickup'));
     }
   }
 
@@ -196,8 +193,12 @@ class OrderCubit extends Cubit<OrderState> {
       paymentMethod: effectivelyCourierEnabled ? state.paymentMethod : null,
       pickupType: effectivelyCourierEnabled ? state.pickupType : 'self_dropoff',
       notes: state.notes,
-      customerAddressId: effectivelyCourierEnabled ? state.selectedAddress?.id : null,
-      pickupScheduleId: effectivelyCourierEnabled ? state.selectedSchedule?.id : null,
+      customerAddressId: effectivelyCourierEnabled
+          ? state.selectedAddress?.id
+          : null,
+      pickupScheduleId: effectivelyCourierEnabled
+          ? state.selectedSchedule?.id
+          : null,
       pickupDate: effectivelyCourierEnabled && state.selectedDate != null
           ? DateFormat('yyyy-MM-dd').format(state.selectedDate!)
           : null,
@@ -254,10 +255,7 @@ class OrderCubit extends Cubit<OrderState> {
     final method = state.selectedOrder?.paymentMethod ?? state.paymentMethod;
 
     final result = await _payOrderUseCase(
-      PayOrderParams(
-        orderId: orderId,
-        paymentMethod: method,
-      ),
+      PayOrderParams(orderId: orderId, paymentMethod: method),
     );
 
     result.when(
@@ -390,9 +388,6 @@ class OrderCubit extends Cubit<OrderState> {
   }
 
   void clearPaymentFlags() {
-    emit(state.copyWith(
-      paymentSuccess: false,
-      midtransPaymentUrl: null,
-    ));
+    emit(state.copyWith(paymentSuccess: false, midtransPaymentUrl: null));
   }
 }

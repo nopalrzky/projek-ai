@@ -116,9 +116,7 @@ class AppChip extends StatelessWidget {
           backgroundColor: selected
               ? colors.primarySurface
               : colors.surfaceVariant,
-          borderColor: selected
-              ? colors.primary
-              : colors.border,
+          borderColor: selected ? colors.primary : colors.border,
           textColor: selected ? colors.primary : colors.textSecondary,
         );
 
@@ -160,7 +158,9 @@ class AppChip extends StatelessWidget {
           backgroundColor: selected
               ? colors.errorSurface
               : colors.surfaceVariant,
-          borderColor: selected ? colors.error : colors.error.withValues(alpha: 0.3),
+          borderColor: selected
+              ? colors.error
+              : colors.error.withValues(alpha: 0.3),
           textColor: colors.error,
         );
     }

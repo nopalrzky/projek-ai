@@ -32,4 +32,18 @@ abstract class AuthRepository {
   Future<Result<void>> logout();
 
   Future<Result<void>> saveRememberedAccount(AuthEmployee employee);
+
+  Future<Result<AuthEmployee>> updateProfile({
+    required String name,
+    String? email,
+    String? phone,
+    String? gender,
+    String? address,
+  });
+
+  Future<Result<void>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String newPasswordConfirmation,
+  });
 }

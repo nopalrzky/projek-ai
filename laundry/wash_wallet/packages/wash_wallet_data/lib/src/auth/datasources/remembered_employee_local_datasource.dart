@@ -22,14 +22,14 @@ class RememberedEmployeeAccount {
   });
 
   Map<String, dynamic> toJson() => {
-        'employeeId': employeeId,
-        'username': username,
-        'name': name,
-        'outletId': outletId,
-        'outletName': outletName,
-        'hasPin': hasPin,
-        'lastUsedAt': lastUsedAt.toIso8601String(),
-      };
+    'employeeId': employeeId,
+    'username': username,
+    'name': name,
+    'outletId': outletId,
+    'outletName': outletName,
+    'hasPin': hasPin,
+    'lastUsedAt': lastUsedAt.toIso8601String(),
+  };
 
   factory RememberedEmployeeAccount.fromJson(Map<String, dynamic> json) {
     return RememberedEmployeeAccount(
@@ -50,7 +50,8 @@ abstract class RememberedEmployeeLocalDatasource {
   Future<void> removeAccount(int employeeId);
 }
 
-class RememberedEmployeeLocalDatasourceImpl implements RememberedEmployeeLocalDatasource {
+class RememberedEmployeeLocalDatasourceImpl
+    implements RememberedEmployeeLocalDatasource {
   final SharedPreferences _prefs;
   static const String _key = 'cashier_remembered_employee_accounts_v1';
 
@@ -59,9 +60,10 @@ class RememberedEmployeeLocalDatasourceImpl implements RememberedEmployeeLocalDa
   @override
   Future<void> saveAccount(AuthEmployeeModel employee) async {
     final accounts = await getAccounts();
-    
+
     String outletName = 'Outlet ${employee.outletId}';
-    if (employee.accessibleOutlets != null && employee.accessibleOutlets!.isNotEmpty) {
+    if (employee.accessibleOutlets != null &&
+        employee.accessibleOutlets!.isNotEmpty) {
       final match = employee.accessibleOutlets!.firstWhere(
         (o) => o.outletId == employee.outletId,
         orElse: () => employee.accessibleOutlets!.first,
@@ -81,7 +83,7 @@ class RememberedEmployeeLocalDatasourceImpl implements RememberedEmployeeLocalDa
 
     accounts.removeWhere((a) => a.employeeId == employee.id);
     accounts.insert(0, newAccount);
-    
+
     // Sort by lastUsedAt descending
     accounts.sort((a, b) => b.lastUsedAt.compareTo(a.lastUsedAt));
 
@@ -101,9 +103,12 @@ class RememberedEmployeeLocalDatasourceImpl implements RememberedEmployeeLocalDa
     try {
       final mapData = json.decode(str) as Map<String, dynamic>;
       final accountsList = mapData['accounts'] as List<dynamic>? ?? [];
-      
+
       return accountsList
-          .map((e) => RememberedEmployeeAccount.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) =>
+                RememberedEmployeeAccount.fromJson(e as Map<String, dynamic>),
+          )
           .toList();
     } catch (e) {
       return [];

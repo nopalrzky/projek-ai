@@ -529,7 +529,7 @@ class CustomerController extends Controller
         try {
             $subscription = $this->customerSubscriptionService->getById($subscriptionId);
 
-            if ($subscription->customer_id !== $customerId) {
+            if ((int) $subscription->customer_id !== (int) $customerId) {
                 throw new Exception('Subscription does not belong to this customer');
             }
 
@@ -626,7 +626,7 @@ class CustomerController extends Controller
                 'membershipPlan',
             ]);
 
-            if ($contract->customer_id !== $customerId) {
+            if ((int) $contract->customer_id !== (int) $customerId) {
                 throw new Exception('Contract does not belong to this customer');
             }
 
@@ -663,7 +663,7 @@ class CustomerController extends Controller
                 'membershipPlan',
             ]);
 
-            if ($contract->customer_id !== $customerId) {
+            if ((int) $contract->customer_id !== (int) $customerId) {
                 throw new Exception('Contract does not belong to this customer');
             }
 
@@ -706,7 +706,7 @@ class CustomerController extends Controller
         try {
             $contract = $this->membershipContractService->getById($membershipContractId);
 
-            if ($contract->customer_id !== $customerId) {
+            if ((int) $contract->customer_id !== (int) $customerId) {
                 throw new Exception('Contract does not belong to this customer');
             }
 

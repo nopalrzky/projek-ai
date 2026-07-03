@@ -103,8 +103,8 @@ class _PriorityOrderItem extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              statusColor.withOpacity(0.05),
-              statusColor.withOpacity(0.02),
+              statusColor.withValues(alpha: 0.05),
+              statusColor.withValues(alpha: 0.02),
             ],
           ),
         ),
@@ -195,4 +195,3 @@ class _PriorityOrderItem extends StatelessWidget {
     );
   }
 }
-

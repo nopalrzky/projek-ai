@@ -140,7 +140,6 @@ const JournalEntryCreate = ({
 
                     const updated = { ...detail, [field]: value };
 
-                    // If debit is entered, clear credit and vice versa
                     if (field === "debit" && value) {
                         updated.credit = "";
                     } else if (field === "credit" && value) {
@@ -158,7 +157,6 @@ const JournalEntryCreate = ({
         [errors.journalDetails, clearErrors],
     );
 
-    // Convert detail inputs to form data format
     const prepareDetailsForSubmit = useCallback(() => {
         return detailInputs
             .filter(

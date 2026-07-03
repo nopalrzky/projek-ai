@@ -31,6 +31,7 @@ class AppColorExtension extends ThemeExtension<AppColorExtension> {
   Color get onSurface => colors.textPrimary;
   Color get surfaceElevated => colors.surfaceElevated;
   Color get surfaceVariant => colors.surfaceVariant;
+  Color get surfaceMuted => colors.surfaceMuted;
   Color get surfaceContainerHighest => colors.surfaceVariant;
   Color get onSurfaceVariant => colors.textSecondary;
   Color get primaryContainer => colors.primaryLight;
@@ -39,6 +40,8 @@ class AppColorExtension extends ThemeExtension<AppColorExtension> {
   Color get overlay => colors.overlay;
   Color get border => colors.border;
   Color get borderStrong => colors.borderStrong;
+  Color get borderLight => colors.borderLight;
+  Color get borderHover => colors.borderHover;
   Color get outline => colors.outline;
   Color get outlineVariant => colors.divider;
   Color get divider => colors.divider;
@@ -89,6 +92,9 @@ class AppColorExtension extends ThemeExtension<AppColorExtension> {
   Color get iconContainerError => colors.iconContainerError;
   Color get iconContainerInfo => colors.iconContainerInfo;
   Color get focusRing => colors.focusRing;
+  Color get accent => colors.accent;
+  Color get onAccent => colors.onAccent;
+  Color get accentSurface => colors.accentSurface;
   Color get revenue => colors.revenue;
   Color get expense => colors.expense;
   Color get pending => colors.pending;

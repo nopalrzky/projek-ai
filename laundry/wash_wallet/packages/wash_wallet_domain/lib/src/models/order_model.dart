@@ -1,3 +1,4 @@
+// ignore_for_file: invalid_annotation_target
 import '../../wash_wallet_domain.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -117,22 +118,33 @@ class OrderModel with _$OrderModel {
     normalized['deliveryType'] = json['deliveryType'] ?? json['delivery_type'];
     normalized['canPay'] = json['canPay'] ?? false;
     normalized['canScheduleDelivery'] = json['canScheduleDelivery'] ?? false;
-    normalized['requiresPaymentBeforeDelivery'] = json['requiresPaymentBeforeDelivery'] ?? false;
+    normalized['requiresPaymentBeforeDelivery'] =
+        json['requiresPaymentBeforeDelivery'] ?? false;
     normalized['source'] = json['source'];
     normalized['sourceLabel'] = json['sourceLabel'] ?? json['source_label'];
-    normalized['paymentMethod'] = json['paymentMethod'] ?? json['payment_method'];
+    normalized['paymentMethod'] =
+        json['paymentMethod'] ?? json['payment_method'];
     normalized['customerId'] = toInt(json['customerId'] ?? json['customer_id']);
-    normalized['customerAccountId'] = toInt(json['customerAccountId'] ?? json['customer_account_id']);
+    normalized['customerAccountId'] = toInt(
+      json['customerAccountId'] ?? json['customer_account_id'],
+    );
     normalized['employeeId'] = toInt(json['employeeId'] ?? json['employee_id']);
     normalized['outletId'] = toInt(json['outletId'] ?? json['outlet_id']);
-    normalized['customerAddressId'] = toInt(json['customerAddressId'] ?? json['customer_address_id']);
+    normalized['customerAddressId'] = toInt(
+      json['customerAddressId'] ?? json['customer_address_id'],
+    );
     normalized['updatedBy'] = toInt(json['updatedBy'] ?? json['updated_by']);
-    if (normalized['outletId'] == 0) normalized['outletId'] = 1; // Default to 1 if missing for safety
+    if (normalized['outletId'] == 0)
+      normalized['outletId'] = 1; // Default to 1 if missing for safety
     normalized['subtotal'] = toDouble(json['subtotal']);
     normalized['pickupFee'] = toDouble(json['pickupFee'] ?? json['pickup_fee']);
-    normalized['formattedPickupFee'] = json['formattedPickupFee'] ?? json['formatted_pickup_fee'];
-    normalized['deliveryFee'] = toDouble(json['deliveryFee'] ?? json['delivery_fee']);
-    normalized['formattedDeliveryFee'] = json['formattedDeliveryFee'] ?? json['formatted_delivery_fee'];
+    normalized['formattedPickupFee'] =
+        json['formattedPickupFee'] ?? json['formatted_pickup_fee'];
+    normalized['deliveryFee'] = toDouble(
+      json['deliveryFee'] ?? json['delivery_fee'],
+    );
+    normalized['formattedDeliveryFee'] =
+        json['formattedDeliveryFee'] ?? json['formatted_delivery_fee'];
     normalized['discountAmount'] = toDouble(
       json['discountAmount'] ?? json['discount_amount'],
     );
@@ -153,26 +165,38 @@ class OrderModel with _$OrderModel {
         json['pickupAddress'] ?? json['pickup_address'];
     normalized['pickupSchedule'] =
         json['pickupSchedule'] ?? json['pickup_schedule'];
-    normalized['formattedPickupSchedule'] = json['formattedPickupSchedule'] ?? json['formatted_pickup_schedule'];
+    normalized['formattedPickupSchedule'] =
+        json['formattedPickupSchedule'] ?? json['formatted_pickup_schedule'];
     normalized['pickupType'] = json['pickupType'] ?? json['pickup_type'];
     normalized['deliveryDate'] = json['deliveryDate'] ?? json['delivery_date'];
     normalized['deliverySchedule'] =
         json['deliverySchedule'] ?? json['delivery_schedule'];
     normalized['deliveryAddress'] =
         json['deliveryAddress'] ?? json['delivery_address'];
-    normalized['midtransOrderId'] = json['midtransOrderId'] ?? json['midtrans_order_id'];
-    normalized['midtransTransactionId'] = json['midtransTransactionId'] ?? json['midtrans_transaction_id'];
+    normalized['midtransOrderId'] =
+        json['midtransOrderId'] ?? json['midtrans_order_id'];
+    normalized['midtransTransactionId'] =
+        json['midtransTransactionId'] ?? json['midtrans_transaction_id'];
     normalized['qrUrl'] = json['qrUrl'] ?? json['qr_url'];
-    
+
     // Parse nested models if needed
     if (json['customerAccount'] != null) {
-      normalized['customerAccount'] = _parseNestedEntity(json['customerAccount'], CustomerAccountModel.fromJson);
+      normalized['customerAccount'] = _parseNestedEntity(
+        json['customerAccount'],
+        CustomerAccountModel.fromJson,
+      );
     }
     if (json['statusUpdater'] != null) {
-      normalized['statusUpdater'] = _parseNestedEntity(json['statusUpdater'], EmployeeModel.fromJson);
+      normalized['statusUpdater'] = _parseNestedEntity(
+        json['statusUpdater'],
+        EmployeeModel.fromJson,
+      );
     }
     if (json['review'] != null) {
-      normalized['review'] = _parseNestedEntity(json['review'], OrderReviewModel.fromJson);
+      normalized['review'] = _parseNestedEntity(
+        json['review'],
+        OrderReviewModel.fromJson,
+      );
     }
 
     return normalized;
@@ -219,7 +243,9 @@ class OrderModel with _$OrderModel {
         ? EmployeeModel.fromEntity(entity.statusUpdater!)
         : null,
     commissionLogs: entity.commissionLogs,
-    review: entity.review != null ? OrderReviewModel.fromEntity(entity.review as OrderReview) : null,
+    review: entity.review != null
+        ? OrderReviewModel.fromEntity(entity.review as OrderReview)
+        : null,
     hasReview: entity.hasReview,
     subtotal: entity.subtotal,
     pickupFee: entity.pickupFee,

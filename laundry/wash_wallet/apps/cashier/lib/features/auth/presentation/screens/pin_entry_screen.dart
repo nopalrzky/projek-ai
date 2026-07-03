@@ -140,7 +140,10 @@ class _PinEntryScreenState extends State<PinEntryScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text('Lanjutkan', style: TextStyle(fontSize: 16)),
+                        : const Text(
+                            'Lanjutkan',
+                            style: TextStyle(fontSize: 16),
+                          ),
                   ),
                 ),
               ],

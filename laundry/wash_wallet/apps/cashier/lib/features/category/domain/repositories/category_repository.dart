@@ -2,7 +2,7 @@ import 'package:wash_wallet_core/wash_wallet_core.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 
 abstract class CategoryRepository {
-  Future<Result<List<Category>>> getAll({
+  Future<Result<PaginatedData<Category>>> getAll({
     int? outletId,
     int page = 1,
     int perPage = 15,

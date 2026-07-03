@@ -39,6 +39,7 @@ class Category extends Model
     protected function casts(): array
     {
         return [
+            'outlet_id'  => 'integer',
             'is_active'  => 'boolean',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',

@@ -4,20 +4,22 @@ import 'package:wash_wallet_cashier/core/services/notification_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  
+
   setUpAll(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      const MethodChannel('xyz.luan/audioplayers.global'),
-      (MethodCall methodCall) async {
-        return 1;
-      },
-    );
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      const MethodChannel('xyz.luan/audioplayers'),
-      (MethodCall methodCall) async {
-        return 1;
-      },
-    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('xyz.luan/audioplayers.global'),
+          (MethodCall methodCall) async {
+            return 1;
+          },
+        );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('xyz.luan/audioplayers'),
+          (MethodCall methodCall) async {
+            return 1;
+          },
+        );
   });
   group('NewOrderPayload', () {
     test('parses broadcast style numeric ids', () {

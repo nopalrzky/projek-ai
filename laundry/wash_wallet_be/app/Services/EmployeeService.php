@@ -15,6 +15,7 @@ use App\Models\Outlet;
 use App\Models\Position;
 use App\Models\User;
 use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -302,6 +303,45 @@ class EmployeeService extends BaseService
         });
     }
 
+    public function updatePassword(int $id, string $password): Employee
+    {
+        return DB::transaction(function () use ($id, $password) {
+            try {
+                $employee = $this->employee
+                    ->byId($id)
+                    ->active()
+                    ->with('outlet')
+                    ->firstOrFail();
+
+                /** @var User $user */
+                $user = Auth::user();
+
+                $this->assertUserCanModifyEmployee($user, $employee);
+
+                $employee->password = Hash::make($password);
+                $employee->save();
+                $employee->tokens()->delete();
+
+                Log::info('Employee password updated successfully', [
+                    'employee_id' => $employee->id,
+                    'outlet_id'   => $employee->outlet_id,
+                    'updated_by'  => $user?->id,
+                    'type'        => 'employee_password_update',
+                ]);
+
+                return $employee->fresh(['outlet']);
+            } catch (Exception $e) {
+                Log::error('Failed to update employee password', [
+                    'employee_id' => $id,
+                    'error'       => $e->getMessage(),
+                    'user_id'     => Auth::id(),
+                    'type'        => 'employee_service_error',
+                ]);
+                throw $e;
+            }
+        });
+    }
+
     public function destroy(int $id): bool
     {
         return DB::transaction(function () use ($id) {
@@ -350,7 +390,7 @@ class EmployeeService extends BaseService
                 /** @var User $user */
                 $user = Auth::user();
 
-                $this->canUserModifyEmployee($user, $employee);
+                $this->assertUserCanModifyEmployee($user, $employee);
 
                 if ($employee->avatar) {
                     $this->deleteAvatar($employee->avatar);
@@ -391,7 +431,7 @@ class EmployeeService extends BaseService
                 /** @var User $user */
                 $user = Auth::user();
 
-                $this->canUserModifyEmployee($user, $employee);
+                $this->assertUserCanModifyEmployee($user, $employee);
 
                 $employee->restore();
 
@@ -975,7 +1015,7 @@ class EmployeeService extends BaseService
                 foreach ($orderItemsData as $orderItem) {
                     $laundryService = LaundryService::with(['category', 'unit'])->findOrFail($orderItem['laundryServiceId']);
 
-                    if ($laundryService->category->outlet_id !== $employee->outlet_id) {
+                    if ((int) $laundryService->category->outlet_id !== (int) $employee->outlet_id) {
                         throw new Exception('Laundry service does not belong to the same outlet');
                     }
 
@@ -1091,7 +1131,7 @@ class EmployeeService extends BaseService
 
                 if (isset($data['customerId'])) {
                     $customer = Customer::findOrFail($data['customerId']);
-                    if ($customer->outlet_id !== $employee->outlet_id) {
+                    if ((int) $customer->outlet_id !== (int) $employee->outlet_id) {
                         throw new Exception('Customer does not belong to the same outlet');
                     }
                 }
@@ -1105,7 +1145,7 @@ class EmployeeService extends BaseService
                     foreach ($data['orderItems'] as $orderItem) {
                         $laundryService = LaundryService::with(['category', 'unit'])->findOrFail($orderItem['laundryServiceId']);
 
-                        if ($laundryService->category->outlet_id !== $employee->outlet_id) {
+                        if ((int) $laundryService->category->outlet_id !== (int) $employee->outlet_id) {
                             throw new Exception('Laundry service does not belong to the same outlet');
                         }
 
@@ -1556,7 +1596,7 @@ class EmployeeService extends BaseService
             return true;
         }
 
-        return $user->hasRole('owner') && $outlet->owner_id === $user->id;
+        return $user->hasRole('owner') && $outlet->isOwner($user);
     }
 
     private function canUserModifyEmployee(User $user, Employee $employee): bool
@@ -1567,7 +1607,17 @@ class EmployeeService extends BaseService
 
         return $user->hasRole('owner')
             && $employee->outlet
-            && $employee->outlet->owner_id === $user->id;
+            && $employee->outlet->isOwner($user);
+    }
+
+    /**
+     * @throws AuthorizationException
+     */
+    private function assertUserCanModifyEmployee(?User $user, Employee $employee): void
+    {
+        if (!$user || !$this->canUserModifyEmployee($user, $employee)) {
+            throw new AuthorizationException('Anda tidak berhak mengubah karyawan ini.');
+        }
     }
 
     /*
@@ -1615,8 +1665,9 @@ class EmployeeService extends BaseService
             return;
         }
 
+        $primaryOutletId = (int) $primaryOutletId;
         $primaryOutlet = $this->outlet->findOrFail($primaryOutletId);
-        $ownerId = $primaryOutlet->owner_id;
+        $ownerId = (int) $primaryOutlet->owner_id;
 
         $positions = $this->position->whereIn('id', $positionIds)->with(['outlet', 'permissions'])->get();
 
@@ -1625,11 +1676,14 @@ class EmployeeService extends BaseService
         }
 
         foreach ($positions as $position) {
-            if ($position->outlet->owner_id !== $ownerId) {
+            $positionOutletId = (int) $position->outlet_id;
+            $positionOwnerId = (int) $position->outlet->owner_id;
+
+            if ($positionOwnerId !== $ownerId) {
                 throw new Exception("Posisi '{$position->name}' bukan milik outlet dari owner yang sama.");
             }
 
-            if (!$position->hasCourierPermission() && $position->outlet_id !== $primaryOutletId) {
+            if (!$position->hasCourierPermission() && $positionOutletId !== $primaryOutletId) {
                 throw new Exception(
                     "Posisi '{$position->name}' tidak memiliki permission kurir dan tidak dapat ditugaskan ke outlet lain."
                 );

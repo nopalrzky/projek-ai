@@ -70,7 +70,9 @@ class _ConfirmPinScreenState extends State<ConfirmPinScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('PIN berhasil dibuat')),
             );
-            if (GoRouterState.of(context).matchedLocation.startsWith('/settings')) {
+            if (GoRouterState.of(
+              context,
+            ).matchedLocation.startsWith('/settings')) {
               while (context.canPop()) {
                 context.pop();
               }
@@ -89,10 +91,7 @@ class _ConfirmPinScreenState extends State<ConfirmPinScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 24),
-                Image.asset(
-                  'assets/images/icons/laundry.png',
-                  height: 120,
-                ),
+                Image.asset('assets/images/icons/laundry.png', height: 120),
                 const SizedBox(height: 32),
                 Text(
                   'Konfirmasi PIN Anda',
@@ -144,7 +143,10 @@ class _ConfirmPinScreenState extends State<ConfirmPinScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text('Simpan PIN', style: TextStyle(fontSize: 16)),
+                        : const Text(
+                            'Simpan PIN',
+                            style: TextStyle(fontSize: 16),
+                          ),
                   ),
                 ),
               ],

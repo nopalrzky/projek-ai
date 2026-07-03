@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 enum StatusChipSize { small, medium }
+
 enum StatusChipVariant { filled, outlined, subtle }
 
 class StatusChip extends StatelessWidget {
@@ -25,21 +26,24 @@ class StatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final chipColor = color ?? theme.colorScheme.surfaceContainerHighest;
-    
-    final bool isDark = ThemeData.estimateBrightnessForColor(chipColor) == Brightness.dark;
-    
+
+    final bool isDark =
+        ThemeData.estimateBrightnessForColor(chipColor) == Brightness.dark;
+
     // Determine content color based on variant
     Color contentColor;
     if (variant == StatusChipVariant.filled) {
       contentColor = isDark ? Colors.white : Colors.black;
     } else {
-      contentColor = color != null ? chipColor : theme.colorScheme.onSurfaceVariant;
+      contentColor = color != null
+          ? chipColor
+          : theme.colorScheme.onSurfaceVariant;
     }
 
     // Determine background color and border based on variant
     Color backgroundColor;
     Border? border;
-    
+
     switch (variant) {
       case StatusChipVariant.filled:
         backgroundColor = chipColor;
@@ -60,7 +64,7 @@ class StatusChip extends StatelessWidget {
         : const EdgeInsets.symmetric(horizontal: 8, vertical: 4);
 
     final iconSize = size == StatusChipSize.small ? 12.0 : 14.0;
-    
+
     Widget child = Row(
       mainAxisSize: MainAxisSize.min,
       children: [

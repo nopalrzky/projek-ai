@@ -20,27 +20,51 @@ class OrdersLoaded extends OrderState {
   final List<Order> orders;
   final bool hasReachedMax;
   final int currentPage;
+  final int lastPage;
+  final int total;
+  final int? from;
+  final int? to;
+  final int perPage;
+  final bool isPageLoading;
 
   const OrdersLoaded({
     required this.orders,
     this.hasReachedMax = false,
     this.currentPage = 1,
+    this.lastPage = 1,
+    this.total = 0,
+    this.from,
+    this.to,
+    this.perPage = 15,
+    this.isPageLoading = false,
   });
 
   OrdersLoaded copyWith({
     List<Order>? orders,
     bool? hasReachedMax,
     int? currentPage,
+    int? lastPage,
+    int? total,
+    int? from,
+    int? to,
+    int? perPage,
+    bool? isPageLoading,
   }) {
     return OrdersLoaded(
       orders: orders ?? this.orders,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       currentPage: currentPage ?? this.currentPage,
+      lastPage: lastPage ?? this.lastPage,
+      total: total ?? this.total,
+      from: from ?? this.from,
+      to: to ?? this.to,
+      perPage: perPage ?? this.perPage,
+      isPageLoading: isPageLoading ?? this.isPageLoading,
     );
   }
 
   @override
-  List<Object?> get props => [orders, hasReachedMax, currentPage];
+  List<Object?> get props => [orders, hasReachedMax, currentPage, lastPage, total, from, to, perPage, isPageLoading];
 }
 
 class OrderStarted extends OrderState {

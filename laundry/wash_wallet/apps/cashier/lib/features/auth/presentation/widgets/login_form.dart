@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 import '../bloc/auth_cubit.dart';
@@ -148,4 +148,3 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 }
-

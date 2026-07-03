@@ -13,6 +13,8 @@ class AuthEmployeeModel with _$AuthEmployeeModel {
     required String username,
     String? email,
     String? phone,
+    String? gender,
+    String? address,
     required int outletId,
     List<OutletAccessModel>? accessibleOutlets,
     List<String>? allPermissions,
@@ -31,6 +33,8 @@ class AuthEmployeeModel with _$AuthEmployeeModel {
         username: entity.username,
         email: entity.email,
         phone: entity.phone,
+        gender: entity.gender,
+        address: entity.address,
         outletId: entity.outletId,
         accessibleOutlets: entity.accessibleOutlets
             .map((e) => OutletAccessModel.fromEntity(e))
@@ -45,11 +49,11 @@ class AuthEmployeeModel with _$AuthEmployeeModel {
     username: username,
     email: email,
     phone: phone,
+    gender: gender,
+    address: address,
     outletId: outletId,
-    accessibleOutlets: accessibleOutlets
-            ?.map((e) => e.toEntity())
-            .toList() ??
-        const [],
+    accessibleOutlets:
+        accessibleOutlets?.map((e) => e.toEntity()).toList() ?? const [],
     allPermissions: allPermissions ?? const [],
     hasPin: hasPin,
   );

@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class PositionService extends BaseService
 {
@@ -75,10 +77,45 @@ class PositionService extends BaseService
 
     public function getPermissionCatalog(): array
     {
-        return array_map(
-            fn(Permission $p) => ['key' => $p->value, 'label' => $p->label()],
-            Permission::cases()
-        );
+        $grouped = [];
+
+        foreach ($this->getPermissionKeys() as $key) {
+            $permission = Permission::tryFrom($key);
+            $group = $permission?->group() ?? Str::headline(Str::before($key, '.'));
+
+            $grouped[$group][] = [
+                'key' => $key,
+                'label' => $permission?->label() ?? Str::headline(str_replace(['.', '_'], ' ', $key)),
+            ];
+        }
+
+        return collect($grouped)
+            ->map(fn(array $permissions, string $group) => [
+                'group' => $group,
+                'permissions' => $permissions,
+            ])
+            ->values()
+            ->all();
+    }
+
+    public function getPermissionKeys(): array
+    {
+        $permissionTable = config('permission.table_names.permissions', 'permissions');
+
+        if (Schema::hasTable($permissionTable)) {
+            $keys = DB::table($permissionTable)
+                ->orderBy('name')
+                ->pluck('name')
+                ->unique()
+                ->values()
+                ->all();
+
+            if (!empty($keys)) {
+                return $keys;
+            }
+        }
+
+        return array_map(fn(Permission $permission) => $permission->value, Permission::cases());
     }
 
     /*
@@ -89,12 +126,8 @@ class PositionService extends BaseService
 
     public function store(array $data): Position
     {
-        $authUser = Auth::user();
         $outlet = \App\Models\Outlet::findOrFail($data['outletId']);
-        if (!($authUser instanceof \App\Models\User) || 
-            (!$authUser->hasRole('super_admin') && $outlet->owner_id !== $authUser->id)) {
-            throw new \Illuminate\Auth\Access\AuthorizationException('Unauthorized.');
-        }
+        $this->authorizeOutletAccess($outlet);
 
         return DB::transaction(function () use ($data) {
             try {
@@ -106,7 +139,14 @@ class PositionService extends BaseService
                 ]);
 
                 if (isset($data['permissions']) && is_array($data['permissions'])) {
-                    $this->updatePermissions($position->id, $data['permissions']);
+                    // Update permissions without redundant authorization
+                    $position->permissions()->whereNotIn('permission_key', $data['permissions'])->delete();
+                    foreach ($data['permissions'] as $key) {
+                        if (!in_array($key, $this->getPermissionKeys(), true)) {
+                            throw new Exception("Invalid permission key: " . $key);
+                        }
+                        $position->permissions()->firstOrCreate(['permission_key' => $key]);
+                    }
                 }
 
                 Log::info('Position created successfully', [
@@ -134,13 +174,9 @@ class PositionService extends BaseService
     {
         return DB::transaction(function () use ($id, $data) {
             try {
-                $position = $this->position->findOrFail($id);
+                $position = $this->position->with('outlet')->findOrFail($id);
 
-                $authUser = Auth::user();
-                if (!($authUser instanceof \App\Models\User) || 
-                    (!$authUser->hasRole('super_admin') && $position->outlet->owner_id !== $authUser->id)) {
-                    throw new \Illuminate\Auth\Access\AuthorizationException('Unauthorized.');
-                }
+                $this->authorizeOutletAccess($position->outlet);
 
                 if (isset($data['name']))        $position->name        = $data['name'];
                 if (isset($data['description'])) $position->description = $data['description'];
@@ -175,13 +211,9 @@ class PositionService extends BaseService
     public function destroy(int $id): bool
     {
         try {
-            $position = $this->position->findOrFail($id);
+            $position = $this->position->with('outlet')->findOrFail($id);
 
-            $authUser = Auth::user();
-            if (!($authUser instanceof \App\Models\User) || 
-                (!$authUser->hasRole('super_admin') && $position->outlet->owner_id !== $authUser->id)) {
-                throw new \Illuminate\Auth\Access\AuthorizationException('Unauthorized.');
-            }
+            $this->authorizeOutletAccess($position->outlet);
 
             $deleted  = $position->delete();
 
@@ -209,13 +241,9 @@ class PositionService extends BaseService
     public function restore(int $id): Position
     {
         try {
-            $position = $this->position->withTrashed()->findOrFail($id);
+            $position = $this->position->with('outlet')->withTrashed()->findOrFail($id);
 
-            $authUser = Auth::user();
-            if (!($authUser instanceof \App\Models\User) || 
-                (!$authUser->hasRole('super_admin') && $position->outlet->owner_id !== $authUser->id)) {
-                throw new \Illuminate\Auth\Access\AuthorizationException('Unauthorized.');
-            }
+            $this->authorizeOutletAccess($position->outlet);
 
             if (!$position->trashed()) {
                 throw new Exception('Position is not deleted');
@@ -245,13 +273,9 @@ class PositionService extends BaseService
     public function forceDestroy(int $id): bool
     {
         try {
-            $position = $this->position->withTrashed()->findOrFail($id);
+            $position = $this->position->with('outlet')->withTrashed()->findOrFail($id);
 
-            $authUser = Auth::user();
-            if (!($authUser instanceof \App\Models\User) || 
-                (!$authUser->hasRole('super_admin') && $position->outlet->owner_id !== $authUser->id)) {
-                throw new \Illuminate\Auth\Access\AuthorizationException('Unauthorized.');
-            }
+            $this->authorizeOutletAccess($position->outlet);
 
             if ($position->hasEmployees()) {
                 throw new Exception('Cannot permanently delete position that has associated employees');
@@ -330,20 +354,15 @@ class PositionService extends BaseService
 
     public function updatePermissions(int $positionId, array $permissionKeys): void
     {
-        $position = $this->position->findOrFail($positionId);
+        $position = $this->position->with('outlet')->findOrFail($positionId);
 
-        $authUser = Auth::user();
-        if (!($authUser instanceof \App\Models\User) || 
-            (!$authUser->hasRole('super_admin') && $position->outlet->owner_id !== $authUser->id)) {
-            throw new \Illuminate\Auth\Access\AuthorizationException('Unauthorized.');
-        }
+        $this->authorizeOutletAccess($position->outlet);
 
         DB::transaction(function () use ($position, $permissionKeys) {
             $position->permissions()->whereNotIn('permission_key', $permissionKeys)->delete();
 
             foreach ($permissionKeys as $key) {
-                $validEnum = Permission::tryFrom($key);
-                if (!$validEnum) {
+                if (!in_array($key, $this->getPermissionKeys(), true)) {
                     throw new Exception("Invalid permission key: " . $key);
                 }
 
@@ -413,5 +432,22 @@ class PositionService extends BaseService
                 'is_default'  => true,
             ],
         ];
+    }
+
+    protected function authorizeOutletAccess(\App\Models\Outlet $outlet): void
+    {
+        $authUser = Auth::user();
+
+        if (!($authUser instanceof \App\Models\User)) {
+            throw new \Illuminate\Auth\Access\AuthorizationException('Unauthorized.');
+        }
+
+        if ($authUser->hasRole('super_admin')) {
+            return;
+        }
+
+        if (!$outlet->isOwner($authUser)) {
+            throw new \Illuminate\Auth\Access\AuthorizationException('Unauthorized.');
+        }
     }
 }

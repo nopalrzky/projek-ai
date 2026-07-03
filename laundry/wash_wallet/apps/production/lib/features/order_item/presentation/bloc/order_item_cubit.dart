@@ -1,11 +1,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wash_wallet_core/wash_wallet_core.dart';
+import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 import '../../domain/usecases/get_all_usecase.dart';
 import '../../domain/usecases/get_by_id_usecase.dart';
 import '../../domain/usecases/start_usecase.dart';
 import '../../domain/usecases/complete_usecase.dart';
 import 'order_item_state.dart';
 
-class OrderItemCubit extends Cubit<OrderItemState> {
+class OrderItemCubit extends Cubit<OrderItemState>
+    with TablePaginationCubitMixin<OrderItemState> {
   final GetAllUsecase _getAllUsecase;
   final GetByIdUsecase _getByIdUsecase;
   final StartUsecase _startUsecase;
@@ -39,7 +42,9 @@ class OrderItemCubit extends Cubit<OrderItemState> {
     String sortBy = 'createdAt',
     String sortDirection = 'desc',
   }) async {
-    emit(const OrderItemLoading());
+    if (page == 1) {
+      emit(const OrderItemLoading());
+    }
 
     final result = await _getAllUsecase(
       page: page,
@@ -60,13 +65,38 @@ class OrderItemCubit extends Cubit<OrderItemState> {
     );
 
     result.when(
-      success: (items) => emit(
-        OrderItemsLoaded(
-          orderItems: items,
-          hasReachedMax: items.length < perPage,
-          currentPage: page,
-        ),
-      ),
+      success: (data) {
+        if (page == 1) {
+          emit(
+            OrderItemsLoaded(
+              orderItems: data.items,
+              hasReachedMax: data.hasReachedMax,
+              currentPage: data.currentPage,
+              lastPage: data.lastPage,
+              total: data.total,
+              from: data.from,
+              to: data.to,
+              perPage: data.perPage,
+            ),
+          );
+        } else {
+          final currentState = state;
+          if (currentState is OrderItemsLoaded) {
+            emit(
+              currentState.copyWith(
+                orderItems: currentState.orderItems + data.items,
+                hasReachedMax: data.hasReachedMax,
+                currentPage: data.currentPage,
+                lastPage: data.lastPage,
+                total: data.total,
+                from: data.from,
+                to: data.to,
+                perPage: data.perPage,
+              ),
+            );
+          }
+        }
+      },
       failure: (failure) => emit(OrderItemError(failure.message)),
     );
   }
@@ -102,5 +132,62 @@ class OrderItemCubit extends Cubit<OrderItemState> {
 
   void reset() {
     emit(const OrderItemInitial());
+  }
+
+  /// Called exclusively by [AppPagination.onPageChanged] on tablet.
+  /// Always REPLACES items — never appends.
+  Future<void> changePage(
+    int page, {
+    String? search,
+    String? status,
+    int? orderId,
+    int? laundryServiceId,
+    int? customerId,
+    String? startedAtFrom,
+    String? startedAtTo,
+    String? completedAtFrom,
+    String? completedAtTo,
+    String? createdAtFrom,
+    String? createdAtTo,
+    String sortBy = 'createdAt',
+    String sortDirection = 'desc',
+  }) {
+    final current = state;
+    if (current is! OrderItemsLoaded) return Future.value();
+    return changePageGeneric<OrderItem>(
+      page: page,
+      currentPage: current.currentPage,
+      lastPage: current.lastPage,
+      request: () => _getAllUsecase(
+        page: page,
+        perPage: current.perPage,
+        search: search,
+        status: status,
+        orderId: orderId,
+        laundryServiceId: laundryServiceId,
+        customerId: customerId,
+        startedAtFrom: startedAtFrom,
+        startedAtTo: startedAtTo,
+        completedAtFrom: completedAtFrom,
+        completedAtTo: completedAtTo,
+        createdAtFrom: createdAtFrom,
+        createdAtTo: createdAtTo,
+        sortBy: sortBy,
+        sortDirection: sortDirection,
+      ),
+      markPageLoading: () => current.copyWith(isPageLoading: true),
+      buildLoaded: (data) => OrderItemsLoaded(
+        orderItems: data.items,
+        hasReachedMax: data.hasReachedMax,
+        currentPage: data.currentPage,
+        lastPage: data.lastPage,
+        total: data.total,
+        from: data.from,
+        to: data.to,
+        perPage: data.perPage,
+        isPageLoading: false,
+      ),
+      buildError: (f) => OrderItemError(f.message),
+    );
   }
 }

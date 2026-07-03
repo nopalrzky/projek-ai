@@ -31,17 +31,17 @@ class CustomerTopup extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        customerAccountId,
-        amount,
-        status,
-        paymentStatus,
-        paymentMethod,
-        paymentProvider,
-        paymentData,
-        midtransOrderId,
-        expiredAt,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    customerAccountId,
+    amount,
+    status,
+    paymentStatus,
+    paymentMethod,
+    paymentProvider,
+    paymentData,
+    midtransOrderId,
+    expiredAt,
+    createdAt,
+    updatedAt,
+  ];
 }

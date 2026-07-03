@@ -12,9 +12,7 @@ export interface FeatureIndexProps {
     };
 }
 
-export interface FeatureCreateProps {
-    // any props for create
-}
+export interface FeatureCreateProps {}
 
 export interface FeatureEditProps {
     feature: Feature;

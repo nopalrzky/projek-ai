@@ -21,10 +21,12 @@ import EmployeeLoansIndex from "./Loans/Index";
 import EmployeePageHeader from "./Partials/EmployeePageHeader";
 import EmployeeOrdersIndex from "./Orders/Index";
 import EmployeeFineLogsIndex from "./FineLogs/Index";
+import ChangeEmployeePasswordModal from "./Partials/ChangeEmployeePasswordModal";
 
 function EmployeeShow({ employee, positions }: EmployeeShowProps) {
     const [activeTab, setActiveTab] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
     const tabsConfig = [
         {
@@ -80,7 +82,15 @@ function EmployeeShow({ employee, positions }: EmployeeShowProps) {
             <Head title={`Karyawan: ${employee.name}`} />
 
             <div className="p-6 space-y-6  mx-auto">
-                <EmployeePageHeader employee={employee} />
+                <EmployeePageHeader
+                    employee={employee}
+                    onEdit={() =>
+                        window.location.assign(
+                            route("employees.edit", employee.id),
+                        )
+                    }
+                    onChangePassword={() => setIsPasswordModalOpen(true)}
+                />
 
                 <Tabs
                     variant="underline"
@@ -119,6 +129,12 @@ function EmployeeShow({ employee, positions }: EmployeeShowProps) {
                         isLoading={isLoading}
                     />
                 </Tabs>
+
+                <ChangeEmployeePasswordModal
+                    isOpen={isPasswordModalOpen}
+                    employee={employee}
+                    onClose={() => setIsPasswordModalOpen(false)}
+                />
             </div>
         </>
     );

@@ -31,6 +31,7 @@ import {
 import { ServicePackageCreateProps } from "./types";
 import { formatCurrency } from "@/lib/utils";
 import laundryService from "@/Services/laundry_service.service";
+import { useLatestAsync } from "@/Hooks/useLatestAsync";
 
 const ServicePackageCreate = ({ outlets }: ServicePackageCreateProps) => {
     const { data, setData, post, processing, errors, clearErrors, reset } =
@@ -55,6 +56,8 @@ const ServicePackageCreate = ({ outlets }: ServicePackageCreateProps) => {
     const [laundryServicesError, setLaundryServicesError] = useState<
         string | null
     >(null);
+
+    const { runLatest: runLatestLaundryServices } = useLatestAsync();
 
     useEffect(() => {
         const total = servicePackageItems.reduce((sum, item) => {
@@ -97,27 +100,30 @@ const ServicePackageCreate = ({ outlets }: ServicePackageCreateProps) => {
         setLoadingLaundryServices(true);
         setLaundryServicesError(null);
 
-        try {
-            const laundryServices =
-                await laundryService.getLaundryServicesByOutletId(outletId);
+        runLatestLaundryServices(
+            outletId,
+            async () => await laundryService.getLaundryServicesByOutletId(outletId),
+            {
+                onSuccess: (laundryServices) => {
+                    setAvailableLaundryServices(laundryServices);
 
-            setAvailableLaundryServices(laundryServices);
-
-            if (laundryServices.length === 0) {
-                setLaundryServicesError(
-                    "Tidak ada layanan aktif di outlet ini. Silakan tambahkan layanan terlebih dahulu.",
-                );
+                    if (laundryServices.length === 0) {
+                        setLaundryServicesError(
+                            "Tidak ada layanan aktif di outlet ini. Silakan tambahkan layanan terlebih dahulu.",
+                        );
+                    }
+                },
+                onError: (error: any) => {
+                    console.error("Error fetching laundry services:", error);
+                    setLaundryServicesError(
+                        error.message ||
+                            "Gagal memuat daftar layanan. Silakan coba lagi.",
+                    );
+                    setAvailableLaundryServices([]);
+                },
+                onFinally: () => setLoadingLaundryServices(false)
             }
-        } catch (error: any) {
-            console.error("Error fetching laundry services:", error);
-            setLaundryServicesError(
-                error.message ||
-                    "Gagal memuat daftar layanan. Silakan coba lagi.",
-            );
-            setAvailableLaundryServices([]);
-        } finally {
-            setLoadingLaundryServices(false);
-        }
+        );
     };
 
     const handleAddLaundryServiceItem = () => {

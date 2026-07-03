@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 
 /// Quick actions section for common POS workflows
@@ -146,4 +146,3 @@ class _QuickActionCard extends StatelessWidget {
     );
   }
 }
-

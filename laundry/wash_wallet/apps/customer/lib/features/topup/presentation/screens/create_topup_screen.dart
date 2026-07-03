@@ -50,12 +50,15 @@ class _CreateTopupScreenState extends State<CreateTopupScreen> {
   Widget build(BuildContext context) {
     return BlocListener<TopupCubit, TopupState>(
       listener: (context, state) {
-        if (state.status == TopupStatus.success && state.lastCreatedTopup != null) {
+        if (state.status == TopupStatus.success &&
+            state.lastCreatedTopup != null) {
           context.push('/topup/payment/${state.lastCreatedTopup!.id}');
         } else if (state.status == TopupStatus.error) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.errorMessage ?? 'Gagal membuat topup')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.errorMessage ?? 'Gagal membuat topup'),
+            ),
+          );
         }
       },
       child: AppLayout(

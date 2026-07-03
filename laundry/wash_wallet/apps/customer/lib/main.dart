@@ -28,18 +28,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('id_ID', null);
   await initializeDateFormatting('en_US', null);
-  
-  try {
-    FirebaseMessaging.onBackgroundMessage(
-      customerFirebaseMessagingBackgroundHandler,
-    );
-    await Firebase.initializeApp();
-    await CustomerNotificationService.instance.initialize();
-    await CustomerNotificationService.instance.requestPermission();
-    CustomerPushNotificationCoordinator.instance.initialize();
-  } catch (_) {
-    // Firebase not configured - continue without push notifications
-  }
+  FirebaseMessaging.onBackgroundMessage(
+    customerFirebaseMessagingBackgroundHandler,
+  );
+  await Firebase.initializeApp();
+  await CustomerNotificationService.instance.initialize();
+  await CustomerNotificationService.instance.requestPermission();
+  CustomerPushNotificationCoordinator.instance.initialize();
 
   final dependencies = await _initializeDependencies();
 

@@ -19,7 +19,9 @@ class PickupTypeSelectorWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<OrderCubit, OrderState>(
       listener: (context, state) {
-        if (isCourierEnabled && !canUseCourier && state.pickupType != 'self_dropoff') {
+        if (isCourierEnabled &&
+            !canUseCourier &&
+            state.pickupType != 'self_dropoff') {
           context.read<OrderCubit>().setPickupType('self_dropoff');
         }
       },
@@ -48,7 +50,9 @@ class PickupTypeSelectorWidget extends StatelessWidget {
                     isSelected: state.pickupType == 'self_dropoff',
                     onTap: () {
                       if (isCourierEnabled && canUseCourier) {
-                        context.read<OrderCubit>().setPickupType('self_dropoff');
+                        context.read<OrderCubit>().setPickupType(
+                          'self_dropoff',
+                        );
                       }
                     },
                   ),

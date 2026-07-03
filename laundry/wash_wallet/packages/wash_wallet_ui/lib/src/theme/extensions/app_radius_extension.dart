@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../radius/app_radius.dart';
 
-
 @immutable
 class AppRadiusExtension extends ThemeExtension<AppRadiusExtension> {
   final AppRadius radius;
@@ -71,6 +70,7 @@ class AppRadiusExtension extends ThemeExtension<AppRadiusExtension> {
     return t < 0.5 ? this : other;
   }
 }
+
 extension RadiusContext on BuildContext {
   AppRadiusExtension get radius {
     final extension = Theme.of(this).extension<AppRadiusExtension>();

@@ -35,7 +35,6 @@ export default function NotificationBell() {
     const [loadingDropdown, setLoadingDropdown] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    // Polling setiap 60 detik untuk update badge count
     useEffect(() => {
         const poll = async () => {
             try {
@@ -46,13 +45,11 @@ export default function NotificationBell() {
                     const data = await res.json();
                     setUnreadCount(data.count ?? 0);
                 }
-            } catch {
-                // silent fail
-            }
+            } catch {}
         };
 
-        let interval: NodeJS.Timeout;
-        let timeoutId: number;
+        let interval: ReturnType<typeof setInterval>;
+        let timeoutId: any;
 
         const startPolling = () => {
             poll();
@@ -85,12 +82,10 @@ export default function NotificationBell() {
         };
     }, []);
 
-    // Sync dari shared props ketika berubah (setelah navigasi)
     useEffect(() => {
         setUnreadCount(notifications?.unread_count ?? 0);
     }, [notifications?.unread_count]);
 
-    // Tutup dropdown jika klik di luar
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             if (
@@ -121,7 +116,6 @@ export default function NotificationBell() {
                 setRecentNotifs(json?.notifications ?? []);
             }
         } catch {
-            // silent fail
         } finally {
             setLoadingDropdown(false);
         }
@@ -162,7 +156,7 @@ export default function NotificationBell() {
             <button
                 type="button"
                 onClick={handleToggle}
-                className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="relative p-2 rounded-lg hover:bg-[var(--color-gray-100)] transition-colors"
                 aria-label="Notifikasi"
             >
                 <Bell

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
-import '../../../deposit/presentation/screens/index_deposit_screen.dart';
-import '../../../petty_cash/presentation/screens/index_petty_cash_screen.dart';
-import '../../../expense/presentation/screens/index_expense_screen.dart';
 
 class IndexFinancesScreen extends StatelessWidget {
   final int outletId;
@@ -22,120 +20,85 @@ class IndexFinancesScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [context.colors.primary, context.colors.primaryDark],
-                ),
-              ),
-              padding: EdgeInsets.all(context.space.xl),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(context.space.md),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(context.space.md),
-                        ),
-                        child: Icon(
-                          Icons.account_balance_wallet_rounded,
-                          color: Colors.white,
-                          size: 32,
-                        ),
-                      ),
-                      SizedBox(width: context.space.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Kelola Keuangan',
-                              style: context.typography.headlineSmall.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: context.space.xs),
-                            Text(
-                              'Pantau dan kelola arus kas outlet',
-                              style: context.typography.bodyMedium.copyWith(
-                                color: Colors.white.withValues(alpha: 0.9),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      context.colors.primary,
+                      context.colors.primaryDark,
                     ],
                   ),
-                ],
-              ),
-            ),
-
-            Padding(
-              padding: EdgeInsets.all(context.space.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Menu Keuangan',
-                    style: context.typography.headlineMedium.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: context.colors.textPrimary,
-                    ),
-                  ),
-                  SizedBox(height: context.space.md),
-
-                  ResponsiveLayout(
-                    compactLayout: Column(
+                ),
+                padding: EdgeInsets.all(context.space.xl),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        _buildMenuCard(
-                          context: context,
-                          icon: Icons.point_of_sale_rounded,
-                          title: 'Setoran Kasir',
-                          subtitle: 'Manajemen setoran harian',
-                          gradientColors: [
-                            context.colors.primary,
-                            context.colors.primaryDark,
-                          ],
-                          onTap: () => _navigateToCashDeposit(context),
+                        Container(
+                          padding: EdgeInsets.all(context.space.md),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(
+                              context.space.md,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.account_balance_wallet_rounded,
+                            color: Colors.white,
+                            size: 32,
+                          ),
                         ),
-                        SizedBox(height: context.space.md),
-                        _buildMenuCard(
-                          context: context,
-                          icon: Icons.account_balance_wallet_rounded,
-                          title: 'Saldo Petty Cash',
-                          subtitle: 'Manajemen kas operasional',
-                          gradientColors: [
-                            context.colors.success,
-                            context.colors.successDark,
-                          ],
-                          onTap: () => _navigateToPettyCash(context),
-                        ),
-                        SizedBox(height: context.space.md),
-                        _buildMenuCard(
-                          context: context,
-                          icon: Icons.trending_down_rounded,
-                          title: 'Pengeluaran Outlet',
-                          subtitle: 'Catatan pengeluaran outlet',
-                          gradientColors: [
-                            context.colors.warning,
-                            context.colors.warningDark,
-                          ],
-                          onTap: () => _navigateToCashExpense(context),
+                        SizedBox(width: context.space.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Kelola Keuangan',
+                                style: context.typography.headlineSmall
+                                    .copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              SizedBox(height: context.space.xs),
+                              Text(
+                                'Pantau dan kelola arus kas outlet',
+                                style: context.typography.bodyMedium.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
-                    mediumLayout: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: _buildMenuCard(
+                  ],
+                ),
+              ),
+
+              Padding(
+                padding: EdgeInsets.all(context.space.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Menu Keuangan',
+                      style: context.typography.headlineMedium.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: context.colors.textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: context.space.md),
+
+                    ResponsiveLayout(
+                      compactLayout: Column(
+                        children: [
+                          _buildMenuCard(
                             context: context,
                             icon: Icons.point_of_sale_rounded,
                             title: 'Setoran Kasir',
@@ -146,10 +109,8 @@ class IndexFinancesScreen extends StatelessWidget {
                             ],
                             onTap: () => _navigateToCashDeposit(context),
                           ),
-                        ),
-                        SizedBox(width: context.space.md),
-                        Expanded(
-                          child: _buildMenuCard(
+                          SizedBox(height: context.space.md),
+                          _buildMenuCard(
                             context: context,
                             icon: Icons.account_balance_wallet_rounded,
                             title: 'Saldo Petty Cash',
@@ -160,10 +121,8 @@ class IndexFinancesScreen extends StatelessWidget {
                             ],
                             onTap: () => _navigateToPettyCash(context),
                           ),
-                        ),
-                        SizedBox(width: context.space.md),
-                        Expanded(
-                          child: _buildMenuCard(
+                          SizedBox(height: context.space.md),
+                          _buildMenuCard(
                             context: context,
                             icon: Icons.trending_down_rounded,
                             title: 'Pengeluaran Outlet',
@@ -174,16 +133,61 @@ class IndexFinancesScreen extends StatelessWidget {
                             ],
                             onTap: () => _navigateToCashExpense(context),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                      mediumLayout: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: _buildMenuCard(
+                              context: context,
+                              icon: Icons.point_of_sale_rounded,
+                              title: 'Setoran Kasir',
+                              subtitle: 'Manajemen setoran harian',
+                              gradientColors: [
+                                context.colors.primary,
+                                context.colors.primaryDark,
+                              ],
+                              onTap: () => _navigateToCashDeposit(context),
+                            ),
+                          ),
+                          SizedBox(width: context.space.md),
+                          Expanded(
+                            child: _buildMenuCard(
+                              context: context,
+                              icon: Icons.account_balance_wallet_rounded,
+                              title: 'Saldo Petty Cash',
+                              subtitle: 'Manajemen kas operasional',
+                              gradientColors: [
+                                context.colors.success,
+                                context.colors.successDark,
+                              ],
+                              onTap: () => _navigateToPettyCash(context),
+                            ),
+                          ),
+                          SizedBox(width: context.space.md),
+                          Expanded(
+                            child: _buildMenuCard(
+                              context: context,
+                              icon: Icons.trending_down_rounded,
+                              title: 'Pengeluaran Outlet',
+                              subtitle: 'Catatan pengeluaran outlet',
+                              gradientColors: [
+                                context.colors.warning,
+                                context.colors.warningDark,
+                              ],
+                              onTap: () => _navigateToCashExpense(context),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -282,24 +286,14 @@ class IndexFinancesScreen extends StatelessWidget {
   }
 
   void _navigateToCashDeposit(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => IndexDepositScreen(outletId: outletId)),
-    );
+    context.go('/deposits');
   }
 
   void _navigateToPettyCash(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const IndexPettyCashScreen()),
-    );
+    context.go('/petty-cashes');
   }
 
   void _navigateToCashExpense(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => IndexExpenseScreen(outletId: outletId)),
-    );
+    context.go('/expenses');
   }
 }
-

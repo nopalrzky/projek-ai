@@ -30,6 +30,20 @@ abstract class AuthRemoteDatasource {
     String? deviceName,
   });
 
+  Future<AuthEmployeeModel> updateProfile({
+    required String name,
+    String? email,
+    String? phone,
+    String? gender,
+    String? address,
+  });
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String newPasswordConfirmation,
+  });
+
   Future<bool> requestOtp(String phone, {required String intent});
 
   Future<
@@ -135,10 +149,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     try {
       final response = await _dio.post(
         '$_authBaseEndpoint/pin/setup',
-        data: {
-          'pin': pin,
-          'pin_confirmation': pinConfirmation,
-        },
+        data: {'pin': pin, 'pin_confirmation': pinConfirmation},
       );
 
       _validateResponse(response);
@@ -193,7 +204,8 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
           if (employeeId != null) 'employee_id': employeeId,
           if (username != null && username.isNotEmpty) 'username': username,
           'pin': pin,
-          if (deviceName != null && deviceName.isNotEmpty) 'device_name': deviceName,
+          if (deviceName != null && deviceName.isNotEmpty)
+            'device_name': deviceName,
         },
       );
 
@@ -204,6 +216,59 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       final employeeJson = data['employee'] as Map<String, dynamic>;
 
       return (token, AuthEmployeeModel.fromJson(employeeJson));
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  @override
+  Future<AuthEmployeeModel> updateProfile({
+    required String name,
+    String? email,
+    String? phone,
+    String? gender,
+    String? address,
+  }) async {
+    try {
+      final response = await _dio.patch(
+        '$_authBaseEndpoint/profile',
+        data: {
+          'name': name,
+          if (email != null && email.isNotEmpty) 'email': email,
+          if (phone != null && phone.isNotEmpty) 'phone': phone,
+          if (gender != null && gender.isNotEmpty) 'gender': gender,
+          if (address != null && address.isNotEmpty) 'address': address,
+        },
+      );
+
+      _validateResponse(response);
+
+      final data = response.data['data'] as Map<String, dynamic>;
+      final employeeJson = data['employee'] as Map<String, dynamic>;
+
+      return AuthEmployeeModel.fromJson(employeeJson);
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String newPasswordConfirmation,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '$_authBaseEndpoint/password',
+        data: {
+          'current_password': currentPassword,
+          'password': newPassword,
+          'password_confirmation': newPasswordConfirmation,
+        },
+      );
+
+      _validateResponse(response);
     } catch (e) {
       throw _handleError(e);
     }

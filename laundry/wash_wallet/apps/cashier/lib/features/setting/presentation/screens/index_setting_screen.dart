@@ -37,7 +37,7 @@ class IndexSettingScreen extends StatelessWidget {
               icon: Icons.person_outlined,
               title: 'Profil',
               subtitle: 'Atur profil akun dan preferensi lainnya',
-              onTap: () => context.push('/settings/profile'),
+              onTap: () => context.push('/profile'),
             ),
             SizedBox(height: context.space.sm),
             _buildSettingItem(
@@ -62,7 +62,8 @@ class IndexSettingScreen extends StatelessWidget {
               context,
               icon: Icons.store_outlined,
               title: 'Setup Outlet',
-              subtitle: 'Kelola kategori, layanan, paket, membership, dan pelanggan',
+              subtitle:
+                  'Kelola kategori, layanan, paket, membership, dan pelanggan',
               onTap: () => context.push('/settings/setup-outlet'),
             ),
           ],
@@ -93,14 +94,8 @@ class IndexSettingScreen extends StatelessWidget {
           ),
           child: Icon(icon, color: context.colors.primary),
         ),
-        title: Text(
-          title,
-          style: context.typography.titleMedium,
-        ),
-        subtitle: Text(
-          subtitle,
-          style: context.typography.bodySmall,
-        ),
+        title: Text(title, style: context.typography.titleMedium),
+        subtitle: Text(subtitle, style: context.typography.bodySmall),
         trailing: Icon(
           Icons.chevron_right,
           color: context.colors.onSurfaceVariant,
@@ -110,4 +105,3 @@ class IndexSettingScreen extends StatelessWidget {
     );
   }
 }
-

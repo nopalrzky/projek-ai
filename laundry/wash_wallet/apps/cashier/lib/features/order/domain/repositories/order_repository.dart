@@ -2,7 +2,7 @@ import 'package:wash_wallet_core/wash_wallet_core.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 
 abstract class OrderRepository {
-  Future<Result<List<Order>>> getAll({
+  Future<Result<PaginatedData<Order>>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -30,9 +30,15 @@ abstract class OrderRepository {
     required Map<String, dynamic> data,
   });
 
-  Future<Result<Order>> complete({required int id, required String clientRequestId});
-  
-  Future<Result<Order>> accept({required int id, required String clientRequestId});
+  Future<Result<Order>> complete({
+    required int id,
+    required String clientRequestId,
+  });
+
+  Future<Result<Order>> accept({
+    required int id,
+    required String clientRequestId,
+  });
 
   Future<Result<Order>> reject({
     required int id,
@@ -46,7 +52,10 @@ abstract class OrderRepository {
     String? photoPath,
   });
 
-  Future<Result<Order>> start({required int id, required String clientRequestId});
+  Future<Result<Order>> start({
+    required int id,
+    required String clientRequestId,
+  });
 
   Future<Result<int>> getNewOrderCount();
 

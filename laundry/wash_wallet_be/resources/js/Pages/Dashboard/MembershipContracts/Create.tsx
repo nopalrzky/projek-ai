@@ -23,6 +23,7 @@ import PageHeader from "@/Components/Page/PageHeader";
 import { customerService } from "@/Services/customer.service";
 import { membershipPlanService } from "@/Services/membership_plan.service";
 import { formatCurrency } from "@/lib/utils";
+import { useLatestAsync } from "@/Hooks/useLatestAsync";
 import {
     MembershipContractFormData,
     Outlet,
@@ -55,26 +56,32 @@ const MembershipContractCreate = ({
     >(null);
     const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
 
+    const { runLatest: runLatestCustomers } = useLatestAsync();
+    const { runLatest: runLatestMembershipPlans } = useLatestAsync();
+
     const loadCustomersByOutlet = useCallback(async (outletId: number) => {
         if (!outletId) {
             setCustomers([]);
             return;
         }
 
-        try {
-            setLoadingCustomers(true);
-            setCustomersError(null);
+        setLoadingCustomers(true);
+        setCustomersError(null);
 
-            const fetchedCustomers = await customerService.getAll(outletId);
-            setCustomers(fetchedCustomers);
-        } catch (error: any) {
-            console.error("Error loading customers:", error);
-            setCustomersError(error.message || "Gagal memuat pelanggan");
-            setCustomers([]);
-        } finally {
-            setLoadingCustomers(false);
-        }
-    }, []);
+        runLatestCustomers(
+            outletId,
+            async () => await customerService.getAll(outletId),
+            {
+                onSuccess: (fetchedCustomers) => setCustomers(fetchedCustomers),
+                onError: (error: any) => {
+                    console.error("Error loading customers:", error);
+                    setCustomersError(error.message || "Gagal memuat pelanggan");
+                    setCustomers([]);
+                },
+                onFinally: () => setLoadingCustomers(false)
+            }
+        );
+    }, [runLatestCustomers]);
 
     const loadMembershipPlansByOutlet = useCallback(
         async (outletId: number) => {
@@ -83,32 +90,42 @@ const MembershipContractCreate = ({
                 return;
             }
 
-            try {
-                setLoadingMembershipPlans(true);
-                setMembershipPlansError(null);
+            setLoadingMembershipPlans(true);
+            setMembershipPlansError(null);
 
-                const fetchedPlans =
-                    await membershipPlanService.getMembershipPlansByOutletId(
-                        outletId,
-                    );
-                setMembershipPlans(fetchedPlans);
-
-                setData("membershipPlanId", 0);
-            } catch (error: any) {
-                console.error("Error loading membership plans:", error);
-                setMembershipPlansError(
-                    error.message || "Gagal memuat paket membership",
-                );
-                setMembershipPlans([]);
-            } finally {
-                setLoadingMembershipPlans(false);
-            }
+            runLatestMembershipPlans(
+                outletId,
+                async () => await membershipPlanService.getMembershipPlansByOutletId(outletId),
+                {
+                    onSuccess: (fetchedPlans) => {
+                        setMembershipPlans(fetchedPlans);
+                        setData("membershipPlanId", 0);
+                    },
+                    onError: (error: any) => {
+                        console.error("Error loading membership plans:", error);
+                        setMembershipPlansError(
+                            error.message || "Gagal memuat paket membership",
+                        );
+                        setMembershipPlans([]);
+                    },
+                    onFinally: () => setLoadingMembershipPlans(false)
+                }
+            );
         },
-        [setData],
+        [setData, runLatestMembershipPlans],
     );
 
     useEffect(() => {
         if (selectedOutlet?.id) {
+            setCustomers([]);
+            setMembershipPlans([]);
+            setCustomersError(null);
+            setMembershipPlansError(null);
+            setData((prev) => ({
+                ...prev,
+                customerId: 0,
+                membershipPlanId: 0,
+            }));
             loadCustomersByOutlet(selectedOutlet.id);
             loadMembershipPlansByOutlet(selectedOutlet.id);
         } else {

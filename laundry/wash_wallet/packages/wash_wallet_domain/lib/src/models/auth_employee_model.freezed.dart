@@ -26,6 +26,8 @@ mixin _$AuthEmployeeModel {
   String get username => throw _privateConstructorUsedError;
   String? get email => throw _privateConstructorUsedError;
   String? get phone => throw _privateConstructorUsedError;
+  String? get gender => throw _privateConstructorUsedError;
+  String? get address => throw _privateConstructorUsedError;
   int get outletId => throw _privateConstructorUsedError;
   List<OutletAccessModel>? get accessibleOutlets =>
       throw _privateConstructorUsedError;
@@ -55,6 +57,8 @@ abstract class $AuthEmployeeModelCopyWith<$Res> {
     String username,
     String? email,
     String? phone,
+    String? gender,
+    String? address,
     int outletId,
     List<OutletAccessModel>? accessibleOutlets,
     List<String>? allPermissions,
@@ -82,6 +86,8 @@ class _$AuthEmployeeModelCopyWithImpl<$Res, $Val extends AuthEmployeeModel>
     Object? username = null,
     Object? email = freezed,
     Object? phone = freezed,
+    Object? gender = freezed,
+    Object? address = freezed,
     Object? outletId = null,
     Object? accessibleOutlets = freezed,
     Object? allPermissions = freezed,
@@ -108,6 +114,14 @@ class _$AuthEmployeeModelCopyWithImpl<$Res, $Val extends AuthEmployeeModel>
             phone: freezed == phone
                 ? _value.phone
                 : phone // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            gender: freezed == gender
+                ? _value.gender
+                : gender // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            address: freezed == address
+                ? _value.address
+                : address // ignore: cast_nullable_to_non_nullable
                       as String?,
             outletId: null == outletId
                 ? _value.outletId
@@ -146,6 +160,8 @@ abstract class _$$AuthEmployeeModelImplCopyWith<$Res>
     String username,
     String? email,
     String? phone,
+    String? gender,
+    String? address,
     int outletId,
     List<OutletAccessModel>? accessibleOutlets,
     List<String>? allPermissions,
@@ -172,6 +188,8 @@ class __$$AuthEmployeeModelImplCopyWithImpl<$Res>
     Object? username = null,
     Object? email = freezed,
     Object? phone = freezed,
+    Object? gender = freezed,
+    Object? address = freezed,
     Object? outletId = null,
     Object? accessibleOutlets = freezed,
     Object? allPermissions = freezed,
@@ -198,6 +216,14 @@ class __$$AuthEmployeeModelImplCopyWithImpl<$Res>
         phone: freezed == phone
             ? _value.phone
             : phone // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        gender: freezed == gender
+            ? _value.gender
+            : gender // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        address: freezed == address
+            ? _value.address
+            : address // ignore: cast_nullable_to_non_nullable
                   as String?,
         outletId: null == outletId
             ? _value.outletId
@@ -229,6 +255,8 @@ class _$AuthEmployeeModelImpl extends _AuthEmployeeModel {
     required this.username,
     this.email,
     this.phone,
+    this.gender,
+    this.address,
     required this.outletId,
     final List<OutletAccessModel>? accessibleOutlets,
     final List<String>? allPermissions,
@@ -250,6 +278,10 @@ class _$AuthEmployeeModelImpl extends _AuthEmployeeModel {
   final String? email;
   @override
   final String? phone;
+  @override
+  final String? gender;
+  @override
+  final String? address;
   @override
   final int outletId;
   final List<OutletAccessModel>? _accessibleOutlets;
@@ -279,7 +311,7 @@ class _$AuthEmployeeModelImpl extends _AuthEmployeeModel {
 
   @override
   String toString() {
-    return 'AuthEmployeeModel(id: $id, name: $name, username: $username, email: $email, phone: $phone, outletId: $outletId, accessibleOutlets: $accessibleOutlets, allPermissions: $allPermissions, hasPin: $hasPin)';
+    return 'AuthEmployeeModel(id: $id, name: $name, username: $username, email: $email, phone: $phone, gender: $gender, address: $address, outletId: $outletId, accessibleOutlets: $accessibleOutlets, allPermissions: $allPermissions, hasPin: $hasPin)';
   }
 
   @override
@@ -293,6 +325,8 @@ class _$AuthEmployeeModelImpl extends _AuthEmployeeModel {
                 other.username == username) &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.phone, phone) || other.phone == phone) &&
+            (identical(other.gender, gender) || other.gender == gender) &&
+            (identical(other.address, address) || other.address == address) &&
             (identical(other.outletId, outletId) ||
                 other.outletId == outletId) &&
             const DeepCollectionEquality().equals(
@@ -315,6 +349,8 @@ class _$AuthEmployeeModelImpl extends _AuthEmployeeModel {
     username,
     email,
     phone,
+    gender,
+    address,
     outletId,
     const DeepCollectionEquality().hash(_accessibleOutlets),
     const DeepCollectionEquality().hash(_allPermissions),
@@ -345,6 +381,8 @@ abstract class _AuthEmployeeModel extends AuthEmployeeModel {
     required final String username,
     final String? email,
     final String? phone,
+    final String? gender,
+    final String? address,
     required final int outletId,
     final List<OutletAccessModel>? accessibleOutlets,
     final List<String>? allPermissions,
@@ -365,6 +403,10 @@ abstract class _AuthEmployeeModel extends AuthEmployeeModel {
   String? get email;
   @override
   String? get phone;
+  @override
+  String? get gender;
+  @override
+  String? get address;
   @override
   int get outletId;
   @override

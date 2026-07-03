@@ -242,7 +242,8 @@ class _OtpScreenState extends State<OtpScreen> {
                       SizedBox(height: context.space.lg),
                       if (_hasPassword && !isLoading)
                         TextButton(
-                          onPressed: () => context.go('/login-password', extra: phone),
+                          onPressed: () =>
+                              context.go('/login-password', extra: phone),
                           child: const Text('Masuk dengan Password'),
                         ),
                     ],

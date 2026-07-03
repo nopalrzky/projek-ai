@@ -2,10 +2,10 @@
 class FilterOption {
   /// Unique identifier for this option.
   final String id;
-  
+
   /// Label to display.
   final String label;
-  
+
   /// The underlying value.
   final dynamic value;
 

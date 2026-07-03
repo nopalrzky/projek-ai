@@ -25,7 +25,8 @@ class PaymentMethodSelectorWidget extends StatelessWidget {
             SizedBox(height: context.space.sm),
             PaymentMethodOptionWidget(
               title: 'Transfer Online',
-              subtitle: 'Bayar dengan transfer bank atau metode pembayaran online',
+              subtitle:
+                  'Bayar dengan transfer bank atau metode pembayaran online',
               icon: Icons.account_balance,
               isSelected: state.paymentMethod == 'transfer',
               onTap: () =>
@@ -37,9 +38,9 @@ class PaymentMethodSelectorWidget extends StatelessWidget {
               subtitle: 'Bayar menggunakan saldo deposit Anda',
               icon: Icons.account_balance_wallet,
               isSelected: state.paymentMethod == 'wallet_balance',
-              onTap: () => context
-                  .read<OrderCubit>()
-                  .selectPaymentMethod('wallet_balance'),
+              onTap: () => context.read<OrderCubit>().selectPaymentMethod(
+                'wallet_balance',
+              ),
             ),
           ],
         );

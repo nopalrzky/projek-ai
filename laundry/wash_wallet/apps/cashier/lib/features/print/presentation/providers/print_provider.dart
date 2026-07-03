@@ -11,23 +11,34 @@ import '../bloc/print_cubit.dart';
 class PrintProvider {
   PrintProvider._();
 
-  static PrintRemoteDatasource createRemoteDatasource(Dio dio, ApiEndpoints endpoints) {
+  static PrintRemoteDatasource createRemoteDatasource(
+    Dio dio,
+    ApiEndpoints endpoints,
+  ) {
     return PrintRemoteDatasourceImpl(dio, endpoints);
   }
 
-  static PrintRepository createRepository(PrintRemoteDatasource remoteDatasource) {
+  static PrintRepository createRepository(
+    PrintRemoteDatasource remoteDatasource,
+  ) {
     return PrintRepositoryImpl(remoteDatasource);
   }
 
-  static GetPrintInfoUsecase createGetPrintInfoUsecase(PrintRepository repository) {
+  static GetPrintInfoUsecase createGetPrintInfoUsecase(
+    PrintRepository repository,
+  ) {
     return GetPrintInfoUsecase(repository);
   }
 
-  static ProcessReceiptUsecase createProcessReceiptUsecase(PrintRepository repository) {
+  static ProcessReceiptUsecase createProcessReceiptUsecase(
+    PrintRepository repository,
+  ) {
     return ProcessReceiptUsecase(repository);
   }
 
-  static ProcessLabelUsecase createProcessLabelUsecase(PrintRepository repository) {
+  static ProcessLabelUsecase createProcessLabelUsecase(
+    PrintRepository repository,
+  ) {
     return ProcessLabelUsecase(repository);
   }
 

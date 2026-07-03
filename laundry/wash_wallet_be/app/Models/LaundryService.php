@@ -46,14 +46,16 @@ class LaundryService extends Model
     protected function casts(): array
     {
         return [
-            'is_active'      => 'boolean',
+            'category_id'      => 'integer',
+            'unit_id'          => 'integer',
+            'is_active'        => 'boolean',
             'supports_courier' => 'boolean',
-            'duration_hours' => 'integer',
-            'min_quantity'   => 'integer',
-            'price'          => 'decimal:2',
-            'created_at'     => 'datetime',
-            'updated_at'     => 'datetime',
-            'deleted_at'     => 'datetime',
+            'duration_hours'   => 'integer',
+            'min_quantity'     => 'integer',
+            'price'            => 'decimal:2',
+            'created_at'       => 'datetime',
+            'updated_at'       => 'datetime',
+            'deleted_at'       => 'datetime',
         ];
     }
 

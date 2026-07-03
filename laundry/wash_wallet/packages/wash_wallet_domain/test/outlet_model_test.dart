@@ -24,39 +24,45 @@ void main() {
       expect(() => OutletModel.fromJson(json), returnsNormally);
 
       final model = OutletModel.fromJson(json);
-      expect(model.todaySchedule, isNull,
-          reason: 'todaySchedule should be null for closed outlet');
+      expect(
+        model.todaySchedule,
+        isNull,
+        reason: 'todaySchedule should be null for closed outlet',
+      );
     });
 
-    test('normalizes todaySchedule from non-empty todayHours (open outlet)', () {
-      final json = {
-        ...baseJson(),
-        'isCurrentlyOpen': true,
-        'todaySchedule': [],
-        'todayHours': [
-          {'open': '08:00', 'close': '21:00'},
-        ],
-        'operationalStatus': 'open',
-        'operationalStatusLabel': 'Buka',
-        'operationalStatusMessage': 'Buka sampai 21:00',
-      };
+    test(
+      'normalizes todaySchedule from non-empty todayHours (open outlet)',
+      () {
+        final json = {
+          ...baseJson(),
+          'isCurrentlyOpen': true,
+          'todaySchedule': [],
+          'todayHours': [
+            {'open': '08:00', 'close': '21:00'},
+          ],
+          'operationalStatus': 'open',
+          'operationalStatusLabel': 'Buka',
+          'operationalStatusMessage': 'Buka sampai 21:00',
+        };
 
-      final model = OutletModel.fromJson(json);
-      expect(model.todaySchedule, isNotNull);
-      expect(model.todaySchedule!['isOpen'], isTrue);
-      expect(model.todaySchedule!['openTime'], equals('08:00'));
-      expect(model.todaySchedule!['closeTime'], equals('21:00'));
-    });
+        final model = OutletModel.fromJson(json);
+        expect(model.todaySchedule, isNotNull);
+        expect(model.todaySchedule!['isOpen'], isTrue);
+        expect(model.todaySchedule!['openTime'], equals('08:00'));
+        expect(model.todaySchedule!['closeTime'], equals('21:00'));
+      },
+    );
 
-    test('todaySchedule is null when neither todaySchedule nor todayHours present', () {
-      final json = {
-        ...baseJson(),
-        'operationalStatus': 'hours_not_set',
-      };
+    test(
+      'todaySchedule is null when neither todaySchedule nor todayHours present',
+      () {
+        final json = {...baseJson(), 'operationalStatus': 'hours_not_set'};
 
-      final model = OutletModel.fromJson(json);
-      expect(model.todaySchedule, isNull);
-    });
+        final model = OutletModel.fromJson(json);
+        expect(model.todaySchedule, isNull);
+      },
+    );
 
     test('operationalStatus is populated from flat fields for open outlet', () {
       final json = {
@@ -103,7 +109,7 @@ void main() {
         'distance': 1.2,
         'latitude': -6.200,
         'longitude': 106.816,
-        'todaySchedule': [],        // <-- trigger utama crash
+        'todaySchedule': [], // <-- trigger utama crash
         'todayHours': [],
         'weeklyHours': [],
         'operationalStatus': 'closed_today',

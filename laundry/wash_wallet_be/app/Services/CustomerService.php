@@ -5,9 +5,12 @@ namespace App\Services;
 use App\Models\Customer;
 use App\Models\CustomerQuota;
 use App\Models\CustomerSubscription;
+use App\Models\Employee;
 use App\Models\MembershipContract;
 use App\Models\MembershipPlan;
+use App\Models\Outlet;
 use App\Models\ServicePackage;
+use App\Models\User;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -115,8 +118,11 @@ class CustomerService extends BaseService
     {
         return DB::transaction(function () use ($data) {
             try {
+                $outletId = (int) $data['outletId'];
+                $this->authorizeCustomerOutlet($outletId);
+
                 $customer = $this->customer->create([
-                    'outlet_id'     => $data['outletId'] ?? null,
+                    'outlet_id'     => $outletId,
                     'name'          => $data['name'],
                     'email'         => $data['email'] ?? null,
                     'phone'         => $data['phone'] ?? null,
@@ -267,7 +273,7 @@ class CustomerService extends BaseService
                     ->active()
                     ->firstOrFail();
 
-                if ($servicePackage->outlet_id && $servicePackage->outlet_id !== $customer->outlet_id) {
+                if ($servicePackage->outlet_id && (int) $servicePackage->outlet_id !== (int) $customer->outlet_id) {
                     throw new Exception('Paket layanan tidak tersedia untuk outlet pelanggan ini');
                 }
 
@@ -520,5 +526,27 @@ class CustomerService extends BaseService
             $filters['sortBy'] ?? 'created_at',
             $filters['sortDirection'] ?? 'desc'
         );
+    }
+
+    private function authorizeCustomerOutlet(int $outletId): void
+    {
+        $user = $this->resolveUser();
+        $outlet = Outlet::query()->findOrFail($outletId);
+
+        if ($user instanceof User) {
+            if ($user->hasRole('super_admin')) {
+                return;
+            }
+
+            if ($user->hasRole('owner') && $outlet->isOwner($user)) {
+                return;
+            }
+        }
+
+        if ($user instanceof Employee && in_array($outletId, $user->getAccessibleOutletIds(), true)) {
+            return;
+        }
+
+        throw new Exception('Akses ditolak. Anda hanya dapat membuat pelanggan untuk outlet yang dapat Anda akses.');
     }
 }

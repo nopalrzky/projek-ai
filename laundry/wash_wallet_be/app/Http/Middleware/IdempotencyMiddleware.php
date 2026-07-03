@@ -14,7 +14,7 @@ class IdempotencyMiddleware
      *
      * @param  Closure(Request): (Response)  $next
      */
-    public function handle(Request $request, Closure $next, ?string $actionName): Response
+    public function handle(Request $request, Closure $next, ?string $actionName = null): Response
     {
         $clientRequestId = $request->header('Client-Request-Id') ?? $request->input('client_request_id');
         if (!$clientRequestId) {

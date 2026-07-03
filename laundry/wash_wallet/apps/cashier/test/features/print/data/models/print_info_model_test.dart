@@ -20,10 +20,7 @@ void main() {
           'paidAmount': 265188.18,
           'remainingAmount': 0,
         },
-        'customer': {
-          'name': 'Tod Mills',
-          'phone': '678-740-0026',
-        },
+        'customer': {'name': 'Tod Mills', 'phone': '678-740-0026'},
         'outlet': {
           'name': 'Kunde, Macejkovic and Veum Laundry',
           'address': null,

@@ -172,7 +172,8 @@ class _NonCourierInfoRow extends StatelessWidget {
         color: context.colors.warning.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(context.radius.md),
         border: Border.all(
-            color: context.colors.warning.withValues(alpha: 0.3)),
+          color: context.colors.warning.withValues(alpha: 0.3),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

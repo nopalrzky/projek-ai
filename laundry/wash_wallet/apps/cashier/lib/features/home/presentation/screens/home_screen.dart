@@ -115,7 +115,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         right: 0,
                         child: NewOrderBanner(
                           payload: _visibleBanner!,
-                          onTap: () => _openOrderFromNotification(_visibleBanner!),
+                          onTap: () =>
+                              _openOrderFromNotification(_visibleBanner!),
                           onClose: _hideBanner,
                         ),
                       ),
@@ -238,8 +239,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ordersNotPickedUp: state.ordersNotPickedUp,
                   ordersPickedUp: state.ordersPickedUp,
                   onSetorTap: () => _handleSetorTap(context),
-                  onProductionTap: () => context.go('/orders?status=production'),
-                  onNotPickedUpTap: () => context.go('/orders?status=not_picked_up'),
+                  onProductionTap: () =>
+                      context.go('/orders?status=production'),
+                  onNotPickedUpTap: () =>
+                      context.go('/orders?status=not_picked_up'),
                   onPickedUpTap: () => context.go('/orders?status=picked_up'),
                 ),
                 SizedBox(height: context.space.xl),
@@ -287,9 +290,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           PageContentHeader(
             title: 'Dashboard Kasir',
             subtitle: '$outletName • $employeeName',
-            breadcrumbs: const [
-              BreadcrumbItem(label: 'Dashboard Kasir'),
-            ],
+            breadcrumbs: const [BreadcrumbItem(label: 'Dashboard Kasir')],
             actions: [
               IconButton(
                 onPressed: () => context.read<HomeCubit>().refresh(),
@@ -354,7 +355,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
     return const SizedBox.shrink();
   }
-
 
   void _handleNewOrder(NewOrderPayload payload) {
     if (!mounted) return;

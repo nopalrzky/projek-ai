@@ -4,13 +4,13 @@ import 'sidebar_menu_item.dart';
 class SidebarMenuSection {
   /// Optional title for this section. If null, the section is rendered without a header.
   final String? title;
-  
+
   /// List of items in this section.
   final List<SidebarMenuItem> items;
-  
+
   /// Whether this section can be collapsed/expanded.
   final bool collapsible;
-  
+
   /// If [collapsible] is true, determines whether it is expanded by default.
   final bool initiallyExpanded;
 

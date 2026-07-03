@@ -56,58 +56,58 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
     final isCompact = sizeClass == WindowSizeClass.compact;
 
     final content = BlocConsumer<CategoryCubit, CategoryState>(
-        listener: (context, state) {
-          if (state is CategoryActionSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.check_circle_rounded, color: Colors.white),
-                    SizedBox(width: context.space.sm),
-                    Text(state.message),
-                  ],
-                ),
-                backgroundColor: context.colors.success,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(context.radius.md),
-                ),
+      listener: (context, state) {
+        if (state is CategoryActionSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle_rounded, color: Colors.white),
+                  SizedBox(width: context.space.sm),
+                  Text(state.message),
+                ],
               ),
-            );
-            Navigator.pop(context, true);
-          }
-          if (state is CategoryFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.error_rounded, color: Colors.white),
-                    SizedBox(width: context.space.sm),
-                    Expanded(child: Text(state.failure.message)),
-                  ],
-                ),
-                backgroundColor: context.colors.error,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(context.radius.md),
-                ),
+              backgroundColor: context.colors.success,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(context.radius.md),
               ),
-            );
-          }
-        },
-        builder: (context, state) {
-          return CategoryFormSection(
-            formKey: _formKey,
-            nameController: _nameController,
-            descriptionController: _descController,
-            isActive: _isActive,
-            isLoading: state is CategoryLoading,
-            submitLabel: 'Simpan Perubahan',
-            onActiveChanged: (val) => setState(() => _isActive = val),
-            onSubmit: _handleSubmit,
+            ),
           );
-        },
-      );
+          Navigator.pop(context, true);
+        }
+        if (state is CategoryFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.error_rounded, color: Colors.white),
+                  SizedBox(width: context.space.sm),
+                  Expanded(child: Text(state.failure.message)),
+                ],
+              ),
+              backgroundColor: context.colors.error,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(context.radius.md),
+              ),
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        return CategoryFormSection(
+          formKey: _formKey,
+          nameController: _nameController,
+          descriptionController: _descController,
+          isActive: _isActive,
+          isLoading: state is CategoryLoading,
+          submitLabel: 'Simpan Perubahan',
+          onActiveChanged: (val) => setState(() => _isActive = val),
+          onSubmit: _handleSubmit,
+        );
+      },
+    );
 
     if (isCompact) {
       return AppLayout(
@@ -131,7 +131,10 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
           title: 'Edit Kategori',
           breadcrumbs: [
             const BreadcrumbItem(label: 'Pengaturan'),
-            BreadcrumbItem(label: 'Kategori', onTap: () => Navigator.pop(context)),
+            BreadcrumbItem(
+              label: 'Kategori',
+              onTap: () => Navigator.pop(context),
+            ),
             const BreadcrumbItem(label: 'Edit Kategori'),
           ],
         ),
@@ -141,9 +144,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
               horizontal: context.space.lg,
               vertical: context.space.md,
             ),
-            child: ContentConstraint(
-              child: content,
-            ),
+            child: ContentConstraint(child: content),
           ),
         ),
       ],

@@ -33,7 +33,7 @@ export interface CreateAccountModalProps {
     parentId?: number;
     parentName?: string;
     parentCode?: string;
-    parentType?: string; // Add this
+    parentType?: string;
     accountTypes: AccountType[];
     onClose: () => void;
     onSuccess?: () => void;

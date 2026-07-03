@@ -184,7 +184,8 @@ class Order extends Equatable {
       deliveryTypeLabel: model.deliveryTypeLabel,
       canPay: model.canPay ?? false,
       canScheduleDelivery: model.canScheduleDelivery ?? false,
-      requiresPaymentBeforeDelivery: model.requiresPaymentBeforeDelivery ?? false,
+      requiresPaymentBeforeDelivery:
+          model.requiresPaymentBeforeDelivery ?? false,
       source: model.source,
       sourceLabel: model.sourceLabel,
       paymentMethod: model.paymentMethod,

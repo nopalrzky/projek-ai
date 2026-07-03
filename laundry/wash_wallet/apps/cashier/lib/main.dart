@@ -287,16 +287,28 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
       value: widget.dependencies.printerService,
       child: MultiBlocProvider(
         providers: [
-          BlocProvider<AccountCubit>.value(value: widget.dependencies.accountCubit),
+          BlocProvider<AccountCubit>.value(
+            value: widget.dependencies.accountCubit,
+          ),
           BlocProvider<AuthCubit>.value(value: widget.dependencies.authCubit),
-          BlocProvider<CategoryCubit>.value(value: widget.dependencies.categoryCubit),
-          BlocProvider<CustomerCubit>.value(value: widget.dependencies.customerCubit),
-          BlocProvider<DepositCubit>.value(value: widget.dependencies.depositCubit),
+          BlocProvider<CategoryCubit>.value(
+            value: widget.dependencies.categoryCubit,
+          ),
+          BlocProvider<CustomerCubit>.value(
+            value: widget.dependencies.customerCubit,
+          ),
+          BlocProvider<DepositCubit>.value(
+            value: widget.dependencies.depositCubit,
+          ),
           BlocProvider<PettyCashCubit>.value(
             value: widget.dependencies.pettyCashCubit,
           ),
-          BlocProvider<EmployeeCubit>.value(value: widget.dependencies.employeeCubit),
-          BlocProvider<ExpenseCubit>.value(value: widget.dependencies.expenseCubit),
+          BlocProvider<EmployeeCubit>.value(
+            value: widget.dependencies.employeeCubit,
+          ),
+          BlocProvider<ExpenseCubit>.value(
+            value: widget.dependencies.expenseCubit,
+          ),
           BlocProvider<HomeCubit>.value(value: widget.dependencies.homeCubit),
           BlocProvider<LaundryServiceCubit>.value(
             value: widget.dependencies.laundryServiceCubit,

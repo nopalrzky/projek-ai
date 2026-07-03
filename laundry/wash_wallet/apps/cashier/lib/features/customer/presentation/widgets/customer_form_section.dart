@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 
 class CustomerFormSection extends StatelessWidget {
@@ -258,7 +258,9 @@ class CustomerFormSection extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(context.radius.md),
-          borderSide: BorderSide(color: context.colors.border.withValues(alpha: 0.3)),
+          borderSide: BorderSide(
+            color: context.colors.border.withValues(alpha: 0.3),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(context.radius.md),
@@ -299,7 +301,9 @@ class CustomerFormSection extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(context.radius.md),
-          borderSide: BorderSide(color: context.colors.border.withValues(alpha: 0.3)),
+          borderSide: BorderSide(
+            color: context.colors.border.withValues(alpha: 0.3),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(context.radius.md),
@@ -361,7 +365,9 @@ class CustomerFormSection extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(context.radius.md),
-          borderSide: BorderSide(color: context.colors.border.withValues(alpha: 0.3)),
+          borderSide: BorderSide(
+            color: context.colors.border.withValues(alpha: 0.3),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(context.radius.md),
@@ -394,7 +400,9 @@ class CustomerFormSection extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(context.radius.md),
-          borderSide: BorderSide(color: context.colors.border.withValues(alpha: 0.3)),
+          borderSide: BorderSide(
+            color: context.colors.border.withValues(alpha: 0.3),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(context.radius.md),
@@ -430,7 +438,9 @@ class CustomerFormSection extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(context.radius.md),
-          borderSide: BorderSide(color: context.colors.border.withValues(alpha: 0.3)),
+          borderSide: BorderSide(
+            color: context.colors.border.withValues(alpha: 0.3),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(context.radius.md),
@@ -470,7 +480,9 @@ class CustomerFormSection extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(context.radius.md),
-          borderSide: BorderSide(color: context.colors.border.withValues(alpha: 0.3)),
+          borderSide: BorderSide(
+            color: context.colors.border.withValues(alpha: 0.3),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(context.radius.md),
@@ -613,4 +625,3 @@ class CustomerFormSection extends StatelessWidget {
     );
   }
 }
-

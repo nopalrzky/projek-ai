@@ -4,7 +4,7 @@ import 'package:wash_wallet_core/wash_wallet_core.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 
 abstract class ExpenseRemoteDatasource {
-  Future<List<ExpenseModel>> getAll({
+  Future<PaginatedData<ExpenseModel>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -54,7 +54,7 @@ class ExpenseRemoteDatasourceImpl implements ExpenseRemoteDatasource {
   ExpenseRemoteDatasourceImpl(this._dio, this._endpoints);
 
   @override
-  Future<List<ExpenseModel>> getAll({
+  Future<PaginatedData<ExpenseModel>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -97,7 +97,14 @@ class ExpenseRemoteDatasourceImpl implements ExpenseRemoteDatasource {
 
       final body = _validateResponse(response);
       final List data = body['data'] as List? ?? [];
-      return data.map((e) => ExpenseModel.fromJson(e)).toList();
+      final meta = body['meta'] as Map<String, dynamic>? ?? {};
+      final items = data.map((e) => ExpenseModel.fromJson(e)).toList();
+      return PaginatedData<ExpenseModel>.fromMeta(
+        items: items,
+        meta: meta,
+        requestedPage: page,
+        requestedPerPage: perPage,
+      );
     } catch (e) {
       throw _handleError(e);
     }

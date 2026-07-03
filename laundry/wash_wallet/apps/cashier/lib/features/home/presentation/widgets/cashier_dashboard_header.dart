@@ -25,17 +25,14 @@ class CashierDashboardHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       height: 64,
       padding: const EdgeInsets.symmetric(horizontal: 24),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         border: Border(
-          bottom: BorderSide(
-            color: theme.colorScheme.outlineVariant,
-            width: 1,
-          ),
+          bottom: BorderSide(color: theme.colorScheme.outlineVariant, width: 1),
         ),
       ),
       child: Row(
@@ -60,25 +57,27 @@ class CashierDashboardHeader extends StatelessWidget {
               ),
             ],
           ),
-          
+
           const SizedBox(width: 24),
-          
+
           if (statusChips.isNotEmpty) ...[
-            ...statusChips.map((chip) => Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: chip,
-            )),
+            ...statusChips.map(
+              (chip) => Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: chip,
+              ),
+            ),
           ],
-          
+
           const Spacer(),
-          
+
           if (onRefreshTap != null)
             IconButton(
               icon: const Icon(Icons.refresh_rounded),
               onPressed: onRefreshTap,
               tooltip: 'Refresh',
             ),
-            
+
           if (onSwitchEmployeeTap != null) ...[
             const SizedBox(width: 8),
             IconButton(
@@ -87,7 +86,7 @@ class CashierDashboardHeader extends StatelessWidget {
               tooltip: 'Ganti Akun Kasir',
             ),
           ],
-            
+
           if (onNotificationTap != null) ...[
             const SizedBox(width: 8),
             Stack(
@@ -109,7 +108,9 @@ class CashierDashboardHeader extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: Text(
-                        notificationCount > 99 ? '99+' : notificationCount.toString(),
+                        notificationCount > 99
+                            ? '99+'
+                            : notificationCount.toString(),
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: theme.colorScheme.onError,
                           fontSize: 10,

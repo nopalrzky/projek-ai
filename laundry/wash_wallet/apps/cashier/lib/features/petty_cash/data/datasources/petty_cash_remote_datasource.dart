@@ -1,9 +1,9 @@
-﻿import 'package:dio/dio.dart';
+import 'package:dio/dio.dart';
 import 'package:wash_wallet_core/wash_wallet_core.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 
 abstract class PettyCashRemoteDatasource {
-  Future<List<PettyCashModel>> getAll({
+  Future<PaginatedData<PettyCashModel>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -38,7 +38,7 @@ class PettyCashRemoteDatasourceImpl implements PettyCashRemoteDatasource {
   PettyCashRemoteDatasourceImpl(this._dio, this._endpoints);
 
   @override
-  Future<List<PettyCashModel>> getAll({
+  Future<PaginatedData<PettyCashModel>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -70,7 +70,14 @@ class PettyCashRemoteDatasourceImpl implements PettyCashRemoteDatasource {
       _validateResponse(response);
 
       final List data = response.data['data'];
-      return data.map((e) => PettyCashModel.fromJson(e)).toList();
+      final meta = response.data['meta'] as Map<String, dynamic>? ?? {};
+      final items = data.map((e) => PettyCashModel.fromJson(e)).toList();
+      return PaginatedData<PettyCashModel>.fromMeta(
+        items: items,
+        meta: meta,
+        requestedPage: page,
+        requestedPerPage: perPage,
+      );
     } catch (e) {
       throw _handleError(e);
     }

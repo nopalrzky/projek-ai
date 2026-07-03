@@ -88,7 +88,10 @@ class TabletTableToolbar extends StatelessWidget {
                   border: const OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(8)),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
                 onSubmitted: (_) => onSearch?.call(),
                 onChanged: (_) {
@@ -106,20 +109,26 @@ class TabletTableToolbar extends StatelessWidget {
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
-                  children: filterChips.map((chip) => Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: chip,
-                  )).toList(),
+                  children: filterChips
+                      .map(
+                        (chip) => Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: chip,
+                        ),
+                      )
+                      .toList(),
                 ),
               ),
             ),
             const SizedBox(width: 16),
           ],
           if (secondaryActions != null)
-            ...secondaryActions!.map((action) => Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: action,
-                )),
+            ...secondaryActions!.map(
+              (action) => Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: action,
+              ),
+            ),
           if (primaryActionLabel != null && onPrimaryAction != null)
             FilledButton.icon(
               onPressed: onPrimaryAction,

@@ -5,6 +5,7 @@ import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 import '../bloc/customer_cubit.dart';
 import '../bloc/customer_state.dart';
+
 import '../widgets/customer_form_section.dart';
 
 class EditCustomerScreen extends StatefulWidget {
@@ -107,73 +108,72 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
     final isCompact = sizeClass == WindowSizeClass.compact;
 
     final content = BlocConsumer<CustomerCubit, CustomerState>(
-        listener: (context, state) {
-          if (state is CustomerActionSuccess) {
-            Navigator.pop(context, true);
-          }
-          if (state is CustomerFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.failure.message),
-                backgroundColor: context.colors.error,
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          return CustomerFormSection(
-            formKey: _formKey,
-            nameController: _nameController,
-            emailController: _emailController,
-            phoneController: _phoneController,
-            addressController: _addressController,
-            dateOfBirthController: _dobController,
-            selectedGender: _selectedGender,
-            onGenderChanged: (val) => setState(() => _selectedGender = val),
-            isActive: _isActive,
-            onActiveChanged: (val) => setState(() => _isActive = val),
-            onDateTap: _handleDateTap,
-            isLoading: state is CustomerLoading,
-            onSubmit: _handleSubmit,
-            submitLabel: 'Simpan Perubahan',
+      listener: (context, state) {
+        if (state is CustomerActionSuccess) {
+          Navigator.pop(context, true);
+        }
+        if (state is CustomerFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.failure.message),
+              backgroundColor: context.colors.error,
+            ),
           );
-        },
-      );
-
-    if (isCompact) {
-      return AppLayout(
-        header: AppHeader(
-          title: 'Edit Pelanggan',
-          onBackPressed: () => Navigator.pop(context),
-        ),
-        scrollable: true,
-        padding: EdgeInsets.all(context.space.lg),
-        body: content,
-      );
-    }
-
-    return Column(
-      children: [
-        PageContentHeader(
-          title: 'Edit Pelanggan',
-          breadcrumbs: [
-            const BreadcrumbItem(label: 'Pelanggan'),
-            BreadcrumbItem(label: 'Daftar Pelanggan', onTap: () => Navigator.pop(context)),
-            const BreadcrumbItem(label: 'Edit Pelanggan'),
-          ],
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(
-              horizontal: context.space.lg,
-              vertical: context.space.md,
-            ),
-            child: ContentConstraint(
-              child: content,
-            ),
-          ),
-        ),
-      ],
+        }
+      },
+      builder: (context, state) {
+        return CustomerFormSection(
+          formKey: _formKey,
+          nameController: _nameController,
+          emailController: _emailController,
+          phoneController: _phoneController,
+          addressController: _addressController,
+          dateOfBirthController: _dobController,
+          selectedGender: _selectedGender,
+          onGenderChanged: (val) => setState(() => _selectedGender = val),
+          isActive: _isActive,
+          onActiveChanged: (val) => setState(() => _isActive = val),
+          onDateTap: _handleDateTap,
+          isLoading: state is CustomerLoading,
+          onSubmit: _handleSubmit,
+          submitLabel: 'Simpan Perubahan',
+        );
+      },
     );
+
+    return isCompact
+          ? AppLayout(
+              header: AppHeader(
+                title: 'Edit Pelanggan',
+                onBackPressed: () => Navigator.pop(context),
+              ),
+              scrollable: true,
+              padding: EdgeInsets.all(context.space.lg),
+              body: content,
+            )
+          : Column(
+              children: [
+                PageContentHeader(
+                  title: 'Edit Pelanggan',
+                  breadcrumbs: [
+                    const BreadcrumbItem(label: 'Pelanggan'),
+                    BreadcrumbItem(
+                      label: 'Daftar Pelanggan',
+                      onTap: () => Navigator.pop(context),
+                    ),
+                    const BreadcrumbItem(label: 'Edit Pelanggan'),
+                  ],
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: context.space.lg,
+                      vertical: context.space.md,
+                    ),
+                    child: ContentConstraint(child: content),
+                  ),
+                ),
+              ],
+            );
   }
 }

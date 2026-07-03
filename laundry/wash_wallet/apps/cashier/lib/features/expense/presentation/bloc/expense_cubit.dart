@@ -1,11 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wash_wallet_core/wash_wallet_core.dart';
+import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 import '../../domain/usecases/get_by_id_usecase.dart';
 import '../../domain/usecases/get_all_usecase.dart';
 import '../../domain/usecases/store_usecase.dart';
 import '../../domain/usecases/update_usecase.dart';
 import 'expense_state.dart';
 
-class ExpenseCubit extends Cubit<ExpenseState> {
+class ExpenseCubit extends Cubit<ExpenseState> with TablePaginationCubitMixin<ExpenseState> {
   final GetAllUsecase _getAllUsecase;
   final GetByIdUsecase _getByIdUsecase;
   final StoreUsecase _storeUsecase;
@@ -64,13 +66,18 @@ class ExpenseCubit extends Cubit<ExpenseState> {
     final result = await _getAllUsecase(params);
 
     result.when(
-      success: (expenses) {
+      success: (data) {
         if (page == 1) {
           emit(
             ExpensesLoaded(
-              expenses: expenses,
-              hasReachedMax: expenses.length < perPage,
-              currentPage: page,
+              expenses: data.items,
+              hasReachedMax: data.hasReachedMax,
+              currentPage: data.currentPage,
+              lastPage: data.lastPage,
+              total: data.total,
+              from: data.from,
+              to: data.to,
+              perPage: data.perPage,
             ),
           );
         } else {
@@ -78,15 +85,79 @@ class ExpenseCubit extends Cubit<ExpenseState> {
           if (currentState is ExpensesLoaded) {
             emit(
               currentState.copyWith(
-                expenses: currentState.expenses + expenses,
-                hasReachedMax: expenses.isEmpty || expenses.length < perPage,
-                currentPage: page,
+                expenses: currentState.expenses + data.items,
+                hasReachedMax: data.hasReachedMax,
+                currentPage: data.currentPage,
+                lastPage: data.lastPage,
+                total: data.total,
+                from: data.from,
+                to: data.to,
+                perPage: data.perPage,
               ),
             );
           }
         }
       },
       failure: (failure) => emit(ExpenseFailure(failure)),
+    );
+  }
+
+  /// Called exclusively by [AppPagination.onPageChanged] on tablet.
+  /// Always REPLACES expenses — never appends.
+  Future<void> changePage(
+    int page, {
+    String? search,
+    String? status,
+    int? outletId,
+    int? employeeId,
+    int? expenseAccountId,
+    int? sourceAccountId,
+    String? startDate,
+    String? endDate,
+    double? minAmount,
+    double? maxAmount,
+    bool? hasAttachment,
+    String sortBy = 'date',
+    String sortDirection = 'desc',
+  }) {
+    final current = state;
+    if (current is! ExpensesLoaded) return Future.value();
+    return changePageGeneric<Expense>(
+      page: page,
+      currentPage: current.currentPage,
+      lastPage: current.lastPage,
+      request: () => _getAllUsecase(
+        GetAllParams(
+          page: page,
+          perPage: current.perPage,
+          search: search,
+          status: status,
+          outletId: outletId,
+          employeeId: employeeId,
+          expenseAccountId: expenseAccountId,
+          sourceAccountId: sourceAccountId,
+          startDate: startDate,
+          endDate: endDate,
+          minAmount: minAmount,
+          maxAmount: maxAmount,
+          hasAttachment: hasAttachment,
+          sortBy: sortBy,
+          sortDirection: sortDirection,
+        ),
+      ),
+      markPageLoading: () => current.copyWith(isPageLoading: true),
+      buildLoaded: (data) => ExpensesLoaded(
+        expenses: data.items,
+        hasReachedMax: data.hasReachedMax,
+        currentPage: data.currentPage,
+        lastPage: data.lastPage,
+        total: data.total,
+        from: data.from,
+        to: data.to,
+        perPage: data.perPage,
+        isPageLoading: false,
+      ),
+      buildError: (f) => ExpenseFailure(ServerFailure(message: f.message)),
     );
   }
 

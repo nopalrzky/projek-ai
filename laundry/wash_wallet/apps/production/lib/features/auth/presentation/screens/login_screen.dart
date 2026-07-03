@@ -57,9 +57,9 @@ class LoginScreen extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    context.colors.primary.withValues(alpha:0.05),
+                    context.colors.primary.withValues(alpha: 0.05),
                     context.colors.background,
-                    context.colors.primary.withValues(alpha:0.03),
+                    context.colors.primary.withValues(alpha: 0.03),
                   ],
                 ),
               ),
@@ -74,8 +74,8 @@ class LoginScreen extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      context.colors.primary.withValues(alpha:0.15),
-                      context.colors.primary.withValues(alpha:0.0),
+                      context.colors.primary.withValues(alpha: 0.15),
+                      context.colors.primary.withValues(alpha: 0.0),
                     ],
                   ),
                 ),
@@ -91,8 +91,8 @@ class LoginScreen extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      context.colors.primary.withValues(alpha:0.1),
-                      context.colors.primary.withValues(alpha:0.0),
+                      context.colors.primary.withValues(alpha: 0.1),
+                      context.colors.primary.withValues(alpha: 0.0),
                     ],
                   ),
                 ),
@@ -104,7 +104,7 @@ class LoginScreen extends StatelessWidget {
                 child: SingleChildScrollView(
                   padding: EdgeInsets.all(context.space.xl),
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 420),
+                    constraints: BoxConstraints(maxWidth: AppDialogLayout.formMaxWidth(context)),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -145,19 +145,19 @@ class LoginScreen extends StatelessWidget {
                     end: Alignment.bottomRight,
                     colors: [
                       context.colors.primary,
-                      context.colors.primary.withValues(alpha:0.7),
+                      context.colors.primary.withValues(alpha: 0.7),
                     ],
                   ),
                   borderRadius: context.radius.all.xxl,
                   boxShadow: [
                     BoxShadow(
-                      color: context.colors.primary.withValues(alpha:0.4),
+                      color: context.colors.primary.withValues(alpha: 0.4),
                       blurRadius: 30,
                       spreadRadius: 2,
                       offset: const Offset(0, 15),
                     ),
                     BoxShadow(
-                      color: context.colors.primary.withValues(alpha:0.2),
+                      color: context.colors.primary.withValues(alpha: 0.2),
                       blurRadius: 60,
                       spreadRadius: 10,
                       offset: const Offset(0, 25),
@@ -179,7 +179,7 @@ class LoginScreen extends StatelessWidget {
           shaderCallback: (bounds) => LinearGradient(
             colors: [
               context.colors.primary,
-              context.colors.primary.withValues(alpha:0.8),
+              context.colors.primary.withValues(alpha: 0.8),
             ],
           ).createShader(bounds),
           child: Text(
@@ -212,13 +212,13 @@ class LoginScreen extends StatelessWidget {
         borderRadius: context.radius.all.xxl,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha:0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 40,
             spreadRadius: 0,
             offset: const Offset(0, 20),
           ),
           BoxShadow(
-            color: context.colors.primary.withValues(alpha:0.05),
+            color: context.colors.primary.withValues(alpha: 0.05),
             blurRadius: 60,
             spreadRadius: 10,
             offset: const Offset(0, 30),
@@ -235,7 +235,7 @@ class LoginScreen extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.all(context.space.sm),
                   decoration: BoxDecoration(
-                    color: context.colors.primary.withValues(alpha:0.1),
+                    color: context.colors.primary.withValues(alpha: 0.1),
                     borderRadius: context.radius.all.md,
                   ),
                   child: Icon(
@@ -285,9 +285,11 @@ class LoginScreen extends StatelessWidget {
             vertical: context.space.md,
           ),
           decoration: BoxDecoration(
-            color: context.colors.surfaceVariant.withValues(alpha:0.3),
+            color: context.colors.surfaceVariant.withValues(alpha: 0.3),
             borderRadius: context.radius.all.lg,
-            border: Border.all(color: context.colors.outline.withValues(alpha:0.1)),
+            border: Border.all(
+              color: context.colors.outline.withValues(alpha: 0.1),
+            ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -346,4 +348,3 @@ class LoginScreen extends StatelessWidget {
     );
   }
 }
-

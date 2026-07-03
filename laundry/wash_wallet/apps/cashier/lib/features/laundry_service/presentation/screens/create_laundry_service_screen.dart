@@ -80,38 +80,37 @@ class _CreateLaundryServiceScreenState
     final isCompact = sizeClass == WindowSizeClass.compact;
 
     final content = BlocConsumer<LaundryServiceCubit, LaundryServiceState>(
-        listener: (context, state) {
-          if (state is LaundryServiceActionSuccess) {
-            Navigator.pop(context, true);
-          }
-          if (state is LaundryServiceFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.failure.message),
-                backgroundColor: context.colors.error,
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          return LaundryServiceFormSection(
-            formKey: _formKey,
-            nameController: _nameController,
-            descController: _descController,
-            priceController: _priceController,
-            durationController: _durationController,
-            minQtyController: _minQtyController,
-            selectedCategoryId: _selectedCategoryId,
-            selectedUnitId: _selectedUnitId,
-            onCategoryChanged: (val) =>
-                setState(() => _selectedCategoryId = val),
-            onUnitChanged: (val) => setState(() => _selectedUnitId = val),
-            isLoading: state is LaundryServiceLoading,
-            submitLabel: 'Simpan Layanan',
-            onSubmit: _handleSubmit,
+      listener: (context, state) {
+        if (state is LaundryServiceActionSuccess) {
+          Navigator.pop(context, true);
+        }
+        if (state is LaundryServiceFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.failure.message),
+              backgroundColor: context.colors.error,
+            ),
           );
-        },
-      );
+        }
+      },
+      builder: (context, state) {
+        return LaundryServiceFormSection(
+          formKey: _formKey,
+          nameController: _nameController,
+          descController: _descController,
+          priceController: _priceController,
+          durationController: _durationController,
+          minQtyController: _minQtyController,
+          selectedCategoryId: _selectedCategoryId,
+          selectedUnitId: _selectedUnitId,
+          onCategoryChanged: (val) => setState(() => _selectedCategoryId = val),
+          onUnitChanged: (val) => setState(() => _selectedUnitId = val),
+          isLoading: state is LaundryServiceLoading,
+          submitLabel: 'Simpan Layanan',
+          onSubmit: _handleSubmit,
+        );
+      },
+    );
 
     if (isCompact) {
       return AppLayout(
@@ -134,7 +133,10 @@ class _CreateLaundryServiceScreenState
           title: 'Buat Layanan',
           breadcrumbs: [
             const BreadcrumbItem(label: 'Pengaturan'),
-            BreadcrumbItem(label: 'Layanan', onTap: () => Navigator.pop(context)),
+            BreadcrumbItem(
+              label: 'Layanan',
+              onTap: () => Navigator.pop(context),
+            ),
             const BreadcrumbItem(label: 'Buat Layanan'),
           ],
         ),
@@ -144,9 +146,7 @@ class _CreateLaundryServiceScreenState
               horizontal: context.space.lg,
               vertical: context.space.md,
             ),
-            child: ContentConstraint(
-              child: content,
-            ),
+            child: ContentConstraint(child: content),
           ),
         ),
       ],

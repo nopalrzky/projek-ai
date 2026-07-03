@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 
 class LaundryServiceSearchBar extends StatelessWidget {
@@ -20,7 +20,9 @@ class LaundryServiceSearchBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.surface,
         border: Border(
-          bottom: BorderSide(color: context.colors.border.withValues(alpha: 0.5)),
+          bottom: BorderSide(
+            color: context.colors.border.withValues(alpha: 0.5),
+          ),
         ),
       ),
       child: TextField(
@@ -65,4 +67,3 @@ class LaundryServiceSearchBar extends StatelessWidget {
     );
   }
 }
-

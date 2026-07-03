@@ -532,9 +532,7 @@ class _WeighOrderScreenState extends State<WeighOrderScreen> {
         children: List.generate(
           _draftItems.length,
           (index) => WeighItemCard(
-            key: ValueKey(
-              '${_draftItems[index].laundryServiceId}-$index',
-            ),
+            key: ValueKey('${_draftItems[index].laundryServiceId}-$index'),
             item: _draftItems[index],
             onServiceTap: () => _openServicePicker(replaceIndex: index),
             onQuantityChanged: (quantity) {

@@ -35,9 +35,7 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AccountCubit>().loadExpenseAccounts(
-        widget.outletId,
-      );
+      context.read<AccountCubit>().loadExpenseAccounts(widget.outletId);
     });
   }
 
@@ -167,534 +165,520 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
     final isCompact = sizeClass == WindowSizeClass.compact;
 
     final content = BlocConsumer<ExpenseCubit, ExpenseState>(
-        listener: (context, state) {
-          if (state is ExpenseActionSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.check_circle_rounded, color: Colors.white),
-                    SizedBox(width: context.space.sm),
-                    Expanded(child: Text(state.message)),
-                  ],
-                ),
-                backgroundColor: context.colors.success,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(context.radius.md),
-                ),
+      listener: (context, state) {
+        if (state is ExpenseActionSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle_rounded, color: Colors.white),
+                  SizedBox(width: context.space.sm),
+                  Expanded(child: Text(state.message)),
+                ],
               ),
-            );
-            Navigator.pop(context, true);
-          }
-          if (state is ExpenseFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.error_rounded, color: Colors.white),
-                    SizedBox(width: context.space.sm),
-                    Expanded(child: Text(state.failure.message)),
-                  ],
-                ),
-                backgroundColor: context.colors.error,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(context.radius.md),
-                ),
+              backgroundColor: context.colors.success,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(context.radius.md),
               ),
-            );
-          }
-        },
-        builder: (context, expenseState) {
-          final isLoading = expenseState is ExpenseLoading;
+            ),
+          );
+          Navigator.pop(context, true);
+        }
+        if (state is ExpenseFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.error_rounded, color: Colors.white),
+                  SizedBox(width: context.space.sm),
+                  Expanded(child: Text(state.failure.message)),
+                ],
+              ),
+              backgroundColor: context.colors.error,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(context.radius.md),
+              ),
+            ),
+          );
+        }
+      },
+      builder: (context, expenseState) {
+        final isLoading = expenseState is ExpenseLoading;
 
-          return Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildSectionTitle('Akun Pengeluaran'),
-                SizedBox(height: context.space.sm),
-                BlocBuilder<AccountCubit, AccountState>(
-                  builder: (context, accountState) {
-                    if (accountState is AccountLoading) {
+        return Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildSectionTitle('Akun Pengeluaran'),
+              SizedBox(height: context.space.sm),
+              BlocBuilder<AccountCubit, AccountState>(
+                builder: (context, accountState) {
+                  if (accountState is AccountLoading) {
+                    return Container(
+                      padding: EdgeInsets.all(context.space.md),
+                      decoration: BoxDecoration(
+                        color: context.colors.surface,
+                        borderRadius: BorderRadius.circular(context.radius.md),
+                        border: Border.all(color: context.colors.border),
+                      ),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: context.colors.primary,
+                        ),
+                      ),
+                    );
+                  }
+
+                  if (accountState is AccountsLoaded) {
+                    final accounts = accountState.accounts;
+
+                    if (accounts.isEmpty) {
                       return Container(
                         padding: EdgeInsets.all(context.space.md),
                         decoration: BoxDecoration(
-                          color: context.colors.surface,
+                          color: context.colors.surfaceVariant,
                           borderRadius: BorderRadius.circular(
                             context.radius.md,
                           ),
                           border: Border.all(color: context.colors.border),
                         ),
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: context.colors.primary,
+                        child: Text(
+                          'Tidak ada akun pengeluaran tersedia',
+                          style: context.typography.bodyMedium.copyWith(
+                            color: context.colors.textSecondary,
                           ),
                         ),
                       );
                     }
 
-                    if (accountState is AccountsLoaded) {
-                      final accounts = accountState.accounts;
-
-                      if (accounts.isEmpty) {
-                        return Container(
-                          padding: EdgeInsets.all(context.space.md),
-                          decoration: BoxDecoration(
-                            color: context.colors.surfaceVariant,
-                            borderRadius: BorderRadius.circular(
-                              context.radius.md,
-                            ),
-                            border: Border.all(color: context.colors.border),
+                    return DropdownButtonFormField<int>(
+                      initialValue: _selectedExpenseAccountId,
+                      decoration: InputDecoration(
+                        hintText: 'Pilih akun pengeluaran',
+                        filled: true,
+                        fillColor: context.colors.surface,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            context.radius.md,
                           ),
-                          child: Text(
-                            'Tidak ada akun pengeluaran tersedia',
-                            style: context.typography.bodyMedium.copyWith(
-                              color: context.colors.textSecondary,
-                            ),
+                          borderSide: BorderSide(color: context.colors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            context.radius.md,
                           ),
-                        );
-                      }
-
-                      return DropdownButtonFormField<int>(
-                        initialValue: _selectedExpenseAccountId,
-                        decoration: InputDecoration(
-                          hintText: 'Pilih akun pengeluaran',
-                          filled: true,
-                          fillColor: context.colors.surface,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(
-                              context.radius.md,
-                            ),
-                            borderSide: BorderSide(
-                              color: context.colors.border,
-                            ),
+                          borderSide: BorderSide(color: context.colors.border),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            context.radius.md,
                           ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(
-                              context.radius.md,
-                            ),
-                            borderSide: BorderSide(
-                              color: context.colors.border,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(
-                              context.radius.md,
-                            ),
-                            borderSide: BorderSide(
-                              color: context.colors.primary,
-                              width: 2,
-                            ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(
-                              context.radius.md,
-                            ),
-                            borderSide: BorderSide(color: context.colors.error),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: context.space.md,
-                            vertical: context.space.sm,
+                          borderSide: BorderSide(
+                            color: context.colors.primary,
+                            width: 2,
                           ),
                         ),
-                        items: accounts.map((account) {
-                          return DropdownMenuItem<int>(
-                            value: account.id,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            context.radius.md,
+                          ),
+                          borderSide: BorderSide(color: context.colors.error),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: context.space.md,
+                          vertical: context.space.sm,
+                        ),
+                      ),
+                      items: accounts.map((account) {
+                        return DropdownMenuItem<int>(
+                          value: account.id,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                account.name,
+                                style: context.typography.bodyMedium.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              if (account.code.isNotEmpty)
                                 Text(
-                                  account.name,
-                                  style: context.typography.bodyMedium.copyWith(
-                                    fontWeight: FontWeight.w600,
+                                  account.code,
+                                  style: context.typography.bodySmall.copyWith(
+                                    color: context.colors.textSecondary,
                                   ),
                                 ),
-                                if (account.code.isNotEmpty)
-                                  Text(
-                                    account.code,
-                                    style: context.typography.bodySmall
-                                        .copyWith(
-                                          color: context.colors.textSecondary,
-                                        ),
-                                  ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: isLoading
-                            ? null
-                            : (value) {
-                                setState(() {
-                                  _selectedExpenseAccountId = value;
-                                });
-                              },
-                        validator: (value) {
-                          if (value == null) {
-                            return 'Pilih akun pengeluaran';
-                          }
-                          return null;
-                        },
-                      );
-                    }
-
-                    if (accountState is AccountFailure) {
-                      return Container(
-                        padding: EdgeInsets.all(context.space.md),
-                        decoration: BoxDecoration(
-                          color: context.colors.errorSurface,
-                          borderRadius: BorderRadius.circular(
-                            context.radius.md,
+                            ],
                           ),
-                          border: Border.all(color: context.colors.error),
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              accountState.failure.message,
-                              style: context.typography.bodyMedium.copyWith(
-                                color: context.colors.error,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            SizedBox(height: context.space.sm),
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                context
-                                    .read<AccountCubit>()
-                                    .loadExpenseAccounts(
-                                      widget.outletId,
-                                    );
-                              },
-                              icon: const Icon(Icons.refresh_rounded),
-                              label: const Text('Coba Lagi'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: context.colors.primary,
-                                foregroundColor: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
+                        );
+                      }).toList(),
+                      onChanged: isLoading
+                          ? null
+                          : (value) {
+                              setState(() {
+                                _selectedExpenseAccountId = value;
+                              });
+                            },
+                      validator: (value) {
+                        if (value == null) {
+                          return 'Pilih akun pengeluaran';
+                        }
+                        return null;
+                      },
+                    );
+                  }
 
-                    return const SizedBox.shrink();
-                  },
-                ),
-                SizedBox(height: context.space.lg),
-
-                _buildSectionTitle('Tanggal Pengeluaran'),
-                SizedBox(height: context.space.sm),
-                InkWell(
-                  onTap: isLoading ? null : _selectDate,
-                  borderRadius: BorderRadius.circular(context.radius.md),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: context.space.md,
-                      vertical: context.space.md,
-                    ),
-                    decoration: BoxDecoration(
-                      color: context.colors.surface,
-                      borderRadius: BorderRadius.circular(context.radius.md),
-                      border: Border.all(color: context.colors.border),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.calendar_today_rounded,
-                          color: context.colors.primary,
-                          size: 20,
-                        ),
-                        SizedBox(width: context.space.md),
-                        Expanded(
-                          child: Text(
-                            DateFormat(
-                              'EEEE, dd MMMM yyyy',
-                              'id_ID',
-                            ).format(_selectedDate),
+                  if (accountState is AccountFailure) {
+                    return Container(
+                      padding: EdgeInsets.all(context.space.md),
+                      decoration: BoxDecoration(
+                        color: context.colors.errorSurface,
+                        borderRadius: BorderRadius.circular(context.radius.md),
+                        border: Border.all(color: context.colors.error),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            accountState.failure.message,
                             style: context.typography.bodyMedium.copyWith(
-                              fontWeight: FontWeight.w600,
+                              color: context.colors.error,
                             ),
+                            textAlign: TextAlign.center,
                           ),
-                        ),
-                        Icon(
-                          Icons.arrow_drop_down_rounded,
-                          color: context.colors.textSecondary,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: context.space.lg),
-
-                _buildSectionTitle('Jumlah Pengeluaran'),
-                SizedBox(height: context.space.sm),
-                TextFormField(
-                  controller: _amountController,
-                  decoration: InputDecoration(
-                    hintText: 'Masukkan jumlah',
-                    prefixText: 'Rp ',
-                    filled: true,
-                    fillColor: context.colors.surface,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(context.radius.md),
-                      borderSide: BorderSide(color: context.colors.border),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(context.radius.md),
-                      borderSide: BorderSide(color: context.colors.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(context.radius.md),
-                      borderSide: BorderSide(
-                        color: context.colors.primary,
-                        width: 2,
-                      ),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(context.radius.md),
-                      borderSide: BorderSide(color: context.colors.error),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: context.space.md,
-                      vertical: context.space.sm,
-                    ),
-                  ),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    _ThousandsSeparatorInputFormatter(),
-                  ],
-                  enabled: !isLoading,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Jumlah tidak boleh kosong';
-                    }
-                    final amount =
-                        double.tryParse(
-                          value.replaceAll('.', '').replaceAll(' ', ''),
-                        ) ??
-                        0;
-                    if (amount < 1) {
-                      return 'Jumlah pengeluaran minimal Rp 1';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: context.space.lg),
-
-                _buildSectionTitle('Keterangan'),
-                SizedBox(height: context.space.sm),
-                TextFormField(
-                  controller: _descriptionController,
-                  decoration: InputDecoration(
-                    hintText: 'Masukkan keterangan pengeluaran',
-                    filled: true,
-                    fillColor: context.colors.surface,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(context.radius.md),
-                      borderSide: BorderSide(color: context.colors.border),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(context.radius.md),
-                      borderSide: BorderSide(color: context.colors.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(context.radius.md),
-                      borderSide: BorderSide(
-                        color: context.colors.primary,
-                        width: 2,
-                      ),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(context.radius.md),
-                      borderSide: BorderSide(color: context.colors.error),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: context.space.md,
-                      vertical: context.space.sm,
-                    ),
-                  ),
-                  maxLines: 3,
-                  maxLength: 1000,
-                  enabled: !isLoading,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Keterangan tidak boleh kosong';
-                    }
-                    if (value.trim().length < 3) {
-                      return 'Keterangan minimal 3 karakter';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: context.space.lg),
-
-                _buildSectionTitle('Bukti Pengeluaran (Opsional)'),
-                SizedBox(height: context.space.sm),
-                if (_selectedImage != null)
-                  Container(
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: context.colors.surface,
-                      borderRadius: BorderRadius.circular(context.radius.md),
-                      border: Border.all(color: context.colors.border),
-                    ),
-                    child: Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(
-                            context.radius.md,
-                          ),
-                          child: Image.file(
-                            _selectedImage!,
-                            width: double.infinity,
-                            height: 200,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        Positioned(
-                          top: context.space.sm,
-                          right: context.space.sm,
-                          child: IconButton(
-                            onPressed: isLoading
-                                ? null
-                                : () {
-                                    setState(() {
-                                      _selectedImage = null;
-                                    });
-                                  },
-                            icon: const Icon(Icons.close_rounded),
-                            style: IconButton.styleFrom(
-                              backgroundColor: context.colors.error,
+                          SizedBox(height: context.space.sm),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              context.read<AccountCubit>().loadExpenseAccounts(
+                                widget.outletId,
+                              );
+                            },
+                            icon: const Icon(Icons.refresh_rounded),
+                            label: const Text('Coba Lagi'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: context.colors.primary,
                               foregroundColor: Colors.white,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  )
-                else
-                  InkWell(
-                    onTap: isLoading || _isLoadingImage ? null : _pickImage,
-                    borderRadius: BorderRadius.circular(context.radius.md),
-                    child: Container(
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: context.colors.surfaceVariant,
-                        borderRadius: BorderRadius.circular(context.radius.md),
-                        border: Border.all(
-                          color: context.colors.border,
-                          style: BorderStyle.solid,
-                          width: 2,
-                        ),
+                        ],
                       ),
-                      child: Center(
-                        child: _isLoadingImage
-                            ? CircularProgressIndicator(
-                                color: context.colors.primary,
-                              )
-                            : Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.add_photo_alternate_outlined,
-                                    size: 48,
-                                    color: context.colors.textSecondary,
-                                  ),
-                                  SizedBox(height: context.space.xs),
-                                  Text(
-                                    'Pilih Gambar',
-                                    style: context.typography.bodyMedium
-                                        .copyWith(
-                                          color: context.colors.textSecondary,
-                                        ),
-                                  ),
-                                  SizedBox(height: context.space.xs),
-                                  Text(
-                                    'JPG, PNG (Max: 5MB)',
-                                    style: context.typography.bodySmall
-                                        .copyWith(
-                                          color: context.colors.textTertiary,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                      ),
-                    ),
-                  ),
-                SizedBox(height: context.space.xl),
+                    );
+                  }
 
-                SizedBox(
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: isLoading ? null : _handleSubmit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: context.colors.warning,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(context.radius.md),
-                      ),
-                      elevation: 0,
-                      disabledBackgroundColor: context.colors.warning
-                          .withValues(alpha: 0.6),
-                    ),
-                    child: isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : Text(
-                            'Buat Pengeluaran',
-                            style: context.typography.bodyLarge.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                  ),
-                ),
-                SizedBox(height: context.space.md),
+                  return const SizedBox.shrink();
+                },
+              ),
+              SizedBox(height: context.space.lg),
 
-                Container(
-                  padding: EdgeInsets.all(context.space.md),
+              _buildSectionTitle('Tanggal Pengeluaran'),
+              SizedBox(height: context.space.sm),
+              InkWell(
+                onTap: isLoading ? null : _selectDate,
+                borderRadius: BorderRadius.circular(context.radius.md),
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: context.space.md,
+                    vertical: context.space.md,
+                  ),
                   decoration: BoxDecoration(
-                    color: context.colors.warningSurface.withValues(alpha: 0.3),
+                    color: context.colors.surface,
                     borderRadius: BorderRadius.circular(context.radius.md),
-                    border: Border.all(
-                      color: context.colors.warning.withValues(alpha: 0.3),
-                    ),
+                    border: Border.all(color: context.colors.border),
                   ),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Icon(
-                        Icons.info_outline_rounded,
-                        color: context.colors.warning,
+                        Icons.calendar_today_rounded,
+                        color: context.colors.primary,
                         size: 20,
                       ),
-                      SizedBox(width: context.space.sm),
+                      SizedBox(width: context.space.md),
                       Expanded(
                         child: Text(
-                          'Pengeluaran akan langsung dicatat dalam sistem. Pastikan data yang dimasukkan sudah benar.',
-                          style: context.typography.bodySmall.copyWith(
-                            color: context.colors.textSecondary,
+                          DateFormat(
+                            'EEEE, dd MMMM yyyy',
+                            'id_ID',
+                          ).format(_selectedDate),
+                          style: context.typography.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        Icons.arrow_drop_down_rounded,
+                        color: context.colors.textSecondary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: context.space.lg),
+
+              _buildSectionTitle('Jumlah Pengeluaran'),
+              SizedBox(height: context.space.sm),
+              TextFormField(
+                controller: _amountController,
+                decoration: InputDecoration(
+                  hintText: 'Masukkan jumlah',
+                  prefixText: 'Rp ',
+                  filled: true,
+                  fillColor: context.colors.surface,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(context.radius.md),
+                    borderSide: BorderSide(color: context.colors.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(context.radius.md),
+                    borderSide: BorderSide(color: context.colors.border),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(context.radius.md),
+                    borderSide: BorderSide(
+                      color: context.colors.primary,
+                      width: 2,
+                    ),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(context.radius.md),
+                    borderSide: BorderSide(color: context.colors.error),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: context.space.md,
+                    vertical: context.space.sm,
+                  ),
+                ),
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  _ThousandsSeparatorInputFormatter(),
+                ],
+                enabled: !isLoading,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Jumlah tidak boleh kosong';
+                  }
+                  final amount =
+                      double.tryParse(
+                        value.replaceAll('.', '').replaceAll(' ', ''),
+                      ) ??
+                      0;
+                  if (amount < 1) {
+                    return 'Jumlah pengeluaran minimal Rp 1';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: context.space.lg),
+
+              _buildSectionTitle('Keterangan'),
+              SizedBox(height: context.space.sm),
+              TextFormField(
+                controller: _descriptionController,
+                decoration: InputDecoration(
+                  hintText: 'Masukkan keterangan pengeluaran',
+                  filled: true,
+                  fillColor: context.colors.surface,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(context.radius.md),
+                    borderSide: BorderSide(color: context.colors.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(context.radius.md),
+                    borderSide: BorderSide(color: context.colors.border),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(context.radius.md),
+                    borderSide: BorderSide(
+                      color: context.colors.primary,
+                      width: 2,
+                    ),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(context.radius.md),
+                    borderSide: BorderSide(color: context.colors.error),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: context.space.md,
+                    vertical: context.space.sm,
+                  ),
+                ),
+                maxLines: 3,
+                maxLength: 1000,
+                enabled: !isLoading,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Keterangan tidak boleh kosong';
+                  }
+                  if (value.trim().length < 3) {
+                    return 'Keterangan minimal 3 karakter';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: context.space.lg),
+
+              _buildSectionTitle('Bukti Pengeluaran (Opsional)'),
+              SizedBox(height: context.space.sm),
+              if (_selectedImage != null)
+                Container(
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: context.colors.surface,
+                    borderRadius: BorderRadius.circular(context.radius.md),
+                    border: Border.all(color: context.colors.border),
+                  ),
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(context.radius.md),
+                        child: Image.file(
+                          _selectedImage!,
+                          width: double.infinity,
+                          height: 200,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Positioned(
+                        top: context.space.sm,
+                        right: context.space.sm,
+                        child: IconButton(
+                          onPressed: isLoading
+                              ? null
+                              : () {
+                                  setState(() {
+                                    _selectedImage = null;
+                                  });
+                                },
+                          icon: const Icon(Icons.close_rounded),
+                          style: IconButton.styleFrom(
+                            backgroundColor: context.colors.error,
+                            foregroundColor: Colors.white,
                           ),
                         ),
                       ),
                     ],
                   ),
+                )
+              else
+                InkWell(
+                  onTap: isLoading || _isLoadingImage ? null : _pickImage,
+                  borderRadius: BorderRadius.circular(context.radius.md),
+                  child: Container(
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: context.colors.surfaceVariant,
+                      borderRadius: BorderRadius.circular(context.radius.md),
+                      border: Border.all(
+                        color: context.colors.border,
+                        style: BorderStyle.solid,
+                        width: 2,
+                      ),
+                    ),
+                    child: Center(
+                      child: _isLoadingImage
+                          ? CircularProgressIndicator(
+                              color: context.colors.primary,
+                            )
+                          : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.add_photo_alternate_outlined,
+                                  size: 48,
+                                  color: context.colors.textSecondary,
+                                ),
+                                SizedBox(height: context.space.xs),
+                                Text(
+                                  'Pilih Gambar',
+                                  style: context.typography.bodyMedium.copyWith(
+                                    color: context.colors.textSecondary,
+                                  ),
+                                ),
+                                SizedBox(height: context.space.xs),
+                                Text(
+                                  'JPG, PNG (Max: 5MB)',
+                                  style: context.typography.bodySmall.copyWith(
+                                    color: context.colors.textTertiary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ),
+                  ),
                 ),
-              ],
-            ),
-          );
-        },
+              SizedBox(height: context.space.xl),
+
+              SizedBox(
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: isLoading ? null : _handleSubmit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: context.colors.warning,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(context.radius.md),
+                    ),
+                    elevation: 0,
+                    disabledBackgroundColor: context.colors.warning.withValues(
+                      alpha: 0.6,
+                    ),
+                  ),
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(
+                          'Buat Pengeluaran',
+                          style: context.typography.bodyLarge.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                ),
+              ),
+              SizedBox(height: context.space.md),
+
+              Container(
+                padding: EdgeInsets.all(context.space.md),
+                decoration: BoxDecoration(
+                  color: context.colors.warningSurface.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(context.radius.md),
+                  border: Border.all(
+                    color: context.colors.warning.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      color: context.colors.warning,
+                      size: 20,
+                    ),
+                    SizedBox(width: context.space.sm),
+                    Expanded(
+                      child: Text(
+                        'Pengeluaran akan langsung dicatat dalam sistem. Pastikan data yang dimasukkan sudah benar.',
+                        style: context.typography.bodySmall.copyWith(
+                          color: context.colors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
 
     if (isCompact) {
@@ -719,7 +703,10 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
           title: 'Buat Pengeluaran',
           breadcrumbs: [
             const BreadcrumbItem(label: 'Dana'),
-            BreadcrumbItem(label: 'Pengeluaran', onTap: () => Navigator.pop(context)),
+            BreadcrumbItem(
+              label: 'Pengeluaran',
+              onTap: () => Navigator.pop(context),
+            ),
             const BreadcrumbItem(label: 'Buat Pengeluaran'),
           ],
         ),
@@ -729,9 +716,7 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
               horizontal: context.space.lg,
               vertical: context.space.md,
             ),
-            child: ContentConstraint(
-              child: content,
-            ),
+            child: ContentConstraint(child: content),
           ),
         ),
       ],
@@ -770,4 +755,3 @@ class _ThousandsSeparatorInputFormatter extends TextInputFormatter {
     );
   }
 }
-

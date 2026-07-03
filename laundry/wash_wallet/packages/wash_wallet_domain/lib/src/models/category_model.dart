@@ -25,20 +25,20 @@ class CategoryModel with _$CategoryModel {
       _$CategoryModelFromJson(json);
 
   factory CategoryModel.fromEntity(Category entity) => CategoryModel(
-        id: entity.id,
-        outletId: entity.outletId,
-        name: entity.name,
-        slug: entity.slug,
-        description: entity.description,
-        isActive: entity.isActive,
-        laundryServicesCount: entity.laundryServicesCount,
-        laundryServices: entity.laundryServices
-            ?.map((e) => LaundryServiceModel.fromEntity(e))
-            .toList(),
-        createdAt: entity.createdAt,
-        updatedAt: entity.updatedAt,
-        deletedAt: entity.deletedAt,
-      );
+    id: entity.id,
+    outletId: entity.outletId,
+    name: entity.name,
+    slug: entity.slug,
+    description: entity.description,
+    isActive: entity.isActive,
+    laundryServicesCount: entity.laundryServicesCount,
+    laundryServices: entity.laundryServices
+        ?.map((e) => LaundryServiceModel.fromEntity(e))
+        .toList(),
+    createdAt: entity.createdAt,
+    updatedAt: entity.updatedAt,
+    deletedAt: entity.deletedAt,
+  );
 }
 
 extension CategoryModelX on CategoryModel {

@@ -37,10 +37,7 @@ class PaymentMethodSummaryWidget extends StatelessWidget {
                 color: context.colors.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                color: context.colors.primary,
-              ),
+              child: Icon(icon, color: context.colors.primary),
             ),
             SizedBox(width: context.space.md),
             Expanded(

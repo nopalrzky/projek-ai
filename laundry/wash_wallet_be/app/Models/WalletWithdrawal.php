@@ -53,6 +53,9 @@ class WalletWithdrawal extends Model
     protected function casts(): array
     {
         return [
+            'user_id'               => 'integer',
+            'owner_bank_account_id' => 'integer',
+            'processed_by'          => 'integer',
             'requested_amount' => 'decimal:2',
             'admin_fee'        => 'decimal:2',
             'net_amount'       => 'decimal:2',

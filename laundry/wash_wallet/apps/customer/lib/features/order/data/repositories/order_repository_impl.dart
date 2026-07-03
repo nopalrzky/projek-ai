@@ -81,10 +81,9 @@ class OrderRepositoryImpl implements OrderRepository {
     required String paymentMethod,
   }) async {
     try {
-      final model = await _remoteDatasource.pay(
-        orderId,
-        {'payment_method': paymentMethod},
-      );
+      final model = await _remoteDatasource.pay(orderId, {
+        'payment_method': paymentMethod,
+      });
       return Result.success(model.toEntity());
     } on ApiException catch (e) {
       return Result.failure(ServerFailure(message: e.message));

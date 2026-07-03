@@ -17,7 +17,7 @@ class OutletOrderButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final status = outlet.operationalStatus;
-    
+
     // Fallback if status is not available yet (e.g. older API response)
     if (status == null) {
       return AppButton.primary(
@@ -28,7 +28,7 @@ class OutletOrderButtonWidget extends StatelessWidget {
     }
 
     final canOrder = status.canCreateOrderNow;
-    
+
     String buttonLabel = 'Buat Order';
     if (!canOrder) {
       switch (status.operationalStatus) {
@@ -56,7 +56,9 @@ class OutletOrderButtonWidget extends StatelessWidget {
           onPressed: canOrder && !isLoading ? onPressed : null,
           isLoading: isLoading,
         ),
-        if (!canOrder && status.orderDisabledReason != null && status.orderDisabledReason!.isNotEmpty)
+        if (!canOrder &&
+            status.orderDisabledReason != null &&
+            status.orderDisabledReason!.isNotEmpty)
           Padding(
             padding: EdgeInsets.only(top: context.space.sm),
             child: Text(

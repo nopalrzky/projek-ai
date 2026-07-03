@@ -98,83 +98,83 @@ class _SelectCustomerForOrderScreenState
         child: Column(
           children: [
             Container(
-            padding: EdgeInsets.all(context.space.md),
-            decoration: BoxDecoration(
-              color: context.colors.background,
-              border: Border(
-                bottom: BorderSide(
-                  color: context.colors.border.withValues(alpha: 0.5),
+              padding: EdgeInsets.all(context.space.md),
+              decoration: BoxDecoration(
+                color: context.colors.background,
+                border: Border(
+                  bottom: BorderSide(
+                    color: context.colors.border.withValues(alpha: 0.5),
+                  ),
                 ),
               ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomerSearchBar(
+                    controller: _searchController,
+                    onChanged: _onSearchChanged,
+                    onSubmitted: (_) => _loadCustomers(),
+                    onClear: _loadCustomers,
+                    isLoading: _isSearching,
+                  ),
+                  SizedBox(height: context.space.sm),
+                  _buildSearchInfo(context),
+                ],
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomerSearchBar(
-                  controller: _searchController,
-                  onChanged: _onSearchChanged,
-                  onSubmitted: (_) => _loadCustomers(),
-                  onClear: _loadCustomers,
-                  isLoading: _isSearching,
-                ),
-                SizedBox(height: context.space.sm),
-                _buildSearchInfo(context),
-              ],
-            ),
-          ),
-          Expanded(
-            child: BlocBuilder<CustomerCubit, CustomerState>(
-              builder: (context, state) {
-                if (state is CustomerLoading) {
-                  return const AppLoadingIndicator();
-                }
+            Expanded(
+              child: BlocBuilder<CustomerCubit, CustomerState>(
+                builder: (context, state) {
+                  if (state is CustomerLoading) {
+                    return const AppLoadingIndicator();
+                  }
 
-                if (state is CustomerFailure) {
-                  return AppErrorState(
-                    message: state.failure.message,
-                    onRetry: _loadCustomers,
-                  );
-                }
+                  if (state is CustomerFailure) {
+                    return AppErrorState(
+                      message: state.failure.message,
+                      onRetry: _loadCustomers,
+                    );
+                  }
 
-                if (state is CustomersLoaded) {
-                  if (state.customers.isEmpty) {
-                    return AppEmptyState(
-                      icon: Icons.person_search_rounded,
-                      title: 'Pelanggan tidak ditemukan',
-                      description: _searchController.text.isEmpty
-                          ? 'Belum ada pelanggan terdaftar.\nTambahkan pelanggan baru untuk memulai.'
-                          : 'Tidak ada hasil untuk "${_searchController.text}".\nCoba kata kunci lain atau tambah pelanggan baru.',
-                      action: ElevatedButton.icon(
-                        onPressed: _onAddCustomer,
-                        icon: const Icon(Icons.add_rounded),
-                        label: const Text('Tambah Pelanggan'),
+                  if (state is CustomersLoaded) {
+                    if (state.customers.isEmpty) {
+                      return AppEmptyState(
+                        icon: Icons.person_search_rounded,
+                        title: 'Pelanggan tidak ditemukan',
+                        description: _searchController.text.isEmpty
+                            ? 'Belum ada pelanggan terdaftar.\nTambahkan pelanggan baru untuk memulai.'
+                            : 'Tidak ada hasil untuk "${_searchController.text}".\nCoba kata kunci lain atau tambah pelanggan baru.',
+                        action: ElevatedButton.icon(
+                          onPressed: _onAddCustomer,
+                          icon: const Icon(Icons.add_rounded),
+                          label: const Text('Tambah Pelanggan'),
+                        ),
+                      );
+                    }
+
+                    return RefreshIndicator(
+                      onRefresh: () async => _loadCustomers(),
+                      child: ListView.builder(
+                        padding: EdgeInsets.all(context.space.md),
+                        itemCount: state.customers.length,
+                        itemBuilder: (context, index) {
+                          final customer = state.customers[index];
+                          return CustomerTileCard(
+                            customer: customer,
+                            onTap: () => _onCustomerSelected(customer),
+                            showDivider: false,
+                          );
+                        },
                       ),
                     );
                   }
 
-                  return RefreshIndicator(
-                    onRefresh: () async => _loadCustomers(),
-                    child: ListView.builder(
-                      padding: EdgeInsets.all(context.space.md),
-                      itemCount: state.customers.length,
-                      itemBuilder: (context, index) {
-                        final customer = state.customers[index];
-                        return CustomerTileCard(
-                          customer: customer,
-                          onTap: () => _onCustomerSelected(customer),
-                          showDivider: false,
-                        );
-                      },
-                    ),
-                  );
-                }
-
-                return const SizedBox.shrink();
-              },
+                  return const SizedBox.shrink();
+                },
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }

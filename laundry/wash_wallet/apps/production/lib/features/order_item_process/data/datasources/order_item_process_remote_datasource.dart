@@ -17,9 +17,7 @@ class OrderItemProcessRemoteDataSourceImpl
   @override
   Future<OrderItemProcessModel> start(int id) async {
     try {
-      final response = await _dio.post(
-        _endpoints.orderItemProcessStart(id),
-      );
+      final response = await _dio.post(_endpoints.orderItemProcessStart(id));
       _validateResponse(response);
 
       final data = response.data['data'] as Map<String, dynamic>;
@@ -34,9 +32,7 @@ class OrderItemProcessRemoteDataSourceImpl
   @override
   Future<OrderItemProcessModel> complete(int id) async {
     try {
-      final response = await _dio.post(
-        _endpoints.orderItemProcessComplete(id),
-      );
+      final response = await _dio.post(_endpoints.orderItemProcessComplete(id));
       _validateResponse(response);
 
       final data = response.data['data'] as Map<String, dynamic>;

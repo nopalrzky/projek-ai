@@ -58,21 +58,28 @@ class _IndexDepositScreenState extends State<IndexDepositScreen> {
     final isCompact = AppBreakpoints.of(context) == WindowSizeClass.compact;
 
     return AppLayout(
-      header: isCompact ? AppHeader(
-        title: 'Setoran Kasir',
-        backgroundColor: context.colors.surface,
-        onBackPressed: () => Navigator.pop(context),
-      ) : null,
-      floatingActionButton: isCompact ? FloatingActionButton.extended(
-        onPressed: () => _navigateToCreateScreen(),
-        backgroundColor: context.colors.primary,
-        elevation: 4,
-        icon: const Icon(Icons.add_rounded, color: Colors.white),
-        label: const Text(
-          'Buat Setoran',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-        ),
-      ) : null,
+      header: isCompact
+          ? AppHeader(
+              title: 'Setoran Kasir',
+              backgroundColor: context.colors.surface,
+              onBackPressed: () => Navigator.pop(context),
+            )
+          : null,
+      floatingActionButton: isCompact
+          ? FloatingActionButton.extended(
+              onPressed: () => _navigateToCreateScreen(),
+              backgroundColor: context.colors.primary,
+              elevation: 4,
+              icon: const Icon(Icons.add_rounded, color: Colors.white),
+              label: const Text(
+                'Buat Setoran',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            )
+          : null,
       body: ContentConstraint(
         child: BlocConsumer<DepositCubit, DepositState>(
           listener: (context, state) {
@@ -145,9 +152,7 @@ class _IndexDepositScreenState extends State<IndexDepositScreen> {
           selectedStatus: _selectedStatus,
           onStatusChanged: _handleStatusFilter,
         ),
-        Expanded(
-          child: _buildMobileContent(context, state),
-        ),
+        Expanded(child: _buildMobileContent(context, state)),
       ],
     );
   }
@@ -195,99 +200,119 @@ class _IndexDepositScreenState extends State<IndexDepositScreen> {
   }
 
   Widget _buildTabletTable(BuildContext context, DepositState state) {
-    if (state is DepositLoading) return const AppLoadingIndicator();
-    if (state is DepositFailure) {
-      return AppErrorState(
-        message: state.failure.message,
-        onRetry: () => _loadData(forceRefresh: true),
-      );
-    }
-    
-    if (state is DepositsLoaded) {
-      return AppDataView<Deposit>(
-        rows: state.deposits,
-        emptyMessage: _selectedStatus != null
-            ? 'Tidak ada setoran dengan status yang dipilih'
-            : 'Belum ada data setoran kasir',
-        searchHint: 'Cari referensi...',
-        searchController: _searchController,
-        onSearch: () => _loadData(),
-        onSearchClear: () {
-          _searchController.clear();
-          _loadData();
-        },
-        primaryActionLabel: 'Buat Setoran',
-        onPrimaryAction: _navigateToCreateScreen,
-        activeFilters: [
-          if (_selectedStatus != null)
-            ActiveFilter(
-              filterId: 'status',
-              filterLabel: 'Status',
-              valueLabel: _selectedStatus == 'pending' ? 'Menunggu' : _selectedStatus == 'approved' ? 'Disetujui' : 'Ditolak',
-              value: _selectedStatus!,
+    final loadedState = state is DepositsLoaded ? state : null;
+    return AppDataView<Deposit>(
+      rows: loadedState?.deposits ?? [],
+      emptyMessage: _selectedStatus != null
+          ? 'Tidak ada setoran dengan status yang dipilih'
+          : 'Belum ada data setoran kasir',
+      searchHint: 'Cari referensi...',
+      searchController: _searchController,
+      onSearch: () => _loadData(),
+      onSearchClear: () {
+        _searchController.clear();
+        _loadData();
+      },
+      primaryActionLabel: 'Buat Setoran',
+      onPrimaryAction: _navigateToCreateScreen,
+      isLoading: state is DepositLoading ||
+          (state is DepositsLoaded && state.isPageLoading),
+      errorMessage: state is DepositFailure ? state.failure.message : null,
+      totalCount: loadedState?.total,
+      currentPage: loadedState?.currentPage,
+      lastPage: loadedState?.lastPage,
+      from: loadedState?.from,
+      to: loadedState?.to,
+      onPageChanged: loadedState != null
+          ? (page) => context.read<DepositCubit>().changePage(
+                page,
+                outletId: widget.outletId,
+                search: _searchController.text.isEmpty
+                    ? null
+                    : _searchController.text,
+                status: _selectedStatus,
+              )
+          : null,
+      activeFilters: [
+        if (_selectedStatus != null)
+          ActiveFilter(
+            filterId: 'status',
+            filterLabel: 'Status',
+            valueLabel: _selectedStatus == 'pending'
+                ? 'Menunggu'
+                : _selectedStatus == 'approved'
+                ? 'Disetujui'
+                : 'Ditolak',
+            value: _selectedStatus!,
+          ),
+      ],
+      onFilterRemove: (_) {
+        _handleStatusFilter(null);
+      },
+      onFilterApply: (filter) {
+        _handleStatusFilter(filter.value as String);
+      },
+      onFilterReset: () {
+        _handleStatusFilter(null);
+      },
+      filterConfigs: const [
+        FilterConfig(
+          id: 'status',
+          label: 'Status',
+          type: FilterType.singleSelect,
+          options: [
+            FilterOption(id: 'pending', label: 'Menunggu', value: 'pending'),
+            FilterOption(
+              id: 'approved',
+              label: 'Disetujui',
+              value: 'approved',
             ),
-        ],
-        onFilterRemove: (_) {
-          _handleStatusFilter(null);
-        },
-        onFilterApply: (filter) {
-          _handleStatusFilter(filter.value as String);
-        },
-        onFilterReset: () {
-          _handleStatusFilter(null);
-        },
-        filterConfigs: const [
-          FilterConfig(
-            id: 'status',
-            label: 'Status',
-            type: FilterType.singleSelect,
-            options: [
-              FilterOption(id: 'pending', label: 'Menunggu', value: 'pending'),
-              FilterOption(id: 'approved', label: 'Disetujui', value: 'approved'),
-              FilterOption(id: 'rejected', label: 'Ditolak', value: 'rejected'),
-            ],
+            FilterOption(id: 'rejected', label: 'Ditolak', value: 'rejected'),
+          ],
+        ),
+      ],
+      columns: [
+        DataTableColumnDef<Deposit>(
+          id: 'code',
+          header: 'No Referensi',
+          cellBuilder: (context, item) => Text(
+            item.code,
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-        ],
-        columns: [
-          DataTableColumnDef<Deposit>(
-            id: 'code',
-            header: 'No Referensi',
-            cellBuilder: (context, item) => Text(item.code, style: const TextStyle(fontWeight: FontWeight.bold)),
+        ),
+        DataTableColumnDef<Deposit>(
+          id: 'employee',
+          header: 'Pegawai',
+          cellBuilder: (context, item) => Text(item.cashierName ?? '-'),
+        ),
+        DataTableColumnDef<Deposit>(
+          id: 'amount',
+          header: 'Total',
+          cellBuilder: (context, item) => Text(item.formattedAmount ?? '-'),
+        ),
+        DataTableColumnDef<Deposit>(
+          id: 'date',
+          header: 'Tanggal',
+          cellBuilder: (context, item) =>
+              Text(item.createdAtFormatted ?? item.createdAtHuman ?? '-'),
+        ),
+        DataTableColumnDef<Deposit>(
+          id: 'status',
+          header: 'Status',
+          cellBuilder: (context, item) => StatusChip(
+            label: item.statusLabel,
+            color: _getStatusColor(context, item.status.toLowerCase()),
           ),
-          DataTableColumnDef<Deposit>(
-            id: 'employee',
-            header: 'Pegawai',
-            cellBuilder: (context, item) => Text(item.cashierName ?? '-'),
-          ),
-          DataTableColumnDef<Deposit>(
-            id: 'amount',
-            header: 'Total',
-            cellBuilder: (context, item) => Text(item.formattedAmount ?? '-'),
-          ),
-          DataTableColumnDef<Deposit>(
-            id: 'date',
-            header: 'Tanggal',
-            cellBuilder: (context, item) => Text(item.createdAtFormatted ?? item.createdAtHuman ?? '-'),
-          ),
-          DataTableColumnDef<Deposit>(
-            id: 'status',
-            header: 'Status',
-            cellBuilder: (context, item) => StatusChip(
-              label: item.statusLabel,
-              color: _getStatusColor(context, item.status.toLowerCase()),
-            ),
-          ),
-        ],
-        rowActions: [
-          DataTableRowAction(
-            icon: Icons.visibility_outlined,
-            tooltip: 'Lihat Detail',
-            onTap: (item) => _handleShow(item),
-          ),
-        ],
-      );
-    }
-    return const SizedBox.shrink();
+        ),
+      ],
+      rowActions: [
+        DataTableRowAction(
+          icon: Icons.visibility_outlined,
+          tooltip: 'Lihat Detail',
+          onTap: (item) => _handleShow(item),
+        ),
+      ],
+    );
   }
 
   Color _getStatusColor(BuildContext context, String status) {

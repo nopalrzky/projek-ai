@@ -10,7 +10,10 @@ import '../bloc/wa_notification_cubit.dart';
 class WaNotificationProvider {
   WaNotificationProvider._();
 
-  static WaNotificationRemoteDatasource createRemoteDatasource(Dio dio, ApiEndpoints endpoints) {
+  static WaNotificationRemoteDatasource createRemoteDatasource(
+    Dio dio,
+    ApiEndpoints endpoints,
+  ) {
     return WaNotificationRemoteDatasourceImpl(dio, endpoints);
   }
 

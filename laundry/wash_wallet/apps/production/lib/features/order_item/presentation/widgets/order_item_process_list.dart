@@ -43,7 +43,7 @@ class OrderItemProcessList extends StatelessWidget {
         borderRadius: context.radius.all.lg,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -102,11 +102,13 @@ class OrderItemProcessList extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 padding: EdgeInsets.all(context.space.md),
                 itemCount: processes.length,
-                separatorBuilder: (context, index) => SizedBox(height: context.space.md),
+                separatorBuilder: (context, index) =>
+                    SizedBox(height: context.space.md),
                 itemBuilder: (context, index) {
                   final process = processes[index];
                   final canStartAction = isOrderItemStarted && process.canStart;
-                  final canCompleteAction = isOrderItemStarted && process.canComplete;
+                  final canCompleteAction =
+                      isOrderItemStarted && process.canComplete;
                   final canAct = canStartAction || canCompleteAction;
 
                   return _buildProcessCard(
@@ -171,7 +173,7 @@ class OrderItemProcessList extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(context.space.md),
         decoration: BoxDecoration(
-          color: context.colors.surfaceVariant.withOpacity(0.3),
+          color: context.colors.surfaceVariant.withValues(alpha: 0.3),
           borderRadius: context.radius.all.md,
           border: Border.all(
             color: canAct ? statusColor : context.colors.border,
@@ -231,11 +233,7 @@ class OrderItemProcessList extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (canAct)
-                  Icon(
-                    Icons.chevron_right,
-                    color: statusColor,
-                  ),
+                if (canAct) Icon(Icons.chevron_right, color: statusColor),
               ],
             ),
             if (isInProgress || isCompleted) ...[
@@ -366,7 +364,11 @@ class OrderItemProcessList extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.camera_alt, size: 32, color: context.colors.textSecondary),
+                  Icon(
+                    Icons.camera_alt,
+                    size: 32,
+                    color: context.colors.textSecondary,
+                  ),
                   SizedBox(height: context.space.xs),
                   Text(
                     'Ambil Gambar Bukti',
@@ -396,7 +398,10 @@ class OrderItemProcessList extends StatelessWidget {
     );
   }
 
-  void _showCompleteProcessDialog(BuildContext context, OrderItemProcess process) {
+  void _showCompleteProcessDialog(
+    BuildContext context,
+    OrderItemProcess process,
+  ) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(

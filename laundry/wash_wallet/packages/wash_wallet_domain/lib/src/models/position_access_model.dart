@@ -25,10 +25,11 @@ class PositionAccessModel with _$PositionAccessModel {
     permissions: permissions,
   );
 
-  factory PositionAccessModel.fromEntity(PositionAccess entity) => PositionAccessModel(
-    positionId: entity.positionId,
-    positionName: entity.positionName,
-    slug: entity.slug,
-    permissions: entity.permissions,
-  );
+  factory PositionAccessModel.fromEntity(PositionAccess entity) =>
+      PositionAccessModel(
+        positionId: entity.positionId,
+        positionName: entity.positionName,
+        slug: entity.slug,
+        permissions: entity.permissions,
+      );
 }

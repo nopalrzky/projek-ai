@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 
 class PriceSummaryCard extends StatelessWidget {
@@ -23,7 +23,9 @@ class PriceSummaryCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(context.radius.md),
-        border: Border.all(color: context.colors.primary.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: context.colors.primary.withValues(alpha: 0.2),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,4 +96,3 @@ class PriceSummaryCard extends StatelessWidget {
     );
   }
 }
-

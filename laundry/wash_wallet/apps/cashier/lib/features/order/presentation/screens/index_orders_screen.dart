@@ -8,7 +8,6 @@ import '../bloc/order_cubit.dart';
 import '../bloc/order_state.dart';
 import '../widgets/order_card.dart';
 import '../widgets/order_search_bar.dart';
-import '../widgets/order_filter_chips.dart';
 import 'select_customer_for_order_screen.dart';
 import 'show_order_screen.dart';
 
@@ -32,6 +31,14 @@ class _IndexOrdersScreenState extends State<IndexOrdersScreen> {
   String? _selectedStatus;
   int? _selectedOrderId;
 
+  String? _selectedPaymentStatus;
+  String? _orderDateFrom;
+  String? _orderDateTo;
+  String? _estimatedCompletionFrom;
+  String? _estimatedCompletionTo;
+  double? _totalAmountMin;
+  double? _totalAmountMax;
+
   final List<Map<String, String?>> _statusFilters = [
     {'label': 'Semua', 'value': null},
     {'label': 'Diajukan', 'value': 'requested'},
@@ -43,6 +50,17 @@ class _IndexOrdersScreenState extends State<IndexOrdersScreen> {
     {'label': 'Diproses', 'value': 'in_progress'},
     {'label': 'Siap Ambil', 'value': 'ready'},
     {'label': 'Selesai', 'value': 'completed'},
+  ];
+
+  final List<Map<String, String?>> _paymentStatusFilters = [
+    {'label': 'Semua', 'value': null},
+    {'label': 'Belum Dihargai', 'value': 'not_yet_priced'},
+    {'label': 'Belum Bayar', 'value': 'unpaid'},
+    {'label': 'Sebagian', 'value': 'partial'},
+    {'label': 'Lunas', 'value': 'paid'},
+    {'label': 'Refund', 'value': 'refunded'},
+    {'label': 'Paket', 'value': 'paid_by_package'},
+    {'label': 'COD', 'value': 'cod'},
   ];
 
   @override
@@ -74,6 +92,13 @@ class _IndexOrdersScreenState extends State<IndexOrdersScreen> {
       outletId: widget.outletId,
       search: _searchController.text,
       status: _selectedStatus,
+      paymentStatus: _selectedPaymentStatus,
+      orderDateFrom: _orderDateFrom,
+      orderDateTo: _orderDateTo,
+      estimatedCompletionFrom: _estimatedCompletionFrom,
+      estimatedCompletionTo: _estimatedCompletionTo,
+      totalAmountMin: _totalAmountMin,
+      totalAmountMax: _totalAmountMax,
     );
   }
 
@@ -92,21 +117,28 @@ class _IndexOrdersScreenState extends State<IndexOrdersScreen> {
     return AppLayout(
       userName: authState is Authenticated ? authState.employee.name : null,
       onLogout: () => context.read<AuthCubit>().logout(),
-      header: isCompact ? AppHeader(
-        title: 'Daftar Pesanan',
-        backgroundColor: context.colors.surface,
-        showMenuButton: false,
-      ) : null,
-      floatingActionButton: isCompact ? FloatingActionButton.extended(
-        onPressed: () => _navigateToCreateOrder(),
-        backgroundColor: context.colors.primary,
-        elevation: 4,
-        icon: const Icon(Icons.add_rounded, color: Colors.white),
-        label: const Text(
-          'Pesanan Baru',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-        ),
-      ) : null,
+      header: isCompact
+          ? AppHeader(
+              title: 'Daftar Pesanan',
+              backgroundColor: context.colors.surface,
+              showMenuButton: false,
+            )
+          : null,
+      floatingActionButton: isCompact
+          ? FloatingActionButton.extended(
+              onPressed: () => _navigateToCreateOrder(),
+              backgroundColor: context.colors.primary,
+              elevation: 4,
+              icon: const Icon(Icons.add_rounded, color: Colors.white),
+              label: const Text(
+                'Pesanan Baru',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            )
+          : null,
       body: BlocConsumer<OrderCubit, OrderState>(
         listener: (context, state) {
           if (state is OrderActionSuccess) {
@@ -114,10 +146,7 @@ class _IndexOrdersScreenState extends State<IndexOrdersScreen> {
               SnackBar(
                 content: Row(
                   children: [
-                    const Icon(
-                      Icons.check_circle_rounded,
-                      color: Colors.white,
-                    ),
+                    const Icon(Icons.check_circle_rounded, color: Colors.white),
                     SizedBox(width: context.space.sm),
                     Text(state.message),
                   ],
@@ -173,14 +202,43 @@ class _IndexOrdersScreenState extends State<IndexOrdersScreen> {
           },
           onChanged: (val) => setState(() {}),
         ),
-        OrderFilterChips(
-          selectedStatus: _selectedStatus,
-          onStatusChanged: _onStatusChanged,
-          statusFilters: _statusFilters,
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: context.space.md),
+          child: Row(
+            children: [
+              Expanded(
+                child: AppDropdown<String?>(
+                  label: 'Status Order',
+                  hint: 'Pilih status',
+                  value: _selectedStatus,
+                  items: _statusFilters.map((e) => e['value']).toList(),
+                  itemLabel: (val) => _labelFor(_statusFilters, val),
+                  onChanged: (val) {
+                    if (val == null) return;
+                    _onStatusChanged(val);
+                  },
+                ),
+              ),
+              SizedBox(width: context.space.sm),
+              Expanded(
+                child: AppDropdown<String?>(
+                  label: 'Status Pembayaran',
+                  hint: 'Pilih status',
+                  value: _selectedPaymentStatus,
+                  items: _paymentStatusFilters.map((e) => e['value']).toList(),
+                  itemLabel: (val) => _labelFor(_paymentStatusFilters, val),
+                  onChanged: (val) {
+                    if (val == null) return;
+                    setState(() => _selectedPaymentStatus = val);
+                    _loadData();
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
-        Expanded(
-          child: _buildMobileContent(context, state),
-        ),
+        SizedBox(height: context.space.md),
+        Expanded(child: _buildMobileContent(context, state)),
       ],
     );
   }
@@ -190,16 +248,14 @@ class _IndexOrdersScreenState extends State<IndexOrdersScreen> {
       return const AppLoadingIndicator();
     }
     if (state is OrderFailure) {
-      return AppErrorState(
-        message: state.failure.message,
-        onRetry: _loadData,
-      );
+      return AppErrorState(message: state.failure.message, onRetry: _loadData);
     }
     if (state is OrdersLoaded) {
       if (state.orders.isEmpty) {
         return AppEmptyState(
           title: 'Tidak ada pesanan',
-          description: _searchController.text.isNotEmpty || _selectedStatus != null
+          description:
+              _searchController.text.isNotEmpty || _selectedStatus != null
               ? 'Coba ubah kata kunci pencarian atau filter status.'
               : 'Belum ada transaksi hari ini.',
           action: _searchController.text.isNotEmpty || _selectedStatus != null
@@ -246,75 +302,167 @@ class _IndexOrdersScreenState extends State<IndexOrdersScreen> {
   }
 
   Widget _buildTabletTable(BuildContext context, OrderState state) {
+    final loadedState = state is OrdersLoaded ? state : null;
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
           flex: 2,
-          child: AppDataView<Order>(
-            breadcrumbs: const [
-              BreadcrumbItem(label: 'Home'),
-              BreadcrumbItem(label: 'Transaksi'),
-            ],
-            pageTitle: 'Daftar Transaksi',
-            searchController: _searchController,
-            searchHint: 'Cari pesanan...',
-            onSearch: _loadData,
-            onSearchClear: () {
-              _searchController.clear();
-              _loadData();
-            },
-            filterConfigs: [
-              FilterConfig(
-                id: 'status',
-                label: 'Status',
-                type: FilterType.singleSelect,
-                options: _statusFilters.map((f) => FilterOption(
-                  id: f['value']?.toString() ?? 'all',
-                  label: f['label'] as String,
-                  value: f['value'],
-                )).toList(),
-              ),
-            ],
-            activeFilters: _selectedStatus != null
-              ? [
-                  ActiveFilter(
-                    filterId: 'status',
-                    filterLabel: 'Status',
-                    value: _selectedStatus,
-                    valueLabel: _statusFilters.firstWhere((f) => f['value'] == _selectedStatus, orElse: () => _statusFilters.first)['label'] as String,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isCondensedTable = constraints.maxWidth < 760;
+
+              return AppDataView<Order>(
+                breadcrumbs: const [
+                  BreadcrumbItem(label: 'Home'),
+                  BreadcrumbItem(label: 'Transaksi'),
+                ],
+                pageTitle: 'Daftar Transaksi',
+                searchController: _searchController,
+                searchHint: 'Cari pesanan...',
+                onSearch: _loadData,
+                onSearchClear: () {
+                  _searchController.clear();
+                  _loadData();
+                },
+                filterConfigs: [
+                  FilterConfig(
+                    id: 'status',
+                    label: 'Status Order',
+                    type: FilterType.singleSelect,
+                    options: _statusFilters
+                        .map(
+                          (f) => FilterOption(
+                            id: f['value']?.toString() ?? 'all',
+                            label: f['label'] as String,
+                            value: f['value'],
+                          ),
+                        )
+                        .toList(),
                   ),
-                ]
-              : const [],
-            onFilterApply: (filter) {
-              if (filter.filterId == 'status') {
-                _onStatusChanged(filter.value as String?);
-              }
+                  FilterConfig(
+                    id: 'paymentStatus',
+                    label: 'Status Pembayaran',
+                    type: FilterType.singleSelect,
+                    options: _paymentStatusFilters
+                        .map(
+                          (f) => FilterOption(
+                            id: f['value']?.toString() ?? 'all',
+                            label: f['label'] as String,
+                            value: f['value'],
+                          ),
+                        )
+                        .toList(),
+                  ),
+                  FilterConfig(
+                    id: 'orderDate',
+                    label: 'Tanggal Order',
+                    type: FilterType.dateRange,
+                    fromHint: 'Dari tanggal',
+                    toHint: 'Sampai tanggal',
+                  ),
+                  FilterConfig(
+                    id: 'estimatedCompletion',
+                    label: 'Estimasi Selesai',
+                    type: FilterType.dateRange,
+                    fromHint: 'Dari tanggal',
+                    toHint: 'Sampai tanggal',
+                  ),
+                  FilterConfig(
+                    id: 'totalAmount',
+                    label: 'Range Nominal',
+                    type: FilterType.numberRange,
+                    fromHint: 'Nominal min',
+                    toHint: 'Nominal max',
+                  ),
+                ],
+                activeFilters: _buildActiveFilters(),
+                onFiltersChanged: _applyFilters,
+                onFilterRemove: (filterId) {
+                  setState(() {
+                    switch (filterId) {
+                      case 'status':
+                        _selectedStatus = null;
+                        break;
+                      case 'paymentStatus':
+                        _selectedPaymentStatus = null;
+                        break;
+                      case 'orderDate':
+                        _orderDateFrom = null;
+                        _orderDateTo = null;
+                        break;
+                      case 'estimatedCompletion':
+                        _estimatedCompletionFrom = null;
+                        _estimatedCompletionTo = null;
+                        break;
+                      case 'totalAmount':
+                        _totalAmountMin = null;
+                        _totalAmountMax = null;
+                        break;
+                    }
+                  });
+                  _loadData();
+                },
+                onFilterReset: () {
+                  setState(() {
+                    _selectedStatus = null;
+                    _selectedPaymentStatus = null;
+                    _orderDateFrom = null;
+                    _orderDateTo = null;
+                    _estimatedCompletionFrom = null;
+                    _estimatedCompletionTo = null;
+                    _totalAmountMin = null;
+                    _totalAmountMax = null;
+                  });
+                  _loadData();
+                },
+                primaryActionLabel: 'Pesanan Baru',
+                primaryActionIcon: Icons.add_rounded,
+                onPrimaryAction: _navigateToCreateOrder,
+                columns: _buildTabletColumnDefs(
+                  context,
+                  isCondensed: isCondensedTable,
+                ),
+                rows: loadedState?.orders ?? [],
+                isLoading: state is OrderLoading ||
+                    (state is OrdersLoaded && state.isPageLoading),
+                errorMessage: state is OrderFailure
+                    ? state.failure.message
+                    : null,
+                emptyMessage: 'Belum ada transaksi',
+                totalCount: loadedState?.total,
+                currentPage: loadedState?.currentPage,
+                lastPage: loadedState?.lastPage,
+                from: loadedState?.from,
+                to: loadedState?.to,
+                onPageChanged: loadedState != null
+                    ? (page) => context.read<OrderCubit>().changePage(
+                          page,
+                          outletId: widget.outletId,
+                          search: _searchController.text,
+                          status: _selectedStatus,
+                          paymentStatus: _selectedPaymentStatus,
+                          orderDateFrom: _orderDateFrom,
+                          orderDateTo: _orderDateTo,
+                          estimatedCompletionFrom: _estimatedCompletionFrom,
+                          estimatedCompletionTo: _estimatedCompletionTo,
+                          totalAmountMin: _totalAmountMin,
+                          totalAmountMax: _totalAmountMax,
+                        )
+                    : null,
+                rowHeight: isCondensedTable ? 108 : 96,
+                columnGap: AppDensity.tableColumnGap(AppDensityMode.compact),
+                rowActions: [
+                  DataTableRowAction<Order>(
+                    icon: Icons.visibility_outlined,
+                    tooltip: 'Lihat detail',
+                    onTap: (order) => _navigateToShowOrder(order.id),
+                  ),
+                ],
+                onRowTap: (order) => _navigateToShowOrder(order.id),
+                isRowHighlighted: (order) => order.id == _selectedOrderId,
+              );
             },
-            onFilterRemove: (filterId) {
-              if (filterId == 'status') {
-                _onStatusChanged(null);
-              }
-            },
-            onFilterReset: () {
-              _onStatusChanged(null);
-            },
-            primaryActionLabel: 'Pesanan Baru',
-            primaryActionIcon: Icons.add,
-            onPrimaryAction: _navigateToCreateOrder,
-            columns: _buildTabletColumnDefs(context),
-            rows: state is OrdersLoaded ? state.orders : [],
-            isLoading: state is OrderLoading,
-            errorMessage: state is OrderFailure ? state.failure.message : null,
-            emptyMessage: 'Belum ada transaksi',
-            rowActions: [
-              DataTableRowAction<Order>(
-                icon: Icons.open_in_new_rounded,
-                tooltip: 'Lihat',
-                onTap: (order) => _navigateToShowOrder(order.id),
-              ),
-            ],
-            onRowTap: (order) => _navigateToShowOrder(order.id),
           ),
         ),
         if (_selectedOrderId != null) ...[
@@ -333,53 +481,495 @@ class _IndexOrdersScreenState extends State<IndexOrdersScreen> {
     );
   }
 
-  List<DataTableColumnDef<Order>> _buildTabletColumnDefs(BuildContext context) {
+  List<DataTableColumnDef<Order>> _buildTabletColumnDefs(
+    BuildContext context, {
+    required bool isCondensed,
+  }) {
+    if (isCondensed) {
+      return [
+        DataTableColumnDef<Order>(
+          id: 'customerOrder',
+          header: 'Pelanggan',
+          flex: 2,
+          cellBuilder: _buildCustomerOrderCell,
+        ),
+        DataTableColumnDef<Order>(
+          id: 'status',
+          header: 'Status',
+          width: 142,
+          cellBuilder: _buildTabletStatusCell,
+        ),
+        DataTableColumnDef<Order>(
+          id: 'summary',
+          header: 'Ringkasan',
+          width: 176,
+          headerAlign: TextAlign.right,
+          cellBuilder: _buildCondensedSummaryCell,
+        ),
+      ];
+    }
+
     return [
       DataTableColumnDef<Order>(
-        id: 'orderNumber',
-        header: 'No. Pesanan',
-        width: 120,
-        cellBuilder: (context, order) => Text(order.orderNumber),
+        id: 'orderDate',
+        header: 'Tanggal Pesan',
+        width: 126,
+        cellBuilder: _buildDateCell,
       ),
       DataTableColumnDef<Order>(
-        id: 'customer',
-        header: 'Pelanggan',
-        flex: 1,
-        cellBuilder: (context, order) => Text(order.customer?.name ?? '-'),
+        id: 'customerOrder',
+        header: 'Customer',
+        flex: 2,
+        cellBuilder: _buildCustomerOrderCell,
       ),
       DataTableColumnDef<Order>(
         id: 'status',
         header: 'Status',
-        width: 100,
-        cellBuilder: (context, order) => StatusChip(
-          label: order.statusLabel ?? order.status,
-          color: _getStatusColor(context, order.statusBadgeVariant),
-        ),
+        width: 156,
+        cellBuilder: _buildTabletStatusCell,
+      ),
+      DataTableColumnDef<Order>(
+        id: 'paymentStatus',
+        header: 'Pembayaran',
+        width: 172,
+        cellBuilder: _buildPaymentCell,
       ),
       DataTableColumnDef<Order>(
         id: 'totalAmount',
         header: 'Total',
-        width: 120,
-        cellBuilder: (context, order) => Text(order.formattedTotalAmount ?? '-'),
-      ),
-      DataTableColumnDef<Order>(
-        id: 'orderDate',
-        header: 'Tanggal',
-        width: 120,
-        cellBuilder: (context, order) => Text(order.formattedOrderDate ?? '-'),
+        width: 130,
+        headerAlign: TextAlign.right,
+        cellBuilder: _buildTotalCell,
       ),
     ];
   }
 
-  Color? _getStatusColor(BuildContext context, String? variant) {
-    final colors = context.colors;
-    switch (variant) {
-      case 'success': return colors.success;
-      case 'warning': return colors.warning;
-      case 'error': return colors.error;
-      case 'info': return colors.primary;
-      default: return colors.surfaceContainerHighest;
+  Widget _buildOrderNumberPill(BuildContext context, Order order) {
+    return Tooltip(
+      message: order.orderNumber,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: context.colors.primary.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(context.radius.sm),
+          border: Border.all(
+            color: context.colors.primary.withValues(alpha: 0.16),
+          ),
+        ),
+        child: Text(
+          order.orderNumber,
+          style: context.typography.caption.copyWith(
+            color: context.colors.primary,
+            fontWeight: FontWeight.w800,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCustomerOrderCell(BuildContext context, Order order) {
+    final customerName = _customerName(order.customer);
+    final customerMeta = _customerMeta(order);
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          customerName,
+          style: context.typography.bodyMedium.copyWith(
+            color: context.colors.onSurface,
+            fontWeight: FontWeight.w800,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 6),
+        _buildMetaRow(context, icon: Icons.call_outlined, text: customerMeta),
+        const SizedBox(height: 7),
+        Row(
+          children: [
+            Flexible(child: _buildOrderNumberPill(context, order)),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                _orderItemLabel(order),
+                style: context.typography.caption.copyWith(
+                  color: context.colors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTotalCell(BuildContext context, Order order) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            order.formattedTotalAmount ?? '-',
+            style: context.typography.labelMedium.copyWith(
+              color: context.colors.onSurface,
+              fontWeight: FontWeight.w800,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 8),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerRight,
+            child: PaymentStatusBadge(
+              status: order.paymentStatus,
+              label: order.paymentStatusLabel,
+              size: AppBadgeSize.sm,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateCell(BuildContext context, Order order) {
+    final (date, time) = _splitFormattedDate(order.formattedOrderDate);
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          date,
+          style: context.typography.labelSmall.copyWith(
+            color: context.colors.onSurface,
+            fontWeight: FontWeight.w800,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        if (time != null) ...[
+          const SizedBox(height: 7),
+          _buildMetaRow(context, icon: Icons.schedule_outlined, text: time),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildPaymentCell(BuildContext context, Order order) {
+    final paymentProgress = _paymentProgressLabel(order);
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: PaymentStatusBadge(
+              status: order.paymentStatus,
+              label: order.paymentStatusLabel,
+              size: AppBadgeSize.sm,
+            ),
+          ),
+        ),
+        if (paymentProgress != null) ...[
+          const SizedBox(height: 7),
+          Text(
+            paymentProgress,
+            style: context.typography.caption.copyWith(
+              color: context.colors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildCondensedSummaryCell(BuildContext context, Order order) {
+    final (date, time) = _splitFormattedDate(order.formattedOrderDate);
+
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            order.formattedTotalAmount ?? '-',
+            style: context.typography.labelMedium.copyWith(
+              color: context.colors.onSurface,
+              fontWeight: FontWeight.w900,
+            ),
+            textAlign: TextAlign.right,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            time == null ? date : '$date, $time',
+            style: context.typography.caption.copyWith(
+              color: context.colors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.right,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 8),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerRight,
+            child: PaymentStatusBadge(
+              status: order.paymentStatus,
+              label: order.paymentStatusLabel,
+              size: AppBadgeSize.sm,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabletStatusCell(BuildContext context, Order order) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: OrderStatusBadge(
+              status: order.status,
+              label: order.statusLabel,
+              size: AppBadgeSize.sm,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetaRow(
+    BuildContext context, {
+    required IconData icon,
+    required String text,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, size: 13, color: context.colors.textTertiary),
+        const SizedBox(width: 5),
+        Expanded(
+          child: Text(
+            text,
+            style: context.typography.caption.copyWith(
+              color: context.colors.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _customerName(Customer? customer) {
+    final value = customer?.name.trim();
+    if (value == null || value.isEmpty) return 'Guest';
+    return value;
+  }
+
+  String _customerMeta(Order order) {
+    final phone = order.customer?.phone?.trim();
+    if (phone != null && phone.isNotEmpty) return phone;
+    return 'Customer #${order.customerId}';
+  }
+
+  String _orderItemLabel(Order order) {
+    final itemCount = order.orderItemsCount;
+    return itemCount > 0 ? '$itemCount item' : 'Order #${order.id}';
+  }
+
+  String? _paymentProgressLabel(Order order) {
+    if (order.paymentStatus != 'partial') return null;
+
+    final paid = order.formattedPaidAmount;
+    final total = order.formattedTotalAmount;
+    if (paid == null || paid.isEmpty || total == null || total.isEmpty) {
+      return null;
     }
+
+    return '$paid / $total';
+  }
+
+  (String, String?) _splitFormattedDate(String? value) {
+    final text = value?.trim();
+    if (text == null || text.isEmpty) return ('-', null);
+
+    final parts = text.split(',');
+    if (parts.length < 2) return (text, null);
+
+    final date = parts.first.trim();
+    final time = parts.sublist(1).join(',').trim();
+    return (date.isEmpty ? text : date, time.isEmpty ? null : time);
+  }
+
+  void _applyFilters(List<ActiveFilter> filters) {
+    String? newStatus;
+    String? newPaymentStatus;
+    String? newOrderDateFrom;
+    String? newOrderDateTo;
+    String? newEstimatedFrom;
+    String? newEstimatedTo;
+    double? newTotalMin;
+    double? newTotalMax;
+
+    for (final filter in filters) {
+      switch (filter.filterId) {
+        case 'status':
+          newStatus = filter.value as String?;
+          break;
+        case 'paymentStatus':
+          newPaymentStatus = filter.value as String?;
+          break;
+        case 'orderDate':
+          final v = filter.value as Map;
+          newOrderDateFrom = v['from'] as String?;
+          newOrderDateTo = v['to'] as String?;
+          break;
+        case 'estimatedCompletion':
+          final v = filter.value as Map;
+          newEstimatedFrom = v['from'] as String?;
+          newEstimatedTo = v['to'] as String?;
+          break;
+        case 'totalAmount':
+          final v = filter.value as Map;
+          newTotalMin = v['min'] as double?;
+          newTotalMax = v['max'] as double?;
+          break;
+      }
+    }
+
+    setState(() {
+      _selectedStatus = newStatus;
+      _selectedPaymentStatus = newPaymentStatus;
+      _orderDateFrom = newOrderDateFrom;
+      _orderDateTo = newOrderDateTo;
+      _estimatedCompletionFrom = newEstimatedFrom;
+      _estimatedCompletionTo = newEstimatedTo;
+      _totalAmountMin = newTotalMin;
+      _totalAmountMax = newTotalMax;
+    });
+
+    _loadData();
+  }
+
+  List<ActiveFilter> _buildActiveFilters() {
+    final filters = <ActiveFilter>[];
+
+    if (_selectedStatus != null) {
+      filters.add(
+        ActiveFilter(
+          filterId: 'status',
+          filterLabel: 'Status',
+          valueLabel: _labelFor(_statusFilters, _selectedStatus),
+          value: _selectedStatus,
+        ),
+      );
+    }
+
+    if (_selectedPaymentStatus != null) {
+      filters.add(
+        ActiveFilter(
+          filterId: 'paymentStatus',
+          filterLabel: 'Pembayaran',
+          valueLabel: _labelFor(_paymentStatusFilters, _selectedPaymentStatus),
+          value: _selectedPaymentStatus,
+        ),
+      );
+    }
+
+    if (_orderDateFrom != null || _orderDateTo != null) {
+      final from = _orderDateFrom ?? '...';
+      final to = _orderDateTo ?? '...';
+      filters.add(
+        ActiveFilter(
+          filterId: 'orderDate',
+          filterLabel: 'Tanggal',
+          valueLabel: '$from - $to',
+          value: {'from': _orderDateFrom, 'to': _orderDateTo},
+        ),
+      );
+    }
+
+    if (_estimatedCompletionFrom != null || _estimatedCompletionTo != null) {
+      final from = _estimatedCompletionFrom ?? '...';
+      final to = _estimatedCompletionTo ?? '...';
+      filters.add(
+        ActiveFilter(
+          filterId: 'estimatedCompletion',
+          filterLabel: 'Est. Selesai',
+          valueLabel: '$from - $to',
+          value: {
+            'from': _estimatedCompletionFrom,
+            'to': _estimatedCompletionTo,
+          },
+        ),
+      );
+    }
+
+    if (_totalAmountMin != null || _totalAmountMax != null) {
+      final min = _totalAmountMin != null
+          ? _formatCurrency(_totalAmountMin!)
+          : '...';
+      final max = _totalAmountMax != null
+          ? _formatCurrency(_totalAmountMax!)
+          : '...';
+      filters.add(
+        ActiveFilter(
+          filterId: 'totalAmount',
+          filterLabel: 'Nominal',
+          valueLabel: '$min - $max',
+          value: {'min': _totalAmountMin, 'max': _totalAmountMax},
+        ),
+      );
+    }
+
+    return filters;
+  }
+
+  String _labelFor(List<Map<String, String?>> options, String? value) {
+    return options.firstWhere(
+          (f) => f['value'] == value,
+          orElse: () => options.first,
+        )['label'] ??
+        '-';
+  }
+
+  String _formatCurrency(double amount) {
+    return amount
+        .toStringAsFixed(0)
+        .replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (m) => '${m[1]}.',
+        );
   }
 
   void _navigateToCreateOrder() {

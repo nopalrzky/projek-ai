@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 
 class QuickActionCard extends StatelessWidget {
@@ -64,4 +64,3 @@ class QuickActionCard extends StatelessWidget {
     );
   }
 }
-

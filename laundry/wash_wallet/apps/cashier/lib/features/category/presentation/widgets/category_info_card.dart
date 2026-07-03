@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
@@ -96,7 +96,9 @@ class CategoryInfoCard extends StatelessWidget {
                           border: Border.all(
                             color: category.isActive
                                 ? context.colors.success.withValues(alpha: 0.3)
-                                : context.colors.disabled.withValues(alpha: 0.3),
+                                : context.colors.disabled.withValues(
+                                    alpha: 0.3,
+                                  ),
                           ),
                         ),
                         child: Row(
@@ -250,5 +252,3 @@ class CategoryInfoCard extends StatelessWidget {
     );
   }
 }
-
-

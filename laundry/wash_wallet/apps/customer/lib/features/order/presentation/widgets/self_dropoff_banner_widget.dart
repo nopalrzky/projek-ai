@@ -19,10 +19,7 @@ class SelfDropoffBannerWidget extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.store_outlined,
-            color: context.colors.primary,
-          ),
+          Icon(Icons.store_outlined, color: context.colors.primary),
           SizedBox(width: context.space.sm),
           Expanded(
             child: Column(

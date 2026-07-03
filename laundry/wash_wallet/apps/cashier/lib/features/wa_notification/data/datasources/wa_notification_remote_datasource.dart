@@ -4,10 +4,14 @@ import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 
 abstract class WaNotificationRemoteDatasource {
   Future<WaNotificationPreviewModel> getPreview(int orderId);
-  Future<Map<String, dynamic>> sendNotification(int orderId, {String? clientRequestId});
+  Future<Map<String, dynamic>> sendNotification(
+    int orderId, {
+    String? clientRequestId,
+  });
 }
 
-class WaNotificationRemoteDatasourceImpl implements WaNotificationRemoteDatasource {
+class WaNotificationRemoteDatasourceImpl
+    implements WaNotificationRemoteDatasource {
   final Dio _dio;
   final ApiEndpoints _endpoints;
 
@@ -20,10 +24,17 @@ class WaNotificationRemoteDatasourceImpl implements WaNotificationRemoteDatasour
   }
 
   @override
-  Future<Map<String, dynamic>> sendNotification(int orderId, {String? clientRequestId}) async {
-    final options = clientRequestId != null ? Options(headers: {'Client-Request-Id': clientRequestId}) : null;
-    final response = await _dio.post(_endpoints.waNotificationSend(orderId), options: options);
+  Future<Map<String, dynamic>> sendNotification(
+    int orderId, {
+    String? clientRequestId,
+  }) async {
+    final options = clientRequestId != null
+        ? Options(headers: {'Client-Request-Id': clientRequestId})
+        : null;
+    final response = await _dio.post(
+      _endpoints.waNotificationSend(orderId),
+      options: options,
+    );
     return response.data as Map<String, dynamic>;
   }
 }
-

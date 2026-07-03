@@ -12,7 +12,9 @@ class NonCourierCartWarningWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(context.radius.lg),
-        border: Border.all(color: context.colors.primary.withValues(alpha: 0.3)),
+        border: Border.all(
+          color: context.colors.primary.withValues(alpha: 0.3),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

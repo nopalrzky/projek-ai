@@ -12,15 +12,15 @@ class SearchHistoryService {
   Future<void> addToHistory(String query) async {
     final prefs = await SharedPreferences.getInstance();
     final history = prefs.getStringList(_key) ?? [];
-    
+
     // Remove if already exists to put it at the top
     history.remove(query);
     history.insert(0, query);
-    
+
     if (history.length > _maxItems) {
       history.removeLast();
     }
-    
+
     await prefs.setStringList(_key, history);
   }
 

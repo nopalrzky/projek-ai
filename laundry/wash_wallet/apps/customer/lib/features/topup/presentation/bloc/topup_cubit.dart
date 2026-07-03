@@ -5,7 +5,14 @@ import '../../domain/usecases/store_usecase.dart';
 import '../../domain/usecases/get_all_usecase.dart';
 import '../../domain/usecases/get_by_id_usecase.dart';
 
-enum TopupStatus { initial, loading, success, historyLoaded, detailLoaded, error }
+enum TopupStatus {
+  initial,
+  loading,
+  success,
+  historyLoaded,
+  detailLoaded,
+  error,
+}
 
 class TopupState extends Equatable {
   final TopupStatus status;
@@ -39,7 +46,13 @@ class TopupState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [status, history, lastCreatedTopup, detail, errorMessage];
+  List<Object?> get props => [
+    status,
+    history,
+    lastCreatedTopup,
+    detail,
+    errorMessage,
+  ];
 
   // Helper getters for backward compatibility / easier migration
   bool get isLoading => status == TopupStatus.loading;
@@ -65,15 +78,19 @@ class TopupCubit extends Cubit<TopupState> {
     emit(state.copyWith(status: TopupStatus.loading));
     final result = await _createTopup(payload);
     result.fold(
-      (failure) => emit(state.copyWith(
-        status: TopupStatus.error,
-        errorMessage: failure.message,
-      )),
-      (topup) => emit(state.copyWith(
-        status: TopupStatus.success,
-        lastCreatedTopup: topup,
-        detail: topup, // Also set as current detail
-      )),
+      (failure) => emit(
+        state.copyWith(
+          status: TopupStatus.error,
+          errorMessage: failure.message,
+        ),
+      ),
+      (topup) => emit(
+        state.copyWith(
+          status: TopupStatus.success,
+          lastCreatedTopup: topup,
+          detail: topup, // Also set as current detail
+        ),
+      ),
     );
   }
 
@@ -81,14 +98,15 @@ class TopupCubit extends Cubit<TopupState> {
     emit(state.copyWith(status: TopupStatus.loading));
     final result = await _getHistory();
     result.fold(
-      (failure) => emit(state.copyWith(
-        status: TopupStatus.error,
-        errorMessage: failure.message,
-      )),
-      (topups) => emit(state.copyWith(
-        status: TopupStatus.historyLoaded,
-        history: topups,
-      )),
+      (failure) => emit(
+        state.copyWith(
+          status: TopupStatus.error,
+          errorMessage: failure.message,
+        ),
+      ),
+      (topups) => emit(
+        state.copyWith(status: TopupStatus.historyLoaded, history: topups),
+      ),
     );
   }
 
@@ -97,17 +115,17 @@ class TopupCubit extends Cubit<TopupState> {
     if (state.status != TopupStatus.detailLoaded || state.detail?.id != id) {
       emit(state.copyWith(status: TopupStatus.loading));
     }
-    
+
     final result = await _getDetail(id);
     result.fold(
-      (failure) => emit(state.copyWith(
-        status: TopupStatus.error,
-        errorMessage: failure.message,
-      )),
-      (topup) => emit(state.copyWith(
-        status: TopupStatus.detailLoaded,
-        detail: topup,
-      )),
+      (failure) => emit(
+        state.copyWith(
+          status: TopupStatus.error,
+          errorMessage: failure.message,
+        ),
+      ),
+      (topup) =>
+          emit(state.copyWith(status: TopupStatus.detailLoaded, detail: topup)),
     );
   }
 }

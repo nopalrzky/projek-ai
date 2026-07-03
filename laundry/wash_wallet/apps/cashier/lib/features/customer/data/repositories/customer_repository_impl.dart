@@ -3,13 +3,15 @@ import '../../domain/repositories/customer_repository.dart';
 import '../datasources/customer_remote_datasource.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 
-class CustomerRepositoryImpl with NetworkRetryMixin implements CustomerRepository {
+class CustomerRepositoryImpl
+    with NetworkRetryMixin
+    implements CustomerRepository {
   final CustomerRemoteDatasource _remoteDatasource;
 
   CustomerRepositoryImpl(this._remoteDatasource);
 
   @override
-  Future<Result<List<Customer>>> getAll({
+  Future<Result<PaginatedData<Customer>>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -21,7 +23,7 @@ class CustomerRepositoryImpl with NetworkRetryMixin implements CustomerRepositor
     String sortDirection = 'desc',
   }) async {
     try {
-      final models = await withRetry(
+      final paginatedData = await withRetry(
         () => _remoteDatasource.getAll(
           page: page,
           perPage: perPage,
@@ -34,7 +36,15 @@ class CustomerRepositoryImpl with NetworkRetryMixin implements CustomerRepositor
           sortDirection: sortDirection,
         ),
       );
-      return Result.success(models.map((e) => e.toEntity()).toList());
+      return Result.success(PaginatedData<Customer>(
+        items: paginatedData.items.map((m) => m.toEntity()).toList(),
+        currentPage: paginatedData.currentPage,
+        lastPage: paginatedData.lastPage,
+        perPage: paginatedData.perPage,
+        total: paginatedData.total,
+        from: paginatedData.from,
+        to: paginatedData.to,
+      ));
     } catch (e) {
       return Result.failure(_mapExceptionToFailure(e));
     }

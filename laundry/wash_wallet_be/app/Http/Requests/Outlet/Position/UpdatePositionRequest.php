@@ -4,7 +4,7 @@ namespace App\Http\Requests\Outlet\Position;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Enums\Permission;
+use App\Services\PositionService;
 
 class UpdatePositionRequest extends FormRequest
 {
@@ -34,7 +34,7 @@ class UpdatePositionRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:1000'],
             'isActive' => ['boolean'],
             'permissions'   => ['nullable', 'array'],
-            'permissions.*' => ['string', Rule::in(array_column(Permission::cases(), 'value'))],
+            'permissions.*' => ['string', Rule::in(app(PositionService::class)->getPermissionKeys())],
         ];
     }
 

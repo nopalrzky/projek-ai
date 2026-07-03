@@ -39,6 +39,7 @@ class Position extends Model
     protected function casts(): array
     {
         return [
+            'outlet_id'  => 'integer',
             'is_active'  => 'boolean',
             'is_default' => 'boolean',
             'created_at' => 'datetime',

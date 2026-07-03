@@ -40,7 +40,8 @@ class WaNotificationCubit extends Cubit<WaNotificationState> {
         final nestedData = data['data'] as Map<String, dynamic>? ?? {};
         emit(
           WaNotificationSent(
-            message: data['message'] as String? ?? 'Notifikasi berhasil dikirim',
+            message:
+                data['message'] as String? ?? 'Notifikasi berhasil dikirim',
             coinDeducted: nestedData['coinDeducted'] as int? ?? 0,
             coinSource: nestedData['coinSource'] as String? ?? '-',
             remainingCoin: nestedData['remainingCoin'] as int? ?? 0,

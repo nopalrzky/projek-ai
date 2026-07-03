@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 import '../../../../core/widgets/app_dynamic_bottom_bar.dart';
-import '../../../../core/widgets/production_tablet_shell.dart';
 import '../bloc/order_cubit.dart';
 import '../widgets/order_queued_tab.dart';
 import '../widgets/order_in_progress_tab.dart';
@@ -93,39 +92,34 @@ class _IndexOrderScreenState extends State<IndexOrderScreen>
       );
     }
 
-    return ProductionTabletShell(
-      currentRouteId: 'orders',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const PageContentHeader(
-            title: 'Antrian Produksi',
-            breadcrumbs: [
-              BreadcrumbItem(label: 'Antrian Produksi'),
-            ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const PageContentHeader(
+          title: 'Antrian Produksi',
+          breadcrumbs: [BreadcrumbItem(label: 'Antrian Produksi')],
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: context.space.lg),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: AppTabBar.primary(
+              tabs: const ['Siap Dikerjakan', 'Sedang Dikerjakan'],
+              selectedIndex: _selectedTabIndex,
+              onTabSelected: _onTabChanged,
+            ),
           ),
-          Padding(
+        ),
+        SizedBox(height: context.space.md),
+        Expanded(
+          child: Padding(
             padding: EdgeInsets.symmetric(horizontal: context.space.lg),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: AppTabBar.primary(
-                tabs: const ['Siap Dikerjakan', 'Sedang Dikerjakan'],
-                selectedIndex: _selectedTabIndex,
-                onTabSelected: _onTabChanged,
-              ),
-            ),
+            child: _selectedTabIndex == 0
+                ? const OrderQueuedTab()
+                : const OrderInProgressTab(),
           ),
-          SizedBox(height: context.space.md),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: context.space.lg),
-              child: _selectedTabIndex == 0
-                  ? const OrderQueuedTab()
-                  : const OrderInProgressTab(),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

@@ -36,7 +36,6 @@ const EmployeeLoansIndex: React.FC<EmployeeLoansIndexProps> = ({
         employeeService.goToEditLoanPage(employee.id, loan.id);
     };
 
-    // Get status badge
     const getStatusBadge = (status: string) => {
         const variants: Record<
             string,

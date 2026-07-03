@@ -445,7 +445,7 @@ class OutletService extends BaseService
                 /** @var User $user */
                 $user = Auth::user();
 
-                if (!$user->hasRole('super_admin') && $outlet->owner_id !== $user->id) {
+                if (!$user->hasRole('super_admin') && !(int) $outlet->owner_id === (int) $user->id) {
                     throw new AccessDeniedHttpException('You do not have permission to delete this outlet');
                 }
 
@@ -866,7 +866,7 @@ class OutletService extends BaseService
                     throw new Exception('Pengaturan kurir tidak ditemukan.');
                 }
 
-                if ($setting->outlet_id !== $outletId) {
+                if ((int) $setting->outlet_id !== (int) $outletId) {
                     throw new Exception('Pengaturan kurir tidak dimiliki oleh outlet ini.');
                 }
 
@@ -2135,7 +2135,7 @@ class OutletService extends BaseService
         }
 
         if ($user instanceof \App\Models\Employee) {
-            if ($user->outlet_id === $outlet->id) {
+            if ((int) $user->outlet_id === (int) $outlet->id) {
                 return;
             }
         }
@@ -2146,7 +2146,7 @@ class OutletService extends BaseService
             }
 
             if ($user->hasRole('owner')) {
-                if ($user->id === $outlet->owner_id) {
+                if ((int) $user->id === (int) $outlet->owner_id) {
                     return;
                 }
             }

@@ -62,15 +62,9 @@ class OutletDetailLoaded extends OutletState {
   final Outlet outlet;
   final int? selectedCategoryId;
 
-  const OutletDetailLoaded(
-    this.outlet, {
-    this.selectedCategoryId,
-  });
+  const OutletDetailLoaded(this.outlet, {this.selectedCategoryId});
 
-  OutletDetailLoaded copyWith({
-    Outlet? outlet,
-    int? selectedCategoryId,
-  }) {
+  OutletDetailLoaded copyWith({Outlet? outlet, int? selectedCategoryId}) {
     return OutletDetailLoaded(
       outlet ?? this.outlet,
       selectedCategoryId: selectedCategoryId ?? this.selectedCategoryId,
@@ -78,10 +72,7 @@ class OutletDetailLoaded extends OutletState {
   }
 
   @override
-  List<Object?> get props => [
-    outlet,
-    selectedCategoryId,
-  ];
+  List<Object?> get props => [outlet, selectedCategoryId];
 }
 
 class OutletActionSuccess extends OutletState {

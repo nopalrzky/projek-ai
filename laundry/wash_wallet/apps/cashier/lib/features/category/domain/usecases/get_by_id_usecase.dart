@@ -7,10 +7,7 @@ class GetByIdUsecase {
 
   GetByIdUsecase(this._repository);
 
-  Future<Result<Category>> call({
-    required int id,
-    bool forceRefresh = false,
-  }) {
+  Future<Result<Category>> call({required int id, bool forceRefresh = false}) {
     return _repository.getById(id: id, forceRefresh: forceRefresh);
   }
 }

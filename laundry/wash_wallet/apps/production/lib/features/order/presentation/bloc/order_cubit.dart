@@ -10,7 +10,8 @@ import '../../domain/usecases/confirm_pickup_usecase.dart';
 import '../../domain/usecases/confirm_arrived_usecase.dart';
 import 'order_state.dart';
 
-class OrderCubit extends Cubit<OrderState> {
+class OrderCubit extends Cubit<OrderState>
+    with TablePaginationCubitMixin<OrderState> {
   final GetAllUsecase _getAllUsecase;
   final GetByIdUsecase _getByIdUsecase;
   final StartUsecase _startUsecase;
@@ -54,7 +55,9 @@ class OrderCubit extends Cubit<OrderState> {
     String sortBy = 'orderDate',
     String sortDirection = 'desc',
   }) async {
-    emit(const OrderLoading());
+    if (page == 1) {
+      emit(const OrderLoading());
+    }
 
     final result = await _getAllUsecase(
       page: page,
@@ -76,13 +79,38 @@ class OrderCubit extends Cubit<OrderState> {
     );
 
     result.when(
-      success: (orders) => emit(
-        OrdersLoaded(
-          orders: orders,
-          hasReachedMax: orders.length < perPage,
-          currentPage: page,
-        ),
-      ),
+      success: (data) {
+        if (page == 1) {
+          emit(
+            OrdersLoaded(
+              orders: data.items,
+              hasReachedMax: data.hasReachedMax,
+              currentPage: data.currentPage,
+              lastPage: data.lastPage,
+              total: data.total,
+              from: data.from,
+              to: data.to,
+              perPage: data.perPage,
+            ),
+          );
+        } else {
+          final currentState = state;
+          if (currentState is OrdersLoaded) {
+            emit(
+              currentState.copyWith(
+                orders: currentState.orders + data.items,
+                hasReachedMax: data.hasReachedMax,
+                currentPage: data.currentPage,
+                lastPage: data.lastPage,
+                total: data.total,
+                from: data.from,
+                to: data.to,
+                perPage: data.perPage,
+              ),
+            );
+          }
+        }
+      },
       failure: (failure) => emit(OrderError(failure.message)),
     );
   }
@@ -134,11 +162,16 @@ class OrderCubit extends Cubit<OrderState> {
     );
 
     result.when(
-      success: (orders) => emit(
+      success: (paginatedOrders) => emit(
         OrdersLoaded(
-          orders: orders,
-          hasReachedMax: orders.length < 15,
-          currentPage: 1,
+          orders: paginatedOrders.items,
+          hasReachedMax: paginatedOrders.hasReachedMax,
+          currentPage: paginatedOrders.currentPage,
+          lastPage: paginatedOrders.lastPage,
+          total: paginatedOrders.total,
+          from: paginatedOrders.from,
+          to: paginatedOrders.to,
+          perPage: paginatedOrders.perPage,
         ),
       ),
       failure: (failure) => emit(OrderError(failure.message)),
@@ -182,9 +215,9 @@ class OrderCubit extends Cubit<OrderState> {
     final todayStart = DateTime(now.year, now.month, now.day);
     final selectedDateStart = DateTime(date.year, date.month, date.day);
 
-    Result<List<Order>>? scheduledResult;
-    Result<List<Order>>? inProgressResult;
-    Result<List<Order>>? pickedUpResult;
+    Result<PaginatedData<Order>>? scheduledResult;
+    Result<PaginatedData<Order>>? inProgressResult;
+    Result<PaginatedData<Order>>? pickedUpResult;
 
     if (fetchAccepted) {
       scheduledResult = await _getAllUsecase(
@@ -234,7 +267,7 @@ class OrderCubit extends Cubit<OrderState> {
         return;
       }
 
-      final allScheduled = scheduledResult.dataOrNull!;
+      final allScheduled = scheduledResult.dataOrNull!.items;
 
       overdueOrders = allScheduled
           .where(
@@ -266,7 +299,7 @@ class OrderCubit extends Cubit<OrderState> {
         return;
       }
 
-      inProgressOrders = inProgressResult.dataOrNull!;
+      inProgressOrders = inProgressResult.dataOrNull!.items;
     }
 
     if (fetchPickedUp) {
@@ -280,7 +313,7 @@ class OrderCubit extends Cubit<OrderState> {
         return;
       }
 
-      inProgressOrders = [...inProgressOrders, ...pickedUpResult.dataOrNull!];
+      inProgressOrders = [...inProgressOrders, ...pickedUpResult.dataOrNull!.items];
       inProgressOrders.sort((a, b) {
         final aSchedule = a.pickupSchedule;
         final bSchedule = b.pickupSchedule;
@@ -384,5 +417,67 @@ class OrderCubit extends Cubit<OrderState> {
 
   void reset() {
     emit(const OrderInitial());
+  }
+
+  /// Called exclusively by [AppPagination.onPageChanged] on tablet.
+  ///
+  /// Always REPLACES the current list (never appends), and temporarily marks
+  /// [OrdersLoaded.isPageLoading] so the pagination bar is disabled while
+  /// the new page is loading.
+  Future<void> changePage(
+    int page, {
+    String search = '',
+    String? status,
+    String? paymentStatus,
+    int? outletId,
+    int? customerId,
+    int? employeeId,
+    String? orderDateFrom,
+    String? orderDateTo,
+    String? estimatedCompletionFrom,
+    String? estimatedCompletionTo,
+    double? totalAmountMin,
+    double? totalAmountMax,
+    String sortBy = 'orderDate',
+    String sortDirection = 'desc',
+  }) {
+    final current = state;
+    if (current is! OrdersLoaded) return Future.value();
+    return changePageGeneric<Order>(
+      page: page,
+      currentPage: current.currentPage,
+      lastPage: current.lastPage,
+      request: () => _getAllUsecase(
+        page: page,
+        perPage: current.perPage,
+        search: search,
+        status: status,
+        paymentStatus: paymentStatus,
+        outletId: outletId,
+        customerId: customerId,
+        employeeId: employeeId,
+        orderDateFrom: orderDateFrom,
+        orderDateTo: orderDateTo,
+        estimatedCompletionFrom: estimatedCompletionFrom,
+        estimatedCompletionTo: estimatedCompletionTo,
+        totalAmountMin: totalAmountMin,
+        totalAmountMax: totalAmountMax,
+        sortBy: sortBy,
+        sortDirection: sortDirection,
+      ),
+      markPageLoading: () => current.copyWith(isPageLoading: true),
+      buildLoaded: (data) => OrdersLoaded(
+        orders: data.items,
+        hasReachedMax: data.hasReachedMax,
+        currentPage: data.currentPage,
+        lastPage: data.lastPage,
+        total: data.total,
+        from: data.from,
+        to: data.to,
+        perPage: data.perPage,
+        isPageLoading: false,
+      ),
+      buildError: (f) => OrderError(f.message),
+    );
   }
 }

@@ -20,6 +20,7 @@ uses(RefreshDatabase::class);
 
 
 beforeEach(function () {
+    Carbon::setTestNow(Carbon::parse('2026-07-03 08:00:00', 'Asia/Jakarta'));
     $this->owner = User::factory()->create();
     $this->outlet = Outlet::factory()->create(['owner_id' => $this->owner->id]);
     $this->employee = \App\Models\Employee::factory()->create([
@@ -37,8 +38,16 @@ beforeEach(function () {
 
     $this->courierSetting = CourierSetting::factory()->create([
         'outlet_id' => $this->outlet->id,
+        'is_courier_enabled' => true,
         'pickup_fee' => 5000,
         'delivery_fee' => 5000,
+    ]);
+
+    $feature = \App\Models\Feature::firstOrCreate(['key' => 'courier_schedule'], ['name' => 'Courier Schedule']);
+    \App\Models\OutletFeature::create([
+        'outlet_id' => $this->outlet->id,
+        'feature_id' => $feature->id,
+        'status' => 'active'
     ]);
 
     $this->todayDay = strtolower(now()->format('l'));
@@ -437,7 +446,7 @@ it('fails to create courier order when courier is disabled', function () {
     $response->assertStatus(500); // or 400 depending on service exception handling, let's check
 });
 
-it('fails to create self drop-off order when courier is enabled', function () {
+it('creates self drop-off order when courier is enabled', function () {
     actingAsCustomerAccount($this->customerAccount);
 
     $this->courierSetting->update(['is_courier_enabled' => true]);
@@ -455,5 +464,5 @@ it('fails to create self drop-off order when courier is enabled', function () {
 
     $response = $this->postJson('/api/mobile/customer/orders', $payload);
 
-    $response->assertStatus(500); // or 400 depending on service exception handling
+    $response->assertStatus(201);
 });

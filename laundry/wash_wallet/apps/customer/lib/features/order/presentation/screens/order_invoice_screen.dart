@@ -52,9 +52,7 @@ class OrderInvoiceScreen extends StatelessWidget {
       child: BlocBuilder<OrderCubit, OrderState>(
         builder: (context, state) {
           if (state.isFetchingOrderDetail || state.selectedOrder == null) {
-            return const AppLayout(
-              body: Center(child: AppLoadingIndicator()),
-            );
+            return const AppLayout(body: Center(child: AppLoadingIndicator()));
           }
 
           final order = state.selectedOrder!;
@@ -123,8 +121,7 @@ class OrderInvoiceScreen extends StatelessWidget {
                           ),
                           SizedBox(height: context.space.md),
                           AppButton.primary(
-                            onPressed: () =>
-                                context.pushReplacement('/orders'),
+                            onPressed: () => context.pushReplacement('/orders'),
                             label: 'Lihat Daftar Pesanan',
                           ),
                         ],
@@ -137,12 +134,12 @@ class OrderInvoiceScreen extends StatelessWidget {
                             onPressed: isPayDisabled
                                 ? null
                                 : () => _showConfirmPaymentSheet(
-                                      context,
-                                      paymentMethod,
-                                      order.totalAmount.toDouble(),
-                                      balance.toDouble(),
-                                      formatter,
-                                    ),
+                                    context,
+                                    paymentMethod,
+                                    order.totalAmount.toDouble(),
+                                    balance.toDouble(),
+                                    formatter,
+                                  ),
                             isLoading: state.isPayingOrder,
                             label: 'Bayar Sekarang',
                           ),

@@ -71,7 +71,6 @@ const EmployeeOrdersIndex: React.FC<EmployeeOrdersIndexProps> = ({
         );
     };
 
-    // Get payment status badge config
     const getPaymentStatusBadge = (paymentStatus: string) => {
         const variants: Record<
             string,
@@ -107,7 +106,6 @@ const EmployeeOrdersIndex: React.FC<EmployeeOrdersIndexProps> = ({
         );
     };
 
-    // Calculate summary statistics
     const statistics = useMemo(() => {
         const orders = employee.orders || [];
         const totalOrders = orders.length;

@@ -24,11 +24,7 @@ const FineLogsIndex: React.FC<FineLogsIndexProps> = ({
         fineLogService.goToView(fineLog.id);
     };
 
-    const handleDownload = (fineLog: FineLog) => {
-        // if (fineLog.hasAttachment) {
-        //     fineLogService.downloadAttachment(fineLog);
-        // }
-    };
+    const handleDownload = (fineLog: FineLog) => {};
 
     const columns: ColumnDef<FineLog>[] = useMemo(
         () => [
@@ -190,7 +186,6 @@ const FineLogsIndex: React.FC<FineLogsIndexProps> = ({
         [],
     );
 
-    // Calculate totals
     const totals = useMemo(() => {
         const totalAmount = fineLogs.reduce(
             (sum, log) => sum + (log.amount || 0),

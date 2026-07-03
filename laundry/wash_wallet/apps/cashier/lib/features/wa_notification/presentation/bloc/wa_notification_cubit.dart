@@ -11,13 +11,13 @@ class WaNotificationCubit extends Cubit<WaNotificationState> {
   WaNotificationCubit({
     required GetWaNotificationPreviewUsecase getPreviewUsecase,
     required SendWaNotificationUsecase sendNotificationUsecase,
-  })  : _getPreviewUsecase = getPreviewUsecase,
-        _sendNotificationUsecase = sendNotificationUsecase,
-        super(const WaNotificationInitial());
+  }) : _getPreviewUsecase = getPreviewUsecase,
+       _sendNotificationUsecase = sendNotificationUsecase,
+       super(const WaNotificationInitial());
 
   Future<void> getPreview(int orderId) async {
     emit(const WaNotificationPreviewLoading());
-    
+
     final result = await _getPreviewUsecase(orderId);
 
     result.when(
@@ -26,22 +26,34 @@ class WaNotificationCubit extends Cubit<WaNotificationState> {
     );
   }
 
-  Future<void> sendNotification(int orderId, WaNotificationPreview preview, {String? clientRequestId}) async {
+  Future<void> sendNotification(
+    int orderId,
+    WaNotificationPreview preview, {
+    String? clientRequestId,
+  }) async {
     emit(WaNotificationSending(preview));
-    
-    final result = await _sendNotificationUsecase.execute(SendWaNotificationParams(orderId: orderId, clientRequestId: clientRequestId));
+
+    final result = await _sendNotificationUsecase.execute(
+      SendWaNotificationParams(
+        orderId: orderId,
+        clientRequestId: clientRequestId,
+      ),
+    );
 
     result.when(
       success: (data) {
         final nestedData = data['data'] as Map<String, dynamic>;
-        emit(WaNotificationSent(
-          message: data['message'] as String,
-          coinDeducted: nestedData['coinDeducted'] as int,
-          coinSource: nestedData['coinSource'] as String,
-          remainingCoin: nestedData['remainingCoin'] as int,
-        ));
+        emit(
+          WaNotificationSent(
+            message: data['message'] as String,
+            coinDeducted: nestedData['coinDeducted'] as int,
+            coinSource: nestedData['coinSource'] as String,
+            remainingCoin: nestedData['remainingCoin'] as int,
+          ),
+        );
       },
-      failure: (failure) => emit(WaNotificationError(failure, preview: preview)),
+      failure: (failure) =>
+          emit(WaNotificationError(failure, preview: preview)),
     );
   }
 

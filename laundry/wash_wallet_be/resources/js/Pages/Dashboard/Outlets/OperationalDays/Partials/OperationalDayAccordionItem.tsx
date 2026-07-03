@@ -120,7 +120,6 @@ const OperationalDayAccordionItem: React.FC<OperationalDayAccordionItemProps> = 
         });
     };
 
-    // Derived states
     const hasUnsavedChanges =
         formData.isOpen !== day.isOpen ||
         formData.openTime !== (day.openTime || "") ||

@@ -16,3 +16,5 @@ build/
 coverage/
 .turbo/
 .cache/laundry/graphify-out/
+*.sqlite
+server-monitor/data/

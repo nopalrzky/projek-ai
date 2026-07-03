@@ -77,14 +77,19 @@ class LaundryServiceModel with _$LaundryServiceModel {
       json['averageRating'] ?? json['average_rating'],
     );
     normalized['reviewsCount'] = toIntOrNull(
-      json['reviewsCount'] ?? json['totalReviews'] ?? json['total_reviews'] ?? json['reviews_count'],
+      json['reviewsCount'] ??
+          json['totalReviews'] ??
+          json['total_reviews'] ??
+          json['reviews_count'],
     );
-    
+
     normalized['supportsCourier'] = toBool(
       json['supportsCourier'] ?? json['supports_courier'] ?? true,
     );
-    normalized['courierSupportLabel'] = json['courierSupportLabel'] ?? json['courier_support_label'];
-    normalized['courierSupportMessage'] = json['courierSupportMessage'] ?? json['courier_support_message'];
+    normalized['courierSupportLabel'] =
+        json['courierSupportLabel'] ?? json['courier_support_label'];
+    normalized['courierSupportMessage'] =
+        json['courierSupportMessage'] ?? json['courier_support_message'];
 
     return normalized;
   }

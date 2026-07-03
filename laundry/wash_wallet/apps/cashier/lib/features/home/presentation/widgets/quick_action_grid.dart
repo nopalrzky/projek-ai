@@ -28,4 +28,3 @@ class QuickActionGrid extends StatelessWidget {
     );
   }
 }
-

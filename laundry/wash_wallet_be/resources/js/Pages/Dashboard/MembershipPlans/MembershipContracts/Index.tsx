@@ -287,7 +287,6 @@ const MembershipContractsIndex: React.FC<MembershipPlanContractsProps> = ({
         [],
     );
 
-    // Calculate statistics
     const stats = useMemo(() => {
         const contracts = membershipPlan.membershipContracts || [];
         const now = new Date();

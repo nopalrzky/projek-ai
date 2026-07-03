@@ -1,11 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wash_wallet_core/wash_wallet_core.dart';
+import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 import '../../domain/usecases/get_by_id_usecase.dart';
 import '../../domain/usecases/get_all_usecase.dart';
 import '../../domain/usecases/store_usecase.dart';
 import '../../domain/usecases/update_usecase.dart';
 import 'deposit_state.dart';
 
-class DepositCubit extends Cubit<DepositState> {
+class DepositCubit extends Cubit<DepositState> with TablePaginationCubitMixin<DepositState> {
   final GetAllUsecase _getAllUsecase;
   final GetByIdUsecase _getByIdUsecase;
   final StoreUsecase _storeUsecase;
@@ -52,13 +54,18 @@ class DepositCubit extends Cubit<DepositState> {
     final result = await _getAllUsecase(params);
 
     result.when(
-      success: (deposits) {
+      success: (data) {
         if (page == 1) {
           emit(
             DepositsLoaded(
-              deposits: deposits,
-              hasReachedMax: deposits.length < perPage,
-              currentPage: page,
+              deposits: data.items,
+              hasReachedMax: data.hasReachedMax,
+              currentPage: data.currentPage,
+              lastPage: data.lastPage,
+              total: data.total,
+              from: data.from,
+              to: data.to,
+              perPage: data.perPage,
             ),
           );
         } else {
@@ -66,15 +73,67 @@ class DepositCubit extends Cubit<DepositState> {
           if (currentState is DepositsLoaded) {
             emit(
               currentState.copyWith(
-                deposits: currentState.deposits + deposits,
-                hasReachedMax: deposits.isEmpty || deposits.length < perPage,
-                currentPage: page,
+                deposits: currentState.deposits + data.items,
+                hasReachedMax: data.hasReachedMax,
+                currentPage: data.currentPage,
+                lastPage: data.lastPage,
+                total: data.total,
+                from: data.from,
+                to: data.to,
+                perPage: data.perPage,
               ),
             );
           }
         }
       },
       failure: (failure) => emit(DepositFailure(failure)),
+    );
+  }
+
+  /// Called exclusively by [AppPagination.onPageChanged] on tablet.
+  /// Always REPLACES deposits — never appends.
+  Future<void> changePage(
+    int page, {
+    String? search,
+    int? ownerId,
+    String? status,
+    int? outletId,
+    int? cashierId,
+    String sortBy = 'created_at',
+    String sortDirection = 'desc',
+  }) {
+    final current = state;
+    if (current is! DepositsLoaded) return Future.value();
+    return changePageGeneric<Deposit>(
+      page: page,
+      currentPage: current.currentPage,
+      lastPage: current.lastPage,
+      request: () => _getAllUsecase(
+        GetAllParams(
+          page: page,
+          perPage: current.perPage,
+          search: search,
+          ownerId: ownerId,
+          status: status,
+          outletId: outletId,
+          cashierId: cashierId,
+          sortBy: sortBy,
+          sortDirection: sortDirection,
+        ),
+      ),
+      markPageLoading: () => current.copyWith(isPageLoading: true),
+      buildLoaded: (data) => DepositsLoaded(
+        deposits: data.items,
+        hasReachedMax: data.hasReachedMax,
+        currentPage: data.currentPage,
+        lastPage: data.lastPage,
+        total: data.total,
+        from: data.from,
+        to: data.to,
+        perPage: data.perPage,
+        isPageLoading: false,
+      ),
+      buildError: (f) => DepositFailure(ServerFailure(message: f.message)),
     );
   }
 

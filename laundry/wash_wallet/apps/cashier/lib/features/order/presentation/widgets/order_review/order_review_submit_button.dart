@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 
 class OrderReviewSubmitButton extends StatelessWidget {
@@ -28,8 +28,8 @@ class OrderReviewSubmitButton extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 16),
             backgroundColor: context.colors.primary,
             foregroundColor: Colors.white,
-            disabledBackgroundColor: context.colors.textSecondary.withValues(alpha: 
-              0.3,
+            disabledBackgroundColor: context.colors.textSecondary.withValues(
+              alpha: 0.3,
             ),
           ),
           child: isLoading
@@ -50,4 +50,3 @@ class OrderReviewSubmitButton extends StatelessWidget {
     );
   }
 }
-

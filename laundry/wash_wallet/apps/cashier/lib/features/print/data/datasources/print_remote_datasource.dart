@@ -5,8 +5,14 @@ import '../models/print_info_model.dart';
 
 abstract class PrintRemoteDatasource {
   Future<PrintInfoModel> getPrintInfo(int orderId);
-  Future<PrintCoinInfoModel> processReceipt(int orderId, {String? clientRequestId});
-  Future<PrintCoinInfoModel> processLabel(int orderId, {String? clientRequestId});
+  Future<PrintCoinInfoModel> processReceipt(
+    int orderId, {
+    String? clientRequestId,
+  });
+  Future<PrintCoinInfoModel> processLabel(
+    int orderId, {
+    String? clientRequestId,
+  });
 }
 
 class PrintRemoteDatasourceImpl implements PrintRemoteDatasource {
@@ -36,10 +42,18 @@ class PrintRemoteDatasourceImpl implements PrintRemoteDatasource {
   }
 
   @override
-  Future<PrintCoinInfoModel> processReceipt(int orderId, {String? clientRequestId}) async {
+  Future<PrintCoinInfoModel> processReceipt(
+    int orderId, {
+    String? clientRequestId,
+  }) async {
     try {
-      final options = clientRequestId != null ? Options(headers: {'Client-Request-Id': clientRequestId}) : null;
-      final response = await _dio.post(_endpoints.orderPrintReceipt(orderId), options: options);
+      final options = clientRequestId != null
+          ? Options(headers: {'Client-Request-Id': clientRequestId})
+          : null;
+      final response = await _dio.post(
+        _endpoints.orderPrintReceipt(orderId),
+        options: options,
+      );
       final body = validateResponse(response);
       return parsePrintCoinInfo(body, response.statusCode);
     } catch (e) {
@@ -48,10 +62,18 @@ class PrintRemoteDatasourceImpl implements PrintRemoteDatasource {
   }
 
   @override
-  Future<PrintCoinInfoModel> processLabel(int orderId, {String? clientRequestId}) async {
+  Future<PrintCoinInfoModel> processLabel(
+    int orderId, {
+    String? clientRequestId,
+  }) async {
     try {
-      final options = clientRequestId != null ? Options(headers: {'Client-Request-Id': clientRequestId}) : null;
-      final response = await _dio.post(_endpoints.orderPrintLabel(orderId), options: options);
+      final options = clientRequestId != null
+          ? Options(headers: {'Client-Request-Id': clientRequestId})
+          : null;
+      final response = await _dio.post(
+        _endpoints.orderPrintLabel(orderId),
+        options: options,
+      );
       final body = validateResponse(response);
       return parsePrintCoinInfo(body, response.statusCode);
     } catch (e) {

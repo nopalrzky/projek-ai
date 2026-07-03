@@ -43,7 +43,10 @@ class OrderFilterSection extends StatelessWidget {
     final items = [
       const AppDropdownItem(value: 'all', label: 'Semua'),
       const AppDropdownItem(value: 'requested', label: 'Diajukan'),
-      const AppDropdownItem(value: 'ready_to_process', label: 'Siap Dikerjakan'),
+      const AppDropdownItem(
+        value: 'ready_to_process',
+        label: 'Siap Dikerjakan',
+      ),
       const AppDropdownItem(value: 'in_progress', label: 'Diproses'),
       const AppDropdownItem(value: 'ready', label: 'Siap Ambil'),
       const AppDropdownItem(value: 'completed', label: 'Selesai'),
@@ -65,7 +68,7 @@ class OrderFilterSection extends StatelessWidget {
       itemLabel: (item) => item.label,
       prefixIcon: const Icon(Icons.filter_list_rounded),
       onChanged: (item) {
-        onStatusChanged(item.value == 'all' ? null : item.value);
+        onStatusChanged(item?.value == 'all' ? null : item?.value);
       },
     );
   }
@@ -99,7 +102,7 @@ class OrderFilterSection extends StatelessWidget {
       itemLabel: (item) => item.label,
       prefixIcon: const Icon(Icons.payment_rounded),
       onChanged: (item) {
-        onPaymentStatusChanged(item.value == 'all' ? null : item.value);
+        onPaymentStatusChanged(item?.value == 'all' ? null : item?.value);
       },
     );
   }

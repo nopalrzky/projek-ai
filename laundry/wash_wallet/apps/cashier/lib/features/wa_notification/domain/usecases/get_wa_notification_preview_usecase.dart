@@ -11,4 +11,3 @@ class GetWaNotificationPreviewUsecase {
     return await _repository.getPreview(orderId);
   }
 }
-

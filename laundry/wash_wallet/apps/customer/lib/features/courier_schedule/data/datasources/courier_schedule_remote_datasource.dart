@@ -26,10 +26,8 @@ class CourierScheduleRemoteDatasourceImpl
     String? date,
   }) async {
     try {
-      final Map<String, dynamic> queryParams = {
-        'outletId': outletId,
-      };
-      
+      final Map<String, dynamic> queryParams = {'outletId': outletId};
+
       if (dayOfWeek != null) queryParams['dayOfWeek'] = dayOfWeek;
       if (type != null) queryParams['type'] = type;
       if (date != null) queryParams['date'] = date;

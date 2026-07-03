@@ -8,7 +8,6 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/services/production_notification_service.dart';
 import '../../../../core/widgets/app_dynamic_bottom_bar.dart';
-import '../../../../core/widgets/production_tablet_shell.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../bloc/order_cubit.dart';
@@ -192,22 +191,15 @@ class _PickupScheduleScreenState extends State<PickupScheduleScreen>
       );
     }
 
-    return ProductionTabletShell(
-      currentRouteId: 'pickup-schedule',
-      child: Column(
-        children: [
-          PageContentHeader(
-            title: 'Jadwal Pickup',
-            subtitle: DateFormat('EEEE, d MMMM yyyy').format(_selectedDate),
-            breadcrumbs: const [
-              BreadcrumbItem(label: 'Jadwal Pickup'),
-            ],
-          ),
-          Expanded(
-            child: body,
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        PageContentHeader(
+          title: 'Jadwal Pickup',
+          subtitle: DateFormat('EEEE, d MMMM yyyy').format(_selectedDate),
+          breadcrumbs: const [BreadcrumbItem(label: 'Jadwal Pickup')],
+        ),
+        Expanded(child: body),
+      ],
     );
   }
 

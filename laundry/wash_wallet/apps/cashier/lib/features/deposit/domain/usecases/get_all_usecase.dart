@@ -32,7 +32,7 @@ class GetAllUsecase {
 
   GetAllUsecase(this._repository);
 
-  Future<Result<List<Deposit>>> call(GetAllParams params) async {
+  Future<Result<PaginatedData<Deposit>>> call(GetAllParams params) async {
     return await _repository.getAll(
       page: params.page,
       perPage: params.perPage,

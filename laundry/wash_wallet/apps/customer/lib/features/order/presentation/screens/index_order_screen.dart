@@ -39,11 +39,7 @@ class _IndexOrderScreenState extends State<IndexOrderScreen>
       'value': 'ready',
       'icon': Icons.check_circle_outline_rounded,
     },
-    {
-      'label': 'Selesai',
-      'value': 'completed',
-      'icon': Icons.done_all_rounded,
-    },
+    {'label': 'Selesai', 'value': 'completed', 'icon': Icons.done_all_rounded},
     {
       'label': 'Dibatalkan',
       'value': 'cancelled',

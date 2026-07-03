@@ -31,16 +31,16 @@ class OutletOperationalStatus extends Equatable {
 
   @override
   List<Object?> get props => [
-        isOpenNow,
-        operationalStatus,
-        operationalStatusLabel,
-        operationalStatusMessage,
-        todayHours,
-        weeklyHours,
-        nextOpenAt,
-        nextCloseAt,
-        canCreateOrderNow,
-        orderDisabledReason,
-        timezone,
-      ];
+    isOpenNow,
+    operationalStatus,
+    operationalStatusLabel,
+    operationalStatusMessage,
+    todayHours,
+    weeklyHours,
+    nextOpenAt,
+    nextCloseAt,
+    canCreateOrderNow,
+    orderDisabledReason,
+    timezone,
+  ];
 }

@@ -8,7 +8,6 @@ import '../widgets/order_item_action_buttons.dart';
 import '../widgets/order_item_info_card.dart';
 import '../widgets/order_item_process_list.dart';
 import '../widgets/order_item_status_card.dart';
-import '../../../../core/widgets/production_tablet_shell.dart';
 
 class ShowOrderItemScreen extends StatefulWidget {
   final int orderItemId;
@@ -120,25 +119,22 @@ class _ShowOrderItemScreenState extends State<ShowOrderItemScreen> {
       );
     }
 
-    return ProductionTabletShell(
-      currentRouteId: 'orders',
-      child: Column(
-        children: [
-          PageContentHeader(
-            title: 'Detail Item Order',
-            breadcrumbs: const [
-              BreadcrumbItem(label: 'Order'),
-              BreadcrumbItem(label: 'Detail Item'),
-            ],
+    return Column(
+      children: [
+        PageContentHeader(
+          title: 'Detail Item Order',
+          breadcrumbs: [
+            BreadcrumbItem(label: 'Order', onTap: () => context.pop()),
+            const BreadcrumbItem(label: 'Detail Item'),
+          ],
+        ),
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.all(context.space.lg),
+            child: content,
           ),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.all(context.space.lg),
-              child: content,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

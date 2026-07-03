@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ChangeEmployeePasswordRequest;
 use App\Http\Requests\Auth\EmployeeLoginRequest;
 use App\Http\Requests\Auth\ResetPinRequest;
 use App\Http\Requests\Auth\SetupPinRequest;
+use App\Http\Requests\Auth\UpdateEmployeeProfileRequest;
 use App\Http\Requests\Auth\VerifyPinRequest;
 use App\Http\Resources\Employee\LoginEmployeeResource;
 use App\Services\AuthService;
@@ -13,6 +15,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -200,6 +203,57 @@ class EmployeeAuthController extends Controller
             ]);
 
             return $this->errorResponse('Terjadi kesalahan saat verifikasi PIN', 500, $e);
+        }
+    }
+
+    public function updateProfile(UpdateEmployeeProfileRequest $request): JsonResponse
+    {
+        try {
+            $employee = $request->user();
+            
+            $employee->update($request->only([
+                'name', 'email', 'phone', 'gender', 'address'
+            ]));
+
+            return $this->successResponse(
+                [
+                    'employee' => new LoginEmployeeResource($employee->fresh()),
+                ],
+                'Profile berhasil diperbarui'
+            );
+        } catch (Throwable $e) {
+            Log::error('[EmployeeAuthController] Failed to update profile', [
+                'error'   => $e->getMessage(),
+                'user_id' => Auth::id(),
+                'type'    => 'employee_profile_update',
+            ]);
+
+            return $this->errorResponse('Terjadi kesalahan saat memperbarui profile', 500, $e);
+        }
+    }
+
+    public function changePassword(ChangeEmployeePasswordRequest $request): JsonResponse
+    {
+        try {
+            $employee = $request->user();
+
+            if (!Hash::check($request->current_password, $employee->password)) {
+                return $this->errorResponse('current_password tidak sesuai', 422);
+            }
+
+            $employee->update([
+                'password' => Hash::make($request->password),
+            ]);
+
+            return $this->successResponse(null, 'Password berhasil diperbarui');
+        } catch (Throwable $e) {
+            Log::error('[EmployeeAuthController] Failed to change password', [
+                'error'   => $e->getMessage(),
+                'user_id' => Auth::id(),
+                'type'    => 'employee_password_change',
+            ]);
+
+            return $this->errorResponse('Terjadi kesalahan saat mengubah password', 500, $e);
         }
     }
 }

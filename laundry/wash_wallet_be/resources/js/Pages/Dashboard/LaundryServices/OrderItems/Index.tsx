@@ -101,17 +101,15 @@ const LaundryServiceOrderItemsIndex: React.FC<LaundryServiceOrderItemsIndexProps
                 cell: ({ row }) => {
                     const statusLabel = row.original.statusLabel;
                     const status = row.original.status;
-                    
-                    // Assign variant based on typical order item statuses
-                    let variant: "default" | "success" | "warning" | "info" = "default";
+
+                    let variant: "default" | "success" | "warning" | "info" =
+                        "default";
                     if (status === "done") variant = "success";
                     else if (status === "processing") variant = "warning";
                     else if (status === "pending") variant = "info";
 
                     return (
-                        <Badge variant={variant}>
-                            {statusLabel || status}
-                        </Badge>
+                        <Badge variant={variant}>{statusLabel || status}</Badge>
                     );
                 },
                 size: 150,

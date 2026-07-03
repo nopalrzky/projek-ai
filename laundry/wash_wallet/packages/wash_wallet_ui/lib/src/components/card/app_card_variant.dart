@@ -1,1 +1,9 @@
-enum AppCardVariant { surface, outlined, elevated, filled, info, danger, success }
+enum AppCardVariant {
+  surface,
+  outlined,
+  elevated,
+  filled,
+  info,
+  danger,
+  success,
+}

@@ -3,7 +3,7 @@ import 'package:wash_wallet_core/wash_wallet_core.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 
 abstract class CustomerRemoteDatasource {
-  Future<List<CustomerModel>> getAll({
+  Future<PaginatedData<CustomerModel>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -65,7 +65,7 @@ class CustomerRemoteDatasourceImpl implements CustomerRemoteDatasource {
   CustomerRemoteDatasourceImpl(this._dio, this._endpoints);
 
   @override
-  Future<List<CustomerModel>> getAll({
+  Future<PaginatedData<CustomerModel>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -102,7 +102,12 @@ class CustomerRemoteDatasourceImpl implements CustomerRemoteDatasource {
         final body = _validateResponse(response);
 
         final List data = body['data'] as List? ?? [];
-        return data.map((e) => CustomerModel.fromJson(e)).toList();
+        final meta = body['meta'] as Map<String, dynamic>? ?? {};
+        final items = data.map((e) => CustomerModel.fromJson(e)).toList();
+        return PaginatedData<CustomerModel>.fromMeta(
+          items: items, meta: meta,
+          requestedPage: page, requestedPerPage: perPage,
+        );
       } on DioException catch (e) {
         if (_isTransientGetError(e) && attempt < maxAttempts) {
           await Future.delayed(Duration(milliseconds: 500 * attempt));

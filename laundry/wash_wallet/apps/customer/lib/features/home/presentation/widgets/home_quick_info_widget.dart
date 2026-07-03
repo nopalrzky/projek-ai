@@ -58,10 +58,7 @@ class HomeQuickInfoWidget extends StatelessWidget {
             onTap: onOrderHistoryTap,
             child: Row(
               children: [
-                Icon(
-                  Icons.assignment_rounded,
-                  color: context.colors.secondary,
-                ),
+                Icon(Icons.assignment_rounded, color: context.colors.secondary),
                 SizedBox(width: context.space.sm),
                 Expanded(
                   child: Column(

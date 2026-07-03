@@ -15,6 +15,9 @@ class ProcessReceiptUsecase {
   ProcessReceiptUsecase(this._repository);
 
   Future<Result<PrintCoinInfo>> execute(ProcessReceiptParams params) async {
-    return _repository.processReceipt(params.orderId, clientRequestId: params.clientRequestId);
+    return _repository.processReceipt(
+      params.orderId,
+      clientRequestId: params.clientRequestId,
+    );
   }
 }

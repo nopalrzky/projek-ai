@@ -12,9 +12,5 @@ class OutletReviewSummary extends Equatable {
   });
 
   @override
-  List<Object?> get props => [
-        averageRating,
-        totalReviews,
-        ratingDistribution,
-      ];
+  List<Object?> get props => [averageRating, totalReviews, ratingDistribution];
 }

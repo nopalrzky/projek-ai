@@ -61,7 +61,9 @@ class OrderCard extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 16,
-                    backgroundColor: context.colors.primary.withValues(alpha: 0.1),
+                    backgroundColor: context.colors.primary.withValues(
+                      alpha: 0.1,
+                    ),
                     child: Icon(
                       Icons.person,
                       size: 16,

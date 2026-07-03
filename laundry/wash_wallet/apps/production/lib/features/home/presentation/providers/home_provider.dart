@@ -9,7 +9,10 @@ import '../bloc/home_cubit.dart';
 class HomeProvider {
   HomeProvider._();
 
-  static HomeRemoteDatasource createRemoteDatasource(Dio dio, ApiEndpoints endpoints) {
+  static HomeRemoteDatasource createRemoteDatasource(
+    Dio dio,
+    ApiEndpoints endpoints,
+  ) {
     return HomeRemoteDatasourceImpl(dio, endpoints);
   }
 

@@ -40,11 +40,13 @@ class CourierSchedule extends Model
     protected function casts(): array
     {
         return [
-            'is_active'  => 'boolean',
-            'start_time' => 'datetime:H:i',
-            'end_time'   => 'datetime:H:i',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
+            'outlet_id'           => 'integer',
+            'operational_day_id'  => 'integer',
+            'is_active'           => 'boolean',
+            'start_time'          => 'datetime:H:i',
+            'end_time'            => 'datetime:H:i',
+            'created_at'          => 'datetime',
+            'updated_at'          => 'datetime',
         ];
     }
 

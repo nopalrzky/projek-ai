@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Outlet\Position;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Enums\Permission;
+use App\Services\PositionService;
 use Illuminate\Validation\Rule;
 
 class StorePositionRequest extends FormRequest
@@ -31,7 +31,7 @@ class StorePositionRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:1000'],
             'isActive' => ['boolean'],
             'permissions'   => ['nullable', 'array'],
-            'permissions.*' => ['string', Rule::in(array_column(Permission::cases(), 'value'))],
+            'permissions.*' => ['string', Rule::in(app(PositionService::class)->getPermissionKeys())],
         ];
     }
 

@@ -65,21 +65,28 @@ class _IndexPettyCashScreenState extends State<IndexPettyCashScreen> {
     final isCompact = AppBreakpoints.of(context) == WindowSizeClass.compact;
 
     return AppLayout(
-      header: isCompact ? AppHeader(
-        title: 'Kas Kecil',
-        backgroundColor: context.colors.surface,
-        onBackPressed: () => Navigator.pop(context),
-      ) : null,
-      floatingActionButton: isCompact ? FloatingActionButton.extended(
-        onPressed: () => _navigateToCreateScreen(),
-        backgroundColor: context.colors.primary,
-        elevation: 4,
-        icon: const Icon(Icons.add_rounded, color: Colors.white),
-        label: const Text(
-          'Buat Permintaan',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-        ),
-      ) : null,
+      header: isCompact
+          ? AppHeader(
+              title: 'Kas Kecil',
+              backgroundColor: context.colors.surface,
+              onBackPressed: () => Navigator.pop(context),
+            )
+          : null,
+      floatingActionButton: isCompact
+          ? FloatingActionButton.extended(
+              onPressed: () => _navigateToCreateScreen(),
+              backgroundColor: context.colors.primary,
+              elevation: 4,
+              icon: const Icon(Icons.add_rounded, color: Colors.white),
+              label: const Text(
+                'Buat Permintaan',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            )
+          : null,
       body: ContentConstraint(
         child: BlocConsumer<PettyCashCubit, PettyCashState>(
           listener: (context, state) {
@@ -152,9 +159,7 @@ class _IndexPettyCashScreenState extends State<IndexPettyCashScreen> {
           selectedStatus: _selectedStatus,
           onStatusChanged: _handleStatusFilter,
         ),
-        Expanded(
-          child: _buildMobileContent(context, state),
-        ),
+        Expanded(child: _buildMobileContent(context, state)),
       ],
     );
   }
@@ -202,99 +207,120 @@ class _IndexPettyCashScreenState extends State<IndexPettyCashScreen> {
   }
 
   Widget _buildTabletTable(BuildContext context, PettyCashState state) {
-    if (state is PettyCashLoading) return const AppLoadingIndicator();
-    if (state is PettyCashFailure) {
-      return AppErrorState(
-        message: state.failure.message,
-        onRetry: () => _loadData(forceRefresh: true),
-      );
-    }
-    
-    if (state is PettyCashesLoaded) {
-      return AppDataView<PettyCash>(
-        rows: state.pettyCashes,
-        emptyMessage: _selectedStatus != null
-            ? 'Tidak ada permintaan dengan status yang dipilih'
-            : 'Belum ada data permintaan kas kecil',
-        searchHint: 'Cari referensi...',
-        searchController: _searchController,
-        onSearch: () => _loadData(),
-        onSearchClear: () {
-          _searchController.clear();
-          _loadData();
-        },
-        primaryActionLabel: 'Buat Permintaan',
-        onPrimaryAction: _navigateToCreateScreen,
-        activeFilters: [
-          if (_selectedStatus != null)
-            ActiveFilter(
-              filterId: 'status',
-              filterLabel: 'Status',
-              valueLabel: _selectedStatus == 'pending' ? 'Menunggu' : _selectedStatus == 'approved' ? 'Disetujui' : 'Ditolak',
-              value: _selectedStatus!,
+    final loadedState = state is PettyCashesLoaded ? state : null;
+    return AppDataView<PettyCash>(
+      rows: loadedState?.pettyCashes ?? [],
+      emptyMessage: _selectedStatus != null
+          ? 'Tidak ada permintaan dengan status yang dipilih'
+          : 'Belum ada data permintaan kas kecil',
+      searchHint: 'Cari referensi...',
+      searchController: _searchController,
+      onSearch: () => _loadData(),
+      onSearchClear: () {
+        _searchController.clear();
+        _loadData();
+      },
+      primaryActionLabel: 'Buat Permintaan',
+      onPrimaryAction: _navigateToCreateScreen,
+      isLoading: state is PettyCashLoading ||
+          (state is PettyCashesLoaded && state.isPageLoading),
+      errorMessage: state is PettyCashFailure ? state.failure.message : null,
+      totalCount: loadedState?.total,
+      currentPage: loadedState?.currentPage,
+      lastPage: loadedState?.lastPage,
+      from: loadedState?.from,
+      to: loadedState?.to,
+      onPageChanged: loadedState != null
+          ? (page) => context.read<PettyCashCubit>().changePage(
+                page,
+                search: _searchController.text.isEmpty
+                    ? null
+                    : _searchController.text,
+                status: _selectedStatus,
+                cashierId: widget.cashierId,
+              )
+          : null,
+      activeFilters: [
+        if (_selectedStatus != null)
+          ActiveFilter(
+            filterId: 'status',
+            filterLabel: 'Status',
+            valueLabel: _selectedStatus == 'pending'
+                ? 'Menunggu'
+                : _selectedStatus == 'approved'
+                ? 'Disetujui'
+                : 'Ditolak',
+            value: _selectedStatus!,
+          ),
+      ],
+      onFilterRemove: (_) {
+        _handleStatusFilter(null);
+      },
+      onFilterApply: (filter) {
+        _handleStatusFilter(filter.value as String);
+      },
+      onFilterReset: () {
+        _handleStatusFilter(null);
+      },
+      filterConfigs: const [
+        FilterConfig(
+          id: 'status',
+          label: 'Status',
+          type: FilterType.singleSelect,
+          options: [
+            FilterOption(id: 'pending', label: 'Menunggu', value: 'pending'),
+            FilterOption(
+              id: 'approved',
+              label: 'Disetujui',
+              value: 'approved',
             ),
-        ],
-        onFilterRemove: (_) {
-          _handleStatusFilter(null);
-        },
-        onFilterApply: (filter) {
-          _handleStatusFilter(filter.value as String);
-        },
-        onFilterReset: () {
-          _handleStatusFilter(null);
-        },
-        filterConfigs: const [
-          FilterConfig(
-            id: 'status',
-            label: 'Status',
-            type: FilterType.singleSelect,
-            options: [
-              FilterOption(id: 'pending', label: 'Menunggu', value: 'pending'),
-              FilterOption(id: 'approved', label: 'Disetujui', value: 'approved'),
-              FilterOption(id: 'rejected', label: 'Ditolak', value: 'rejected'),
-            ],
+            FilterOption(id: 'rejected', label: 'Ditolak', value: 'rejected'),
+          ],
+        ),
+      ],
+      columns: [
+        DataTableColumnDef<PettyCash>(
+          id: 'code',
+          header: 'No Referensi',
+          cellBuilder: (context, item) => Text(
+            item.code ?? '-',
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-        ],
-        columns: [
-          DataTableColumnDef<PettyCash>(
-            id: 'code',
-            header: 'No Referensi',
-            cellBuilder: (context, item) => Text(item.code ?? '-', style: const TextStyle(fontWeight: FontWeight.bold)),
+        ),
+        DataTableColumnDef<PettyCash>(
+          id: 'employee',
+          header: 'Pegawai',
+          cellBuilder: (context, item) =>
+              Text((item.cashier?['name'] as String?) ?? '-'),
+        ),
+        DataTableColumnDef<PettyCash>(
+          id: 'amount',
+          header: 'Total',
+          cellBuilder: (context, item) => Text(item.formattedAmount ?? '-'),
+        ),
+        DataTableColumnDef<PettyCash>(
+          id: 'date',
+          header: 'Tanggal',
+          cellBuilder: (context, item) =>
+              Text(item.createdAtFormatted ?? item.createdAtHuman ?? '-'),
+        ),
+        DataTableColumnDef<PettyCash>(
+          id: 'status',
+          header: 'Status',
+          cellBuilder: (context, item) => StatusChip(
+            label: item.statusLabel ?? item.status,
+            color: _getStatusColor(context, item.status.toLowerCase()),
           ),
-          DataTableColumnDef<PettyCash>(
-            id: 'employee',
-            header: 'Pegawai',
-            cellBuilder: (context, item) => Text((item.cashier?['name'] as String?) ?? '-'),
-          ),
-          DataTableColumnDef<PettyCash>(
-            id: 'amount',
-            header: 'Total',
-            cellBuilder: (context, item) => Text(item.formattedAmount ?? '-'),
-          ),
-          DataTableColumnDef<PettyCash>(
-            id: 'date',
-            header: 'Tanggal',
-            cellBuilder: (context, item) => Text(item.createdAtFormatted ?? item.createdAtHuman ?? '-'),
-          ),
-          DataTableColumnDef<PettyCash>(
-            id: 'status',
-            header: 'Status',
-            cellBuilder: (context, item) => StatusChip(
-              label: item.statusLabel ?? item.status,
-              color: _getStatusColor(context, item.status.toLowerCase()),
-            ),
-          ),
-        ],
-        rowActions: [
-          DataTableRowAction(
-            icon: Icons.visibility_outlined,
-            tooltip: 'Lihat Detail',
-            onTap: (item) => _handleShow(item),
-          ),
-        ],
-      );
-    }
-    return const SizedBox.shrink();
+        ),
+      ],
+      rowActions: [
+        DataTableRowAction(
+          icon: Icons.visibility_outlined,
+          tooltip: 'Lihat Detail',
+          onTap: (item) => _handleShow(item),
+        ),
+      ],
+    );
   }
 
   Color _getStatusColor(BuildContext context, String status) {

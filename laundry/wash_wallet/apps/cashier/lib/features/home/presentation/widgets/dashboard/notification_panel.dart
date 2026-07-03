@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 
 class CashierNotificationPanel extends StatelessWidget {
-  const CashierNotificationPanel({
-    super.key,
-    required this.newOrderBanner,
-  });
+  const CashierNotificationPanel({super.key, required this.newOrderBanner});
 
   final Widget? newOrderBanner;
 
@@ -12,11 +9,11 @@ class CashierNotificationPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final hasNotification = newOrderBanner != null;
-    
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: hasNotification 
+        color: hasNotification
             ? theme.colorScheme.errorContainer.withValues(alpha: 0.2)
             : theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
@@ -32,15 +29,23 @@ class CashierNotificationPanel extends StatelessWidget {
           Row(
             children: [
               Icon(
-                hasNotification ? Icons.notifications_active_rounded : Icons.notifications_none_rounded,
-                color: hasNotification ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant,
+                hasNotification
+                    ? Icons.notifications_active_rounded
+                    : Icons.notifications_none_rounded,
+                color: hasNotification
+                    ? theme.colorScheme.error
+                    : theme.colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: 8),
               Text(
                 'Notifikasi',
                 style: theme.textTheme.titleSmall?.copyWith(
-                  color: hasNotification ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant,
-                  fontWeight: hasNotification ? FontWeight.bold : FontWeight.normal,
+                  color: hasNotification
+                      ? theme.colorScheme.error
+                      : theme.colorScheme.onSurfaceVariant,
+                  fontWeight: hasNotification
+                      ? FontWeight.bold
+                      : FontWeight.normal,
                 ),
               ),
             ],
@@ -57,7 +62,9 @@ class CashierNotificationPanel extends StatelessWidget {
                     Icon(
                       Icons.check_circle_outline_rounded,
                       size: 32,
-                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                      color: theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.5,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(

@@ -57,6 +57,15 @@ class AuthSetupPinRequired extends AuthState {
   List<Object?> get props => [employee];
 }
 
+class AuthPinSetupPrompt extends AuthState {
+  final AuthEmployee employee;
+
+  const AuthPinSetupPrompt(this.employee);
+
+  @override
+  List<Object?> get props => [employee];
+}
+
 class AuthAccessDenied extends AuthState {
   final AuthEmployee employee;
 
@@ -78,7 +87,11 @@ class SwitchPinVerifying extends AuthState {
   });
 
   @override
-  List<Object?> get props => [previousEmployee, targetEmployeeId, targetUsername];
+  List<Object?> get props => [
+    previousEmployee,
+    targetEmployeeId,
+    targetUsername,
+  ];
 }
 
 class SwitchPinFailure extends AuthState {
@@ -111,4 +124,32 @@ class PinResetSuccess extends AuthState {
 
   @override
   List<Object?> get props => [employee];
+}
+
+class ProfileUpdating extends AuthState {
+  const ProfileUpdating();
+}
+
+class ProfileUpdateFailure extends AuthState {
+  final String message;
+  const ProfileUpdateFailure(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class PasswordChanging extends AuthState {
+  const PasswordChanging();
+}
+
+class PasswordChangeSuccess extends AuthState {
+  const PasswordChangeSuccess();
+}
+
+class PasswordChangeFailure extends AuthState {
+  final String message;
+  const PasswordChangeFailure(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }

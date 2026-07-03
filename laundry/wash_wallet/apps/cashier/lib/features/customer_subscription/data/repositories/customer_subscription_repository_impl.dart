@@ -10,7 +10,7 @@ class CustomerSubscriptionRepositoryImpl
   CustomerSubscriptionRepositoryImpl(this._remoteDatasource);
 
   @override
-  Future<Result<List<CustomerSubscription>>> getAll({
+  Future<Result<PaginatedData<CustomerSubscription>>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -28,7 +28,7 @@ class CustomerSubscriptionRepositoryImpl
     String sortDirection = 'desc',
   }) async {
     try {
-      final result = await _remoteDatasource.getAll(
+      final paginatedData = await _remoteDatasource.getAll(
         page: page,
         perPage: perPage,
         search: search,
@@ -45,7 +45,15 @@ class CustomerSubscriptionRepositoryImpl
         sortDirection: sortDirection,
         outletId: outletId,
       );
-      return Result.success(result.map((model) => model.toEntity()).toList());
+      return Result.success(PaginatedData<CustomerSubscription>(
+        items: paginatedData.items.map((model) => model.toEntity()).toList(),
+        currentPage: paginatedData.currentPage,
+        lastPage: paginatedData.lastPage,
+        perPage: paginatedData.perPage,
+        total: paginatedData.total,
+        from: paginatedData.from,
+        to: paginatedData.to,
+      ));
     } catch (e) {
       return Result.failure(_mapExceptionToFailure(e));
     }
@@ -106,9 +114,7 @@ class CustomerSubscriptionRepositoryImpl
   @override
   Future<Result<void>> destroy(int id) async {
     try {
-      await _remoteDatasource.destroy(
-        customerSubscriptionId: id,
-      );
+      await _remoteDatasource.destroy(customerSubscriptionId: id);
       return const Result.success(null);
     } catch (e) {
       return Result.failure(_mapExceptionToFailure(e));
@@ -116,7 +122,7 @@ class CustomerSubscriptionRepositoryImpl
   }
 
   @override
-  Future<Result<List<CustomerSubscription>>> getByCustomerId({
+  Future<Result<PaginatedData<CustomerSubscription>>> getByCustomerId({
     required int customerId,
     int page = 1,
     int perPage = 15,
@@ -126,7 +132,7 @@ class CustomerSubscriptionRepositoryImpl
     String sortDirection = 'desc',
   }) async {
     try {
-      final result = await _remoteDatasource.getAll(
+      final paginatedData = await _remoteDatasource.getAll(
         customerId: customerId,
         page: page,
         perPage: perPage,
@@ -135,14 +141,22 @@ class CustomerSubscriptionRepositoryImpl
         sortBy: sortBy,
         sortDirection: sortDirection,
       );
-      return Result.success(result.map((model) => model.toEntity()).toList());
+      return Result.success(PaginatedData<CustomerSubscription>(
+        items: paginatedData.items.map((model) => model.toEntity()).toList(),
+        currentPage: paginatedData.currentPage,
+        lastPage: paginatedData.lastPage,
+        perPage: paginatedData.perPage,
+        total: paginatedData.total,
+        from: paginatedData.from,
+        to: paginatedData.to,
+      ));
     } catch (e) {
       return Result.failure(_mapExceptionToFailure(e));
     }
   }
 
   @override
-  Future<Result<List<CustomerSubscription>>> getByOutletId({
+  Future<Result<PaginatedData<CustomerSubscription>>> getByOutletId({
     required int outletId,
     int page = 1,
     int perPage = 15,
@@ -152,7 +166,7 @@ class CustomerSubscriptionRepositoryImpl
     String sortDirection = 'desc',
   }) async {
     try {
-      final result = await _remoteDatasource.getAll(
+      final paginatedData = await _remoteDatasource.getAll(
         outletId: outletId,
         page: page,
         perPage: perPage,
@@ -161,7 +175,15 @@ class CustomerSubscriptionRepositoryImpl
         sortBy: sortBy,
         sortDirection: sortDirection,
       );
-      return Result.success(result.map((model) => model.toEntity()).toList());
+      return Result.success(PaginatedData<CustomerSubscription>(
+        items: paginatedData.items.map((model) => model.toEntity()).toList(),
+        currentPage: paginatedData.currentPage,
+        lastPage: paginatedData.lastPage,
+        perPage: paginatedData.perPage,
+        total: paginatedData.total,
+        from: paginatedData.from,
+        to: paginatedData.to,
+      ));
     } catch (e) {
       return Result.failure(_mapExceptionToFailure(e));
     }

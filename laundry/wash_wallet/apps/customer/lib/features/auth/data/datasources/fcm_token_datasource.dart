@@ -14,10 +14,7 @@ class FcmTokenRemoteDataSourceImpl implements FcmTokenRemoteDataSource {
   @override
   Future<void> update(String token) async {
     try {
-      await _dio.post(
-        _endpoints.updateFcmToken,
-        data: {'fcm_token': token},
-      );
+      await _dio.post(_endpoints.updateFcmToken, data: {'fcm_token': token});
     } catch (e) {
       rethrow;
     }

@@ -46,7 +46,10 @@ class _WaNotificationSheet extends StatelessWidget {
         } else if (state is WaNotificationError && state.preview == null) {
         } else if (state is WaNotificationError && state.preview != null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.failure.message), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text(state.failure.message),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       },
@@ -479,4 +482,3 @@ class _WaNotificationSheet extends StatelessWidget {
     );
   }
 }
-

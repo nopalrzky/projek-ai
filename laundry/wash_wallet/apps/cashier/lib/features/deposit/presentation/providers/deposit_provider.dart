@@ -12,7 +12,10 @@ import '../bloc/deposit_cubit.dart';
 class DepositProvider {
   DepositProvider._();
 
-  static DepositRemoteDatasource createRemoteDatasource(Dio dio, ApiEndpoints endpoints) {
+  static DepositRemoteDatasource createRemoteDatasource(
+    Dio dio,
+    ApiEndpoints endpoints,
+  ) {
     return DepositRemoteDatasourceImpl(dio, endpoints);
   }
 

@@ -2,18 +2,38 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wash_wallet_cashier/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:wash_wallet_cashier/features/auth/presentation/bloc/auth_state.dart';
+import 'package:wash_wallet_cashier/core/permissions/cashier_permissions.dart';
 import 'package:wash_wallet_cashier/features/auth/domain/usecases/register_fcm_token_usecase.dart';
 import 'package:wash_wallet_cashier/features/auth/domain/usecases/remove_fcm_token_usecase.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 import 'package:wash_wallet_core/wash_wallet_core.dart';
 import 'package:wash_wallet_cashier/core/services/notification_service.dart';
 
+class MockChangePasswordUseCase implements ChangePasswordUseCase {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class MockUpdateProfileUseCase implements UpdateProfileUseCase {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 class MockLoginUsecase implements LoginUsecase {
-  Future<Result<AuthEmployee>> Function({required String username, required String password})? callMock;
+  Future<Result<AuthEmployee>> Function({
+    required String username,
+    required String password,
+  })?
+  callMock;
 
   @override
-  Future<Result<AuthEmployee>> call({required String username, required String password}) {
-    if (callMock != null) return callMock!(username: username, password: password);
+  Future<Result<AuthEmployee>> call({
+    required String username,
+    required String password,
+  }) {
+    if (callMock != null) {
+      return callMock!(username: username, password: password);
+    }
     throw UnimplementedError();
   }
 }
@@ -74,7 +94,11 @@ class MockSaveRememberedAccountUsecase implements SaveRememberedAccountUsecase {
 
 class MockRegisterFcmTokenUsecase implements RegisterFcmTokenUsecase {
   @override
-  Future<Result<void>> call({required String token, String? deviceId, String? deviceName}) async {
+  Future<Result<void>> call({
+    required String token,
+    String? deviceId,
+    String? deviceName,
+  }) async {
     return const Result.success(null);
   }
 }
@@ -105,6 +129,9 @@ class MockNotificationService implements NotificationService {
 }
 
 void main() {
+  late MockChangePasswordUseCase mockChangePasswordUseCase;
+  late MockUpdateProfileUseCase mockUpdateProfileUseCase;
+
   late AuthCubit authCubit;
   late MockLoginUsecase mockLoginUsecase;
   late MockLogoutUsecase mockLogoutUsecase;
@@ -143,6 +170,9 @@ void main() {
     mockRemoveFcmTokenUsecase = MockRemoveFcmTokenUsecase();
     mockNotificationService = MockNotificationService();
 
+    mockChangePasswordUseCase = MockChangePasswordUseCase();
+    mockUpdateProfileUseCase = MockUpdateProfileUseCase();
+
     authCubit = AuthCubit(
       loginUsecase: mockLoginUsecase,
       logoutUsecase: mockLogoutUsecase,
@@ -151,6 +181,9 @@ void main() {
       setupPinUseCase: mockSetupPinUseCase,
       verifyPinUseCase: mockVerifyPinUseCase,
       resetPinUseCase: mockResetPinUseCase,
+
+      changePasswordUseCase: mockChangePasswordUseCase,
+      updateProfileUseCase: mockUpdateProfileUseCase,
       saveRememberedAccountUsecase: mockSaveRememberedAccountUsecase,
       registerFcmTokenUsecase: mockRegisterFcmTokenUsecase,
       removeFcmTokenUsecase: mockRemoveFcmTokenUsecase,
@@ -158,107 +191,129 @@ void main() {
     );
   });
 
-  tearDown(() {
+  tearDown(() async {
+    await Future.delayed(Duration.zero);
     authCubit.close();
   });
 
-  test('switchEmployee emits SwitchPinVerifying then Authenticated on success', () async {
-    mockVerifyPinUseCase.callMock = (params) async => Result.success(tEmployee);
+  test(
+    'switchEmployee emits SwitchPinVerifying then Authenticated on success',
+    () async {
+      mockVerifyPinUseCase.callMock = (params) async =>
+          Result.success(tEmployee);
 
-    final previousEmployee = const AuthEmployee(
-      id: 2,
-      username: 'other',
-      name: 'Other',
-      outletId: 1,
-      hasPin: true,
-      accessibleOutlets: [],
-      allPermissions: ['order.view'],
-    );
-    mockCheckAuthStatusUsecase.callMock = () async => Result.success(previousEmployee);
+      final previousEmployee = const AuthEmployee(
+        id: 2,
+        username: 'other',
+        name: 'Other',
+        outletId: 1,
+        hasPin: true,
+        accessibleOutlets: [],
+        allPermissions: ['order.view'],
+      );
+      mockCheckAuthStatusUsecase.callMock = () async =>
+          Result.success(previousEmployee);
 
-    await authCubit.checkAuthStatus();
-    expect(authCubit.state, isA<Authenticated>());
+      await authCubit.checkAuthStatus();
+      expect(authCubit.state, isA<Authenticated>());
 
-    final states = <AuthState>[];
-    final subscription = authCubit.stream.listen(states.add);
+      final states = <AuthState>[];
+      final subscription = authCubit.stream.listen(states.add);
 
-    await authCubit.switchEmployee(
-      targetEmployeeId: 1,
-      targetUsername: 'test',
-      pin: '123456',
-    );
+      await authCubit.switchEmployee(
+        targetEmployeeId: 1,
+        targetUsername: 'test',
+        pin: '123456',
+      );
 
-    await Future.delayed(Duration.zero);
+      await Future.delayed(Duration.zero);
 
-    expect(states[0], isA<SwitchPinVerifying>());
-    expect(states[1], isA<Authenticated>());
-    expect((states[1] as Authenticated).employee.id, 1);
+      expect(states[0], isA<SwitchPinVerifying>());
+      expect(states[1], isA<Authenticated>());
+      expect((states[1] as Authenticated).employee.id, 1);
 
-    subscription.cancel();
-  });
+      subscription.cancel();
+    },
+  );
 
-  test('switchEmployee emits SwitchPinVerifying then SwitchPinFailure on fail', () async {
-    mockVerifyPinUseCase.callMock = (params) async => const Result.failure(AuthFailure(message: 'Invalid PIN'));
+  test(
+    'switchEmployee emits SwitchPinVerifying then SwitchPinFailure on fail',
+    () async {
+      mockVerifyPinUseCase.callMock = (params) async =>
+          const Result.failure(AuthFailure(message: 'Invalid PIN'));
 
-    final previousEmployee = const AuthEmployee(
-      id: 2,
-      username: 'other',
-      name: 'Other',
-      outletId: 1,
-      hasPin: true,
-      accessibleOutlets: [],
-      allPermissions: ['order.view'],
-    );
-    mockCheckAuthStatusUsecase.callMock = () async => Result.success(previousEmployee);
+      final previousEmployee = const AuthEmployee(
+        id: 2,
+        username: 'other',
+        name: 'Other',
+        outletId: 1,
+        hasPin: true,
+        accessibleOutlets: [],
+        allPermissions: ['order.view'],
+      );
+      mockCheckAuthStatusUsecase.callMock = () async =>
+          Result.success(previousEmployee);
 
-    await authCubit.checkAuthStatus();
+      await authCubit.checkAuthStatus();
 
-    final states = <AuthState>[];
-    final subscription = authCubit.stream.listen(states.add);
+      final states = <AuthState>[];
+      final subscription = authCubit.stream.listen(states.add);
 
-    await authCubit.switchEmployee(
-      targetEmployeeId: 1,
-      targetUsername: 'test',
-      pin: 'wrong',
-    );
+      await authCubit.switchEmployee(
+        targetEmployeeId: 1,
+        targetUsername: 'test',
+        pin: 'wrong',
+      );
 
-    await Future.delayed(Duration.zero);
+      await Future.delayed(Duration.zero);
 
-    expect(states[0], isA<SwitchPinVerifying>());
-    expect(states[1], isA<SwitchPinFailure>());
-    expect((states[1] as SwitchPinFailure).previousEmployee.id, 2);
+      expect(states[0], isA<SwitchPinVerifying>());
+      expect(states[1], isA<SwitchPinFailure>());
+      expect((states[1] as SwitchPinFailure).previousEmployee.id, 2);
 
-    subscription.cancel();
-  });
+      subscription.cancel();
+    },
+  );
 
-  test('rememberCurrentEmployee memanggil saveRememberedAccountUsecase dan emit state tanpa prompt', () async {
-    mockCheckAuthStatusUsecase.callMock = () async => Result.success(tEmployee);
-    await authCubit.checkAuthStatus();
+  test(
+    'rememberCurrentEmployee memanggil saveRememberedAccountUsecase dan emit state tanpa prompt',
+    () async {
+      mockCheckAuthStatusUsecase.callMock = () async =>
+          Result.success(tEmployee);
+      await authCubit.checkAuthStatus();
 
-    expect(authCubit.state, isA<Authenticated>());
+      expect(authCubit.state, isA<Authenticated>());
 
-    await authCubit.rememberCurrentEmployee();
+      await authCubit.rememberCurrentEmployee();
 
-    expect(mockSaveRememberedAccountUsecase.callCount, 1);
-    expect(mockSaveRememberedAccountUsecase.lastEmployee?.id, tEmployee.id);
-    expect(authCubit.state, isA<Authenticated>());
-    expect((authCubit.state as Authenticated).shouldPromptRemember, false);
-  });
+      expect(mockSaveRememberedAccountUsecase.callCount, 1);
+      expect(mockSaveRememberedAccountUsecase.lastEmployee?.id, tEmployee.id);
+      expect(authCubit.state, isA<Authenticated>());
+      expect((authCubit.state as Authenticated).shouldPromptRemember, false);
+    },
+  );
 
-  test('login success set shouldPromptRemember: true jika akun belum tersimpan', () async {
-    mockLoginUsecase.callMock = ({required String username, required String password}) async {
-      return Result.success(tEmployee);
-    };
+  test(
+    'login success set shouldPromptRemember: true jika akun belum tersimpan',
+    () async {
+      mockLoginUsecase.callMock =
+          ({required String username, required String password}) async {
+            return Result.success(tEmployee);
+          };
 
-    final states = <AuthState>[];
-    final subscription = authCubit.stream.listen(states.add);
+      final states = <AuthState>[];
+      final subscription = authCubit.stream.listen(states.add);
 
-    await authCubit.login(username: 'test', password: 'pass');
-    await Future.delayed(Duration.zero);
+      await authCubit.login(username: 'test', password: 'pass');
+      await Future.delayed(Duration.zero);
 
-    expect(states.any((s) => s is Authenticated && s.shouldPromptRemember), true);
-    subscription.cancel();
-  });
+      expect(
+        states.any((s) => s is Authenticated && s.shouldPromptRemember),
+        true,
+      );
+      subscription.cancel();
+    },
+  );
 
   group('completeOnboarding', () {
     test('emit Unauthenticated jika tidak ada remembered employee', () async {
@@ -275,20 +330,70 @@ void main() {
       subscription.cancel();
     });
 
-    test('emit AuthRequiresSwitchEmployee jika ada remembered employee', () async {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('cashier_remembered_employee_accounts_v1', '{"version": 1, "accounts": [{"employeeId": 1, "username": "test", "name": "Test", "outletId": 1, "outletName": "Outlet 1", "hasPin": true, "lastUsedAt": "2026-06-28T12:00:00.000Z"}]}');
+    test(
+      'emit AuthRequiresSwitchEmployee jika ada remembered employee',
+      () async {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(
+          'cashier_remembered_employee_accounts_v1',
+          '{"version": 1, "accounts": [{"employeeId": 1, "username": "test", "name": "Test", "outletId": 1, "outletName": "Outlet 1", "hasPin": true, "lastUsedAt": "2026-06-28T12:00:00.000Z"}]}',
+        );
 
-      final states = <AuthState>[];
-      final subscription = authCubit.stream.listen(states.add);
+        final states = <AuthState>[];
+        final subscription = authCubit.stream.listen(states.add);
 
-      await authCubit.completeOnboarding();
-      await Future.delayed(Duration.zero);
+        await authCubit.completeOnboarding();
+        await Future.delayed(Duration.zero);
 
-      expect(prefs.getBool('is_onboarding_done'), true);
-      expect(states.last, isA<AuthRequiresSwitchEmployee>());
+        expect(prefs.getBool('is_onboarding_done'), true);
+        expect(states.last, isA<AuthRequiresSwitchEmployee>());
 
-      subscription.cancel();
-    });
+        subscription.cancel();
+      },
+    );
   });
+
+  test(
+    'checkAuthStatus emits AuthAccessDenied jika tidak punya permission cashier',
+    () async {
+      const employee = AuthEmployee(
+        id: 99,
+        username: 'prod',
+        name: 'Production',
+        outletId: 1,
+        hasPin: true,
+        accessibleOutlets: [],
+        allPermissions: ['production.view'],
+      );
+
+      mockCheckAuthStatusUsecase.callMock = () async =>
+          const Result.success(employee);
+
+      await authCubit.checkAuthStatus();
+
+      expect(authCubit.state, isA<AuthAccessDenied>());
+    },
+  );
+
+  test(
+    'checkAuthStatus menerima permission cashier granular selain order.view',
+    () async {
+      const employee = AuthEmployee(
+        id: 100,
+        username: 'service',
+        name: 'Service',
+        outletId: 1,
+        hasPin: true,
+        accessibleOutlets: [],
+        allPermissions: [CashierPermissions.laundryServiceView],
+      );
+
+      mockCheckAuthStatusUsecase.callMock = () async =>
+          const Result.success(employee);
+
+      await authCubit.checkAuthStatus();
+
+      expect(authCubit.state, isA<Authenticated>());
+    },
+  );
 }

@@ -17,9 +17,19 @@ Route::prefix('mobile/production')->name('mobile.production.')->group(function (
         Route::post('logout', 'logout');
         Route::get('validate', 'validateToken');
         Route::get('me', 'me');
+        Route::post('pin/verify', 'verifyPin')->middleware('throttle:5,1');
     });
 
     Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/auth/pin/setup', [EmployeeAuthController::class, 'setupPin'])
+            ->name('auth.pin.setup');
+        Route::post('/auth/pin/reset', [EmployeeAuthController::class, 'resetPin'])
+            ->name('auth.pin.reset');
+        Route::patch('/auth/profile', [EmployeeAuthController::class, 'updateProfile'])
+            ->name('auth.profile.update');
+        Route::post('/auth/password', [EmployeeAuthController::class, 'changePassword'])
+            ->name('auth.password.change');
+            
         Route::post('/auth/fcm-token', [EmployeeFcmTokenController::class, 'store'])
             ->name('auth.fcm-token.store');
         Route::delete('/auth/fcm-token', [EmployeeFcmTokenController::class, 'destroy'])

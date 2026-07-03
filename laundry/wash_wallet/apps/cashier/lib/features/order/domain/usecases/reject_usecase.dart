@@ -6,10 +6,7 @@ class RejectParams {
   final int orderId;
   final String? reason;
 
-  RejectParams({
-    required this.orderId,
-    this.reason,
-  });
+  RejectParams({required this.orderId, this.reason});
 }
 
 class RejectUsecase {
@@ -17,7 +14,10 @@ class RejectUsecase {
 
   RejectUsecase(this._repository);
 
-  Future<Result<Order>> call(RejectParams params, {required String clientRequestId}) {
+  Future<Result<Order>> call(
+    RejectParams params, {
+    required String clientRequestId,
+  }) {
     return _repository.reject(
       id: params.orderId,
       reason: params.reason,

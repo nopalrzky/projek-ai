@@ -33,11 +33,11 @@ class PrintCoinInfo extends Equatable {
 
   @override
   List<Object?> get props => [
-        coinPrice,
-        featureActive,
-        hasEnoughCoin,
-        coinSource,
-        outletCoinBalance,
-        ownerCoinBalance,
-      ];
+    coinPrice,
+    featureActive,
+    hasEnoughCoin,
+    coinSource,
+    outletCoinBalance,
+    ownerCoinBalance,
+  ];
 }

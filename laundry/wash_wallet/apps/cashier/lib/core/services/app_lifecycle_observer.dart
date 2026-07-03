@@ -11,8 +11,8 @@ class AppLifecycleObserver extends WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       authCubit.checkIfStale();
     } else if (state == AppLifecycleState.paused ||
-               state == AppLifecycleState.inactive ||
-               state == AppLifecycleState.detached) {
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.detached) {
       authCubit.recordActivity();
     }
   }

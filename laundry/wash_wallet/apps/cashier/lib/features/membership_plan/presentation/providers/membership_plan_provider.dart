@@ -10,7 +10,10 @@ import '../bloc/membership_plan_cubit.dart';
 class MembershipPlanProvider {
   MembershipPlanProvider._();
 
-  static MembershipPlanRemoteDatasource createRemoteDatasource(Dio dio, ApiEndpoints endpoints) {
+  static MembershipPlanRemoteDatasource createRemoteDatasource(
+    Dio dio,
+    ApiEndpoints endpoints,
+  ) {
     return MembershipPlanRemoteDatasourceImpl(dio, endpoints);
   }
 

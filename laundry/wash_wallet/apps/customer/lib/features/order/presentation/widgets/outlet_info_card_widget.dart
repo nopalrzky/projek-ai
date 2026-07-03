@@ -22,9 +22,10 @@ class OutletInfoCardWidget extends StatelessWidget {
                 children: [
                   Text(
                     outlet.name,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ) ??
+                    style:
+                        Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ) ??
                         const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text(

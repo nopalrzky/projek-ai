@@ -21,7 +21,7 @@ import { PositionFormData } from "@/types";
 import PageHeader from "@/Components/Page/PageHeader";
 import positionService from "@/Services/position.service";
 
-const PositionEdit = ({ position, outlets }: PositionEditProps) => {
+const PositionEdit = ({ position, outlets, permissionCatalog }: PositionEditProps) => {
     const {
         data,
         setData,
@@ -48,50 +48,22 @@ const PositionEdit = ({ position, outlets }: PositionEditProps) => {
         }
     };
 
-    const permissionGroups = [
-        {
-            title: "Manajemen Order",
-            permissions: [
-                { key: "order.create", label: "Buat Order" },
-                { key: "order.view", label: "Lihat Order" },
-                { key: "order.manage", label: "Kelola Order" },
-            ]
-        },
-        {
-            title: "Pembayaran & Kas",
-            permissions: [
-                { key: "payment.manage", label: "Kelola Pembayaran" },
-            ]
-        },
-        {
-            title: "Produksi",
-            permissions: [
-                { key: "production.view", label: "Lihat Produksi" },
-                { key: "production.manage", label: "Kelola Produksi" },
-            ]
-        },
-        {
-            title: "Kurir",
-            permissions: [
-                { key: "courier.view", label: "Lihat Kurir" },
-                { key: "courier.manage", label: "Kelola Kurir" },
-            ]
-        },
-        {
-            title: "Pelanggan",
-            permissions: [
-                { key: "customer.view", label: "Lihat Pelanggan" },
-                { key: "customer.manage", label: "Kelola Pelanggan" },
-            ]
-        },
-        {
-            title: "Layanan & Unit",
-            permissions: [
-                { key: "service.view", label: "Lihat Layanan" },
-                { key: "service.manage", label: "Kelola Layanan" },
-            ]
+    const handleGroupToggle = (keys: string[]) => {
+        const current = data.permissions || [];
+        const allSelected = keys.every((k) => current.includes(k));
+
+        if (allSelected) {
+            setData(
+                "permissions",
+                current.filter((k) => !keys.includes(k)),
+            );
+            return;
         }
-    ];
+
+        const next = new Set(current);
+        keys.forEach((k) => next.add(k));
+        setData("permissions", Array.from(next));
+    };
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -350,18 +322,32 @@ const PositionEdit = ({ position, outlets }: PositionEditProps) => {
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                        {permissionGroups.map((group) => (
+                                        {permissionCatalog.map((group) => {
+                                            const groupKeys = group.permissions.map((p) => p.key);
+                                            const allGroupSelected = groupKeys.every((k) =>
+                                                (data.permissions || []).includes(k),
+                                            );
+
+                                            return (
                                             <div
-                                                key={group.title}
+                                                key={group.group}
                                                 className="p-5 rounded-xl border space-y-4"
                                                 style={{
                                                     borderColor: "var(--color-border)",
                                                     backgroundColor: "var(--color-background-soft, rgba(0, 0, 0, 0.02))",
                                                 }}
                                             >
-                                                <h3 className="font-semibold text-base" style={{ color: "var(--color-text-primary)" }}>
-                                                    {group.title}
-                                                </h3>
+                                                <div className="flex items-center justify-between">
+                                                    <h3 className="font-semibold text-base" style={{ color: "var(--color-text-primary)" }}>
+                                                        {group.group}
+                                                    </h3>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={allGroupSelected}
+                                                        onChange={() => handleGroupToggle(groupKeys)}
+                                                        className="w-4 h-4"
+                                                    />
+                                                </div>
                                                 <div className="space-y-3">
                                                     {group.permissions.map((perm) => {
                                                         const isChecked = (data.permissions || []).includes(perm.key);
@@ -392,7 +378,8 @@ const PositionEdit = ({ position, outlets }: PositionEditProps) => {
                                                     })}
                                                 </div>
                                             </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </div>
 

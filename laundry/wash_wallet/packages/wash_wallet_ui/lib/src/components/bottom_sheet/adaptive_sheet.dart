@@ -28,9 +28,7 @@ Future<T?> showAdaptiveSheet<T>(
       context: context,
       barrierDismissible: isDismissible,
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         clipBehavior: Clip.antiAlias,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 560),
@@ -65,19 +63,25 @@ class _AppBottomSheetContentAdapter extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (title != null) ...[
-            Text(title!, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+            Text(
+              title!,
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+            ),
             const SizedBox(height: 8),
           ],
           if (subtitle != null) ...[
-            Text(subtitle!, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).textTheme.bodySmall?.color)),
+            Text(
+              subtitle!,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).textTheme.bodySmall?.color,
+              ),
+            ),
             const SizedBox(height: 16),
           ],
           if (title != null || subtitle != null) const Divider(height: 32),
-          Flexible(
-            child: SingleChildScrollView(
-              child: child,
-            ),
-          ),
+          Flexible(child: SingleChildScrollView(child: child)),
         ],
       ),
     );

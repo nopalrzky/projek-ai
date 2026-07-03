@@ -167,4 +167,3 @@ class OrderItemsList extends StatelessWidget {
     );
   }
 }
-

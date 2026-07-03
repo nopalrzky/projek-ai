@@ -14,7 +14,9 @@ class OrderTimeline extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(context.radius.md),
-        border: Border.all(color: context.colors.outline.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: context.colors.outline.withValues(alpha: 0.2),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,4 +140,3 @@ class OrderTimeline extends StatelessWidget {
     );
   }
 }
-

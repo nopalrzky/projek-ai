@@ -4,6 +4,7 @@ import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 import '../bloc/customer_cubit.dart';
 import '../bloc/customer_state.dart';
+
 import '../widgets/customer_info_card.dart';
 import '../widgets/customer_menu_item.dart';
 import 'orders/index_orders_screen.dart';
@@ -12,22 +13,104 @@ import 'customer_subscription/index_customer_subscription_screen.dart';
 
 class ShowCustomerScreen extends StatefulWidget {
   final int customerId;
+  final bool isEmbedded;
+  final VoidCallback? onClose;
 
-  const ShowCustomerScreen({super.key, required this.customerId});
+  const ShowCustomerScreen({
+    super.key,
+    required this.customerId,
+    this.isEmbedded = false,
+    this.onClose,
+  });
 
   @override
   State<ShowCustomerScreen> createState() => _ShowCustomerScreenState();
 }
 
 class _ShowCustomerScreenState extends State<ShowCustomerScreen> {
+  Customer? _embeddedCustomer;
+  bool _embeddedLoading = false;
+  String? _embeddedError;
+
   @override
   void initState() {
     super.initState();
     _loadData();
   }
 
-  void _loadData() {
+  @override
+  void didUpdateWidget(covariant ShowCustomerScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.customerId != widget.customerId) {
+      _loadData();
+    }
+  }
+
+  Future<void> _loadData() async {
+    if (widget.isEmbedded) {
+      setState(() {
+        _embeddedLoading = true;
+        _embeddedError = null;
+      });
+      final customer = await context
+          .read<CustomerCubit>()
+          .fetchCustomerSilently(widget.customerId);
+      if (!mounted) return;
+      setState(() {
+        _embeddedCustomer = customer;
+        _embeddedLoading = false;
+        _embeddedError = customer == null ? 'Gagal memuat detail pelanggan' : null;
+      });
+      return;
+    }
+
     context.read<CustomerCubit>().getById(widget.customerId);
+  }
+
+  Widget _buildEmbeddedHeader() {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: context.space.md,
+        vertical: context.space.sm,
+      ),
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        border: Border(
+          bottom: BorderSide(color: context.colors.outlineVariant),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'Detail Pelanggan',
+              style: context.typography.titleMedium,
+            ),
+          ),
+          if (widget.onClose != null)
+            IconButton(
+              onPressed: widget.onClose,
+              icon: const Icon(Icons.close_rounded),
+              tooltip: 'Tutup detail',
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmbeddedContent() {
+    if (_embeddedLoading) {
+      return const AppLoadingIndicator();
+    }
+
+    if (_embeddedError != null) {
+      return AppErrorState(message: _embeddedError!, onRetry: _loadData);
+    }
+
+    final customer = _embeddedCustomer;
+    if (customer == null) return const SizedBox.shrink();
+
+    return _buildContent(customer);
   }
 
   @override
@@ -56,41 +139,45 @@ class _ShowCustomerScreenState extends State<ShowCustomerScreen> {
       },
     );
 
-    if (isCompact) {
-      return AppLayout(
-        header: AppHeader(
-          title: 'Detail Pelanggan',
-          backgroundColor: context.colors.surface,
-          onBackPressed: () => Navigator.pop(context),
-        ),
-        body: content,
+    if (widget.isEmbedded) {
+      return Column(
+        children: [
+          _buildEmbeddedHeader(),
+          Expanded(child: _buildEmbeddedContent()),
+        ],
       );
     }
 
-    return Column(
-      children: [
-        PageContentHeader(
-          title: 'Detail Pelanggan',
-          breadcrumbs: [
-            const BreadcrumbItem(label: 'Pelanggan'),
-            BreadcrumbItem(
-                label: 'Daftar Pelanggan',
-                onTap: () => Navigator.pop(context)),
-            const BreadcrumbItem(label: 'Detail Pelanggan'),
-          ],
-        ),
-        Expanded(
-          child: ContentConstraint(
-            child: content,
-          ),
-        ),
-      ],
-    );
+    return isCompact
+        ? AppLayout(
+            header: AppHeader(
+              title: 'Detail Pelanggan',
+              backgroundColor: context.colors.surface,
+              onBackPressed: () => Navigator.pop(context),
+            ),
+            body: content,
+          )
+        : Column(
+            children: [
+              PageContentHeader(
+                title: 'Detail Pelanggan',
+                breadcrumbs: [
+                  const BreadcrumbItem(label: 'Pelanggan'),
+                  BreadcrumbItem(
+                    label: 'Daftar Pelanggan',
+                    onTap: () => Navigator.pop(context),
+                  ),
+                  const BreadcrumbItem(label: 'Detail Pelanggan'),
+                ],
+              ),
+              Expanded(child: ContentConstraint(child: content)),
+            ],
+          );
   }
 
   Widget _buildContent(Customer customer) {
     return RefreshIndicator(
-      onRefresh: () async => _loadData(),
+      onRefresh: _loadData,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Column(

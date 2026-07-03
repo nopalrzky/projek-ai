@@ -6,10 +6,7 @@ import '../bloc/order_cubit.dart';
 class OrderNotesFieldWidget extends StatelessWidget {
   final TextEditingController controller;
 
-  const OrderNotesFieldWidget({
-    super.key,
-    required this.controller,
-  });
+  const OrderNotesFieldWidget({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {

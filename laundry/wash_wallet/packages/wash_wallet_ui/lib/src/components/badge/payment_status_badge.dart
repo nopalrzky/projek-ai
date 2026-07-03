@@ -21,14 +21,35 @@ class PaymentStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (defaultVariant, defaultLabel, defaultIcon) = switch (status?.toLowerCase()) {
-      'not_yet_priced' => (AppBadgeVariant.neutral, 'Belum Dihargai', Icons.timer_outlined),
-      'unpaid' => (AppBadgeVariant.danger, 'Belum Bayar', Icons.money_off_outlined),
-      'partial' => (AppBadgeVariant.warning, 'Sebagian', Icons.payments_outlined),
+    final (defaultVariant, defaultLabel, defaultIcon) = switch (status
+        ?.toLowerCase()) {
+      'not_yet_priced' => (
+        AppBadgeVariant.neutral,
+        'Belum Dihargai',
+        Icons.timer_outlined,
+      ),
+      'unpaid' => (
+        AppBadgeVariant.danger,
+        'Belum Bayar',
+        Icons.money_off_outlined,
+      ),
+      'partial' => (
+        AppBadgeVariant.warning,
+        'Sebagian',
+        Icons.payments_outlined,
+      ),
       'paid' => (AppBadgeVariant.success, 'Lunas', Icons.check_circle_outlined),
       'refunded' => (AppBadgeVariant.info, 'Refund', Icons.replay_outlined),
-      'paid_by_package' => (AppBadgeVariant.primary, 'Paket', Icons.card_membership_outlined),
-      'cod' => (AppBadgeVariant.warning, 'Bayar di Tempat', Icons.handshake_outlined),
+      'paid_by_package' => (
+        AppBadgeVariant.primary,
+        'Paket',
+        Icons.card_membership_outlined,
+      ),
+      'cod' => (
+        AppBadgeVariant.warning,
+        'Bayar di Tempat',
+        Icons.handshake_outlined,
+      ),
       _ => (AppBadgeVariant.neutral, status ?? 'Unknown', Icons.help_outline),
     };
 

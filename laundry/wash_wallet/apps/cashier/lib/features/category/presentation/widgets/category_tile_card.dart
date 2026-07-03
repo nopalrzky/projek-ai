@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 
@@ -75,12 +75,16 @@ class CategoryTileCard extends StatelessWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: context.colors.disabled.withValues(alpha: 0.15),
+                              color: context.colors.disabled.withValues(
+                                alpha: 0.15,
+                              ),
                               borderRadius: BorderRadius.circular(
                                 context.radius.sm,
                               ),
                               border: Border.all(
-                                color: context.colors.disabled.withValues(alpha: 0.3),
+                                color: context.colors.disabled.withValues(
+                                  alpha: 0.3,
+                                ),
                               ),
                             ),
                             child: Text(

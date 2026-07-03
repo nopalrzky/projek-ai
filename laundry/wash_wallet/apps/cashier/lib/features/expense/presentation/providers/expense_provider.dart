@@ -12,7 +12,10 @@ import '../bloc/expense_cubit.dart';
 class ExpenseProvider {
   ExpenseProvider._();
 
-  static ExpenseRemoteDatasource createRemoteDatasource(Dio dio, ApiEndpoints endpoints) {
+  static ExpenseRemoteDatasource createRemoteDatasource(
+    Dio dio,
+    ApiEndpoints endpoints,
+  ) {
     return ExpenseRemoteDatasourceImpl(dio, endpoints);
   }
 

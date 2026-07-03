@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wash_wallet_core/wash_wallet_core.dart';
+import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 import '../../domain/usecases/destroy_usecase.dart';
 import '../../domain/usecases/get_by_id_usecase.dart';
 import '../../domain/usecases/get_all_usecase.dart';
@@ -6,7 +8,8 @@ import '../../domain/usecases/store_usecase.dart';
 import '../../domain/usecases/update_usecase.dart';
 import 'customer_subscription_state.dart';
 
-class CustomerSubscriptionCubit extends Cubit<CustomerSubscriptionState> {
+class CustomerSubscriptionCubit extends Cubit<CustomerSubscriptionState>
+    with TablePaginationCubitMixin<CustomerSubscriptionState> {
   final GetAllUsecase _getAllUsecase;
   final GetByIdUsecase _getByIdUsecase;
   final StoreUsecase _storeUsecase;
@@ -68,13 +71,18 @@ class CustomerSubscriptionCubit extends Cubit<CustomerSubscriptionState> {
     final result = await _getAllUsecase(params);
 
     result.when(
-      success: (subscriptions) {
+      success: (data) {
         if (page == 1) {
           emit(
             CustomerSubscriptionsLoaded(
-              subscriptions: subscriptions,
-              hasReachedMax: subscriptions.length < perPage,
-              currentPage: page,
+              subscriptions: data.items,
+              hasReachedMax: data.hasReachedMax,
+              currentPage: data.currentPage,
+              lastPage: data.lastPage,
+              total: data.total,
+              from: data.from,
+              to: data.to,
+              perPage: data.perPage,
             ),
           );
         } else {
@@ -82,9 +90,14 @@ class CustomerSubscriptionCubit extends Cubit<CustomerSubscriptionState> {
           if (currentState is CustomerSubscriptionsLoaded) {
             emit(
               currentState.copyWith(
-                subscriptions: currentState.subscriptions + subscriptions,
-                hasReachedMax: subscriptions.isEmpty || subscriptions.length < perPage,
-                currentPage: page,
+                subscriptions: currentState.subscriptions + data.items,
+                hasReachedMax: data.hasReachedMax,
+                currentPage: data.currentPage,
+                lastPage: data.lastPage,
+                total: data.total,
+                from: data.from,
+                to: data.to,
+                perPage: data.perPage,
               ),
             );
           }
@@ -94,13 +107,73 @@ class CustomerSubscriptionCubit extends Cubit<CustomerSubscriptionState> {
     );
   }
 
+  /// Called exclusively by [AppPagination.onPageChanged] on tablet.
+  /// Always REPLACES customer subscriptions — never appends.
+  Future<void> changePage(
+    int page, {
+    String? search,
+    String? status,
+    int? customerId,
+    int? outletId,
+    int? servicePackageId,
+    String? minPurchaseDate,
+    String? maxPurchaseDate,
+    String? expiryAtFrom,
+    String? expiryAtTo,
+    double? minPricePaid,
+    double? maxPricePaid,
+    String sortBy = 'createdAt',
+    String sortDirection = 'desc',
+  }) {
+    final current = state;
+    if (current is! CustomerSubscriptionsLoaded) return Future.value();
+    return changePageGeneric<CustomerSubscription>(
+      page: page,
+      currentPage: current.currentPage,
+      lastPage: current.lastPage,
+      request: () => _getAllUsecase(
+        GetCustomerSubscriptionsParams(
+          page: page,
+          perPage: current.perPage,
+          search: search,
+          status: status,
+          customerId: customerId,
+          outletId: outletId,
+          servicePackageId: servicePackageId,
+          minPurchaseDate: minPurchaseDate,
+          maxPurchaseDate: maxPurchaseDate,
+          expiryAtFrom: expiryAtFrom,
+          expiryAtTo: expiryAtTo,
+          minPricePaid: minPricePaid,
+          maxPricePaid: maxPricePaid,
+          sortBy: sortBy,
+          sortDirection: sortDirection,
+        ),
+      ),
+      markPageLoading: () => current.copyWith(isPageLoading: true),
+      buildLoaded: (data) => CustomerSubscriptionsLoaded(
+        subscriptions: data.items,
+        hasReachedMax: data.hasReachedMax,
+        currentPage: data.currentPage,
+        lastPage: data.lastPage,
+        total: data.total,
+        from: data.from,
+        to: data.to,
+        perPage: data.perPage,
+        isPageLoading: false,
+      ),
+      buildError: (f) => CustomerSubscriptionFailure(ServerFailure(message: f.message)),
+    );
+  }
+
   Future<void> getById(int id) async {
     emit(const CustomerSubscriptionLoading());
 
     final result = await _getByIdUsecase(id);
 
     result.when(
-      success: (subscription) => emit(CustomerSubscriptionDetailLoaded(subscription)),
+      success: (subscription) =>
+          emit(CustomerSubscriptionDetailLoaded(subscription)),
       failure: (failure) => emit(CustomerSubscriptionFailure(failure)),
     );
   }
@@ -135,11 +208,7 @@ class CustomerSubscriptionCubit extends Cubit<CustomerSubscriptionState> {
     );
   }
 
-  Future<void> update({
-    required int id,
-    String? status,
-    String? note,
-  }) async {
+  Future<void> update({required int id, String? status, String? note}) async {
     emit(const CustomerSubscriptionLoading());
 
     final params = UpdateCustomerSubscriptionParams(

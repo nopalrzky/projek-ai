@@ -56,7 +56,7 @@ class _PrintSheetState extends State<_PrintSheet> {
     final prefs = await SharedPreferences.getInstance();
     final key = 'cashier_print_pending_${widget.orderId}';
     final savedKey = prefs.getString(key);
-    
+
     if (savedKey != null) {
       _clientRequestId = savedKey;
     } else {
@@ -198,13 +198,14 @@ class _PrintSheetState extends State<_PrintSheet> {
                       );
                     } else {
                       context.read<PrintCubit>().processLabel(
-                        widget.orderId, 
+                        widget.orderId,
                         info,
                         clientRequestId: 'label_$_clientRequestId',
                       );
                     }
                   },
-                  onOffline: (message) => AppSnackbar.error(context, message: message),
+                  onOffline: (message) =>
+                      AppSnackbar.error(context, message: message),
                 );
               },
               onCancel: () {

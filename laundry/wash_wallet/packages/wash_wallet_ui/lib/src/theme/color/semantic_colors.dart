@@ -4,34 +4,37 @@ import 'app_colors.dart';
 class SemanticColors {
   const SemanticColors();
 
-  Color get primary => AppColors.teal600;
-  Color get onPrimary => AppColors.neutral0;
-  Color get primaryDark => AppColors.teal800;
+  Color get primary => AppColors.teal500;
+  Color get onPrimary => AppColors.gray0;
+  Color get primaryDark => AppColors.teal700;
   Color get primaryLight => AppColors.teal200;
   Color get primarySurface => AppColors.teal50;
 
-  Color get secondary => AppColors.teal500;
-  Color get onSecondary => AppColors.neutral0;
-  Color get secondaryDark => AppColors.teal700;
-  Color get secondaryLight => AppColors.teal300;
-  Color get secondarySurface => AppColors.teal100;
+  Color get secondary => AppColors.secondary500;
+  Color get onSecondary => AppColors.gray0;
+  Color get secondaryDark => AppColors.secondary700;
+  Color get secondaryLight => AppColors.secondary300;
+  Color get secondarySurface => AppColors.secondary50;
 
-  Color get background => AppColors.neutral50;
-  Color get surface => AppColors.neutral0;
-  Color get surfaceElevated => AppColors.neutral0;
-  Color get surfaceVariant => AppColors.neutral100;
+  Color get background => AppColors.gray50;
+  Color get surface => AppColors.gray0;
+  Color get surfaceElevated => AppColors.gray0;
+  Color get surfaceVariant => AppColors.gray100;
+  Color get surfaceMuted => AppColors.gray100;
   Color get overlay => AppColors.neutral900.withValues(alpha: 0.5);
 
-  Color get border => AppColors.neutral200;
-  Color get borderStrong => AppColors.neutral300;
-  Color get outline => AppColors.neutral200;
-  Color get divider => AppColors.neutral200;
+  Color get border => AppColors.gray200;
+  Color get borderStrong => AppColors.gray300;
+  Color get outline => AppColors.gray200;
+  Color get divider => AppColors.gray200;
+  Color get borderLight => AppColors.gray200;
+  Color get borderHover => AppColors.gray300;
 
-  Color get textPrimary => AppColors.neutral900;
-  Color get textSecondary => AppColors.neutral600;
-  Color get textTertiary => AppColors.neutral500;
-  Color get textDisabled => AppColors.neutral400;
-  Color get textOnPrimary => AppColors.neutral0;
+  Color get textPrimary => AppColors.gray900;
+  Color get textSecondary => AppColors.gray600;
+  Color get textTertiary => AppColors.gray400;
+  Color get textDisabled => AppColors.gray300;
+  Color get textOnPrimary => AppColors.gray0;
 
   Color get neutralMuted => AppColors.neutral300;
   Color get neutralForeground => AppColors.neutral700;
@@ -94,5 +97,10 @@ class SemanticColors {
   Color get iconContainerInfo => AppColors.info50;
 
   // Focus ring
-  Color get focusRing => AppColors.teal500.withValues(alpha: 0.3);
+  Color get focusRing => const Color(0x47125B48);
+
+  // Accent Colors
+  Color get accent => AppColors.accent500;
+  Color get onAccent => AppColors.gray0;
+  Color get accentSurface => AppColors.accent50;
 }

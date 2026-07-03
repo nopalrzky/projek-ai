@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Position;
 
-use App\Enums\Permission;
+use App\Services\PositionService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -50,7 +50,7 @@ class UpdatePositionRequest extends FormRequest
             ],
             'permissions.*' => [
                 'string',
-                Rule::enum(Permission::class)
+                Rule::in(app(PositionService::class)->getPermissionKeys()),
             ]
         ];
     }

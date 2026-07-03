@@ -23,13 +23,11 @@ const Progress: React.FC<ProgressProps> = ({
     rounded = true,
     thickness = 1,
 }) => {
-    // Calculate percentage
     const percentage = useMemo(() => {
         if (indeterminate) return 100;
         return Math.min(Math.max((value / max) * 100, 0), 100);
     }, [value, max, indeterminate]);
 
-    // Size classes
     const sizeClasses = useMemo(() => {
         const heights = {
             xs: 1,
@@ -53,7 +51,6 @@ const Progress: React.FC<ProgressProps> = ({
         };
     }, [size, thickness]);
 
-    // Variant colors
     const variantClasses = useMemo(() => {
         if (color) {
             return {
@@ -93,14 +90,12 @@ const Progress: React.FC<ProgressProps> = ({
         return { ...variants[variant], style: {} };
     }, [variant, color]);
 
-    // Label text
     const labelText = useMemo(() => {
         if (label) return label;
         if (showLabel) return `${Math.round(percentage)}%`;
         return null;
     }, [label, showLabel, percentage]);
 
-    // Container layout
     const containerLayoutClasses = useMemo(() => {
         const layouts = {
             top: "flex flex-col gap-2",
@@ -111,12 +106,10 @@ const Progress: React.FC<ProgressProps> = ({
         return layouts[labelPosition];
     }, [labelPosition]);
 
-    // Striped pattern
     const stripedClasses = striped
         ? "bg-[length:1rem_1rem] bg-[linear-gradient(45deg,rgba(255,255,255,.15)_25%,transparent_25%,transparent_50%,rgba(255,255,255,.15)_50%,rgba(255,255,255,.15)_75%,transparent_75%,transparent)]"
         : "";
 
-    // Animation classes
     const animationClasses = useMemo(() => {
         if (indeterminate) {
             return "animate-progress-indeterminate origin-left";
@@ -132,7 +125,6 @@ const Progress: React.FC<ProgressProps> = ({
 
     return (
         <div className={cn("w-full", containerLayoutClasses, className)}>
-            {/* Top Label */}
             {labelPosition === "top" && labelText && (
                 <div className="flex items-center justify-between">
                     <span
@@ -140,7 +132,7 @@ const Progress: React.FC<ProgressProps> = ({
                             "font-medium",
                             sizeClasses.text,
                             variantClasses.text,
-                            labelClassName
+                            labelClassName,
                         )}
                         style={variantClasses.style}
                     >
@@ -150,7 +142,7 @@ const Progress: React.FC<ProgressProps> = ({
                         <span
                             className={cn(
                                 "text-xs text-gray-500 dark:text-gray-400",
-                                labelClassName
+                                labelClassName,
                             )}
                         >
                             {value} / {maxLabel || max}
@@ -159,13 +151,12 @@ const Progress: React.FC<ProgressProps> = ({
                 </div>
             )}
 
-            {/* Progress Bar Container */}
             <div className="flex-1 relative">
                 <div
                     className={cn(
                         "w-full overflow-hidden bg-gray-200 dark:bg-gray-700",
                         rounded ? "rounded-full" : "rounded-sm",
-                        sizeClasses.container
+                        sizeClasses.container,
                     )}
                     role="progressbar"
                     aria-valuenow={value}
@@ -173,7 +164,6 @@ const Progress: React.FC<ProgressProps> = ({
                     aria-valuemax={max}
                     aria-label={label || "Progress"}
                 >
-                    {/* Progress Bar */}
                     <div
                         className={cn(
                             "h-full",
@@ -182,20 +172,19 @@ const Progress: React.FC<ProgressProps> = ({
                             animationClasses,
                             stripedAnimationClasses,
                             rounded ? "rounded-full" : "rounded-sm",
-                            barClassName
+                            barClassName,
                         )}
                         style={{
                             width: indeterminate ? "50%" : `${percentage}%`,
                             ...variantClasses.style,
                         }}
                     >
-                        {/* Inside Label */}
                         {labelPosition === "inside" && labelText && (
                             <div className="flex items-center justify-center h-full px-2">
                                 <span
                                     className={cn(
                                         "text-white font-medium text-xs drop-shadow-sm",
-                                        labelClassName
+                                        labelClassName,
                                     )}
                                 >
                                     {labelText}
@@ -205,7 +194,6 @@ const Progress: React.FC<ProgressProps> = ({
                     </div>
                 </div>
 
-                {/* Min/Max Labels */}
                 {showMinMax && labelPosition !== "top" && (
                     <div className="flex items-center justify-between mt-1">
                         <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -218,14 +206,13 @@ const Progress: React.FC<ProgressProps> = ({
                 )}
             </div>
 
-            {/* Right Label */}
             {labelPosition === "right" && labelText && (
                 <span
                     className={cn(
                         "font-medium whitespace-nowrap min-w-[3rem] text-right",
                         sizeClasses.text,
                         variantClasses.text,
-                        labelClassName
+                        labelClassName,
                     )}
                     style={variantClasses.style}
                 >
@@ -233,7 +220,6 @@ const Progress: React.FC<ProgressProps> = ({
                 </span>
             )}
 
-            {/* Bottom Label */}
             {labelPosition === "bottom" && labelText && (
                 <div className="flex items-center justify-between">
                     <span
@@ -241,7 +227,7 @@ const Progress: React.FC<ProgressProps> = ({
                             "font-medium",
                             sizeClasses.text,
                             variantClasses.text,
-                            labelClassName
+                            labelClassName,
                         )}
                         style={variantClasses.style}
                     >

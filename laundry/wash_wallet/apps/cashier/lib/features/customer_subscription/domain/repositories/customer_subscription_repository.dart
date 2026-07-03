@@ -2,7 +2,7 @@ import 'package:wash_wallet_core/wash_wallet_core.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 
 abstract class CustomerSubscriptionRepository {
-  Future<Result<List<CustomerSubscription>>> getAll({
+  Future<Result<PaginatedData<CustomerSubscription>>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -38,7 +38,7 @@ abstract class CustomerSubscriptionRepository {
 
   Future<Result<void>> destroy(int id);
 
-  Future<Result<List<CustomerSubscription>>> getByCustomerId({
+  Future<Result<PaginatedData<CustomerSubscription>>> getByCustomerId({
     required int customerId,
     int page = 1,
     int perPage = 15,
@@ -48,7 +48,7 @@ abstract class CustomerSubscriptionRepository {
     String sortDirection = 'desc',
   });
 
-  Future<Result<List<CustomerSubscription>>> getByOutletId({
+  Future<Result<PaginatedData<CustomerSubscription>>> getByOutletId({
     required int outletId,
     int page = 1,
     int perPage = 15,

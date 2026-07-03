@@ -18,7 +18,7 @@ class ResponsiveLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sizeClass = AppBreakpoints.of(context);
-    
+
     Widget layout;
     switch (sizeClass) {
       case WindowSizeClass.compact:
@@ -37,10 +37,7 @@ class ResponsiveLayout extends StatelessWidget {
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
-      child: KeyedSubtree(
-        key: ValueKey(sizeClass),
-        child: layout,
-      ),
+      child: KeyedSubtree(key: ValueKey(sizeClass), child: layout),
     );
   }
 }

@@ -35,6 +35,7 @@ class ServicePackage extends Model
     protected function casts(): array
     {
         return [
+            'outlet_id'      => 'integer',
             'price'         => 'decimal:2',
             'validity_days' => 'integer',
             'is_active'     => 'boolean',

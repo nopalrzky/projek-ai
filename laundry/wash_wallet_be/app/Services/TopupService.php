@@ -122,7 +122,7 @@ class TopupService extends BaseService
 
                 if ($isOutletTopup) {
                     $outlet = $this->outlet->findOrFail($data['outletId']);
-                    if ($outlet->owner_id !== $user->id) {
+                    if (!(int) $outlet->owner_id === (int) $user->id) {
                         throw new Exception('Bukan owner outlet ini.');
                     }
                 }

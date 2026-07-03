@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
@@ -21,7 +21,9 @@ class OrderReviewSummarySection extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(context.radius.md),
-        border: Border.all(color: context.colors.primary.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: context.colors.primary.withValues(alpha: 0.2),
+        ),
       ),
       child: Column(
         children: [

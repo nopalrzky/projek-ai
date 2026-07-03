@@ -24,7 +24,9 @@ class LocationStatusBanner extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            isGpsActive ? Icons.location_on_rounded : Icons.location_off_rounded,
+            isGpsActive
+                ? Icons.location_on_rounded
+                : Icons.location_off_rounded,
             size: 16,
             color: isGpsActive ? context.colors.primary : context.colors.error,
           ),
@@ -35,7 +37,9 @@ class LocationStatusBanner extends StatelessWidget {
                   ? 'Menampilkan outlet terdekat'
                   : 'Aktifkan lokasi untuk melihat outlet terdekat',
               style: context.typography.labelSmall.copyWith(
-                color: isGpsActive ? context.colors.primary : context.colors.error,
+                color: isGpsActive
+                    ? context.colors.primary
+                    : context.colors.error,
                 fontWeight: FontWeight.w600,
               ),
             ),

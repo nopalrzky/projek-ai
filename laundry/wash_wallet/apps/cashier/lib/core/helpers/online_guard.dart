@@ -5,7 +5,8 @@ class OfflineException implements Exception {
   const OfflineException({required this.actionName});
 
   @override
-  String toString() => 'Diperlukan koneksi internet untuk $actionName. Draft Anda telah disimpan.';
+  String toString() =>
+      'Diperlukan koneksi internet untuk $actionName. Draft Anda telah disimpan.';
 }
 
 class OnlineGuard {

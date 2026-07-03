@@ -92,9 +92,9 @@ class EmployeeRemoteDatasourceImpl implements EmployeeRemoteDatasource {
       if (avatarPath != null && avatarPath.trim().isNotEmpty) {
         final fileName = avatarPath.split('/').last;
         final mimeType = _getMimeType(fileName);
-        
+
         final Map<String, dynamic> flattenedData = {};
-        
+
         void flatten(dynamic value, String prefix) {
           if (value is Map) {
             value.forEach((key, val) {

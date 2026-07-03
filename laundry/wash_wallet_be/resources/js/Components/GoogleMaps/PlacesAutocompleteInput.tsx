@@ -61,9 +61,7 @@ const PlacesAutocompleteInput: React.FC<PlacesAutocompleteInputProps> = ({
         fetchSuggestions(value, locationBias || undefined);
     };
 
-    const onSuggestionsClearRequested = () => {
-        // We keep suggestions until user selects or clears
-    };
+    const onSuggestionsClearRequested = () => {};
 
     const getSuggestionValue = (suggestion: any) => suggestion.description;
 

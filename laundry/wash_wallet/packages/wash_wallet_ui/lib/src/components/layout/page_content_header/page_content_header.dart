@@ -34,20 +34,19 @@ class PageContentHeader extends StatelessWidget {
                 final index = entry.key;
                 final item = entry.value;
                 final isLast = index == breadcrumbs.length - 1;
-                
+
                 final text = Text(
                   item.label,
                   style: context.typography.labelMedium.copyWith(
-                    color: isLast ? context.colors.primary : context.colors.onSurfaceVariant,
+                    color: isLast
+                        ? context.colors.primary
+                        : context.colors.onSurfaceVariant,
                     fontWeight: isLast ? FontWeight.bold : FontWeight.normal,
                   ),
                 );
-                
+
                 Widget child = item.onTap != null && !isLast
-                    ? InkWell(
-                        onTap: item.onTap,
-                        child: text,
-                      )
+                    ? InkWell(onTap: item.onTap, child: text)
                     : text;
 
                 if (!isLast) {
@@ -87,12 +86,15 @@ class PageContentHeader extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        if (statusBadges != null && statusBadges!.isNotEmpty) ...[
+                        if (statusBadges != null &&
+                            statusBadges!.isNotEmpty) ...[
                           const SizedBox(width: 12),
-                          ...statusBadges!.map((badge) => Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
-                                child: badge,
-                              )),
+                          ...statusBadges!.map(
+                            (badge) => Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: badge,
+                            ),
+                          ),
                         ],
                       ],
                     ),
@@ -114,10 +116,14 @@ class PageContentHeader extends StatelessWidget {
                 const SizedBox(width: 16),
                 Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: actions!.map((action) => Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: action,
-                      )).toList(),
+                  children: actions!
+                      .map(
+                        (action) => Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: action,
+                        ),
+                      )
+                      .toList(),
                 ),
               ],
             ],

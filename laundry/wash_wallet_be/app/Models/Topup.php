@@ -40,6 +40,8 @@ class Topup extends Model
     protected function casts(): array
     {
         return [
+            'user_id'        => 'integer',
+            'outlet_id'      => 'integer',
             'amount_money'  => 'integer',
             'coin_received' => 'integer',
             'payment_data'  => 'array',

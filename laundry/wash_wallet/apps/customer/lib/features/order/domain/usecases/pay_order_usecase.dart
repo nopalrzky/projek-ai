@@ -6,10 +6,7 @@ class PayOrderParams {
   final int orderId;
   final String paymentMethod;
 
-  PayOrderParams({
-    required this.orderId,
-    required this.paymentMethod,
-  });
+  PayOrderParams({required this.orderId, required this.paymentMethod});
 }
 
 class PayOrderUseCase {

@@ -1,11 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wash_wallet_core/wash_wallet_core.dart';
+import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 import '../../domain/usecases/get_all_usecase.dart';
 import '../../domain/usecases/get_by_id_usecase.dart';
 import '../../domain/usecases/store_usecase.dart';
 import '../../domain/usecases/update_usecase.dart';
 import 'petty_cash_state.dart';
 
-class PettyCashCubit extends Cubit<PettyCashState> {
+class PettyCashCubit extends Cubit<PettyCashState> with TablePaginationCubitMixin<PettyCashState> {
   final GetAllUsecase _getAllUsecase;
   final GetByIdUsecase _getByIdUsecase;
   final StoreUsecase _storePettyCashUsecase;
@@ -52,13 +54,18 @@ class PettyCashCubit extends Cubit<PettyCashState> {
     final result = await _getAllUsecase(params);
 
     result.when(
-      success: (pettyCashes) {
+      success: (data) {
         if (page == 1) {
           emit(
             PettyCashesLoaded(
-              pettyCashes: pettyCashes,
-              hasReachedMax: pettyCashes.length < perPage,
-              currentPage: page,
+              pettyCashes: data.items,
+              hasReachedMax: data.hasReachedMax,
+              currentPage: data.currentPage,
+              lastPage: data.lastPage,
+              total: data.total,
+              from: data.from,
+              to: data.to,
+              perPage: data.perPage,
             ),
           );
         } else {
@@ -66,16 +73,67 @@ class PettyCashCubit extends Cubit<PettyCashState> {
           if (currentState is PettyCashesLoaded) {
             emit(
               currentState.copyWith(
-                pettyCashes: currentState.pettyCashes + pettyCashes,
-                hasReachedMax:
-                    pettyCashes.isEmpty || pettyCashes.length < perPage,
-                currentPage: page,
+                pettyCashes: currentState.pettyCashes + data.items,
+                hasReachedMax: data.hasReachedMax,
+                currentPage: data.currentPage,
+                lastPage: data.lastPage,
+                total: data.total,
+                from: data.from,
+                to: data.to,
+                perPage: data.perPage,
               ),
             );
           }
         }
       },
       failure: (failure) => emit(PettyCashFailure(failure)),
+    );
+  }
+
+  /// Called exclusively by [AppPagination.onPageChanged] on tablet.
+  /// Always REPLACES petty cashes — never appends.
+  Future<void> changePage(
+    int page, {
+    String? search,
+    String? status,
+    int? outletId,
+    int? cashierId,
+    int? ownerId,
+    String sortBy = 'created_at',
+    String sortDirection = 'desc',
+  }) {
+    final current = state;
+    if (current is! PettyCashesLoaded) return Future.value();
+    return changePageGeneric<PettyCash>(
+      page: page,
+      currentPage: current.currentPage,
+      lastPage: current.lastPage,
+      request: () => _getAllUsecase(
+        GetAllParams(
+          page: page,
+          perPage: current.perPage,
+          search: search,
+          status: status,
+          outletId: outletId,
+          cashierId: cashierId,
+          ownerId: ownerId,
+          sortBy: sortBy,
+          sortDirection: sortDirection,
+        ),
+      ),
+      markPageLoading: () => current.copyWith(isPageLoading: true),
+      buildLoaded: (data) => PettyCashesLoaded(
+        pettyCashes: data.items,
+        hasReachedMax: data.hasReachedMax,
+        currentPage: data.currentPage,
+        lastPage: data.lastPage,
+        total: data.total,
+        from: data.from,
+        to: data.to,
+        perPage: data.perPage,
+        isPageLoading: false,
+      ),
+      buildError: (f) => PettyCashFailure(ServerFailure(message: f.message)),
     );
   }
 

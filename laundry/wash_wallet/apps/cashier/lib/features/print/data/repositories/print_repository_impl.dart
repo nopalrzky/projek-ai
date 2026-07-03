@@ -20,9 +20,15 @@ class PrintRepositoryImpl implements PrintRepository {
   }
 
   @override
-  Future<Result<PrintCoinInfo>> processReceipt(int orderId, {String? clientRequestId}) async {
+  Future<Result<PrintCoinInfo>> processReceipt(
+    int orderId, {
+    String? clientRequestId,
+  }) async {
     try {
-      final model = await _remoteDatasource.processReceipt(orderId, clientRequestId: clientRequestId);
+      final model = await _remoteDatasource.processReceipt(
+        orderId,
+        clientRequestId: clientRequestId,
+      );
       return Result.success(model.toEntity());
     } catch (e) {
       return Result.failure(ServerFailure(message: e.toString()));
@@ -30,9 +36,15 @@ class PrintRepositoryImpl implements PrintRepository {
   }
 
   @override
-  Future<Result<PrintCoinInfo>> processLabel(int orderId, {String? clientRequestId}) async {
+  Future<Result<PrintCoinInfo>> processLabel(
+    int orderId, {
+    String? clientRequestId,
+  }) async {
     try {
-      final model = await _remoteDatasource.processLabel(orderId, clientRequestId: clientRequestId);
+      final model = await _remoteDatasource.processLabel(
+        orderId,
+        clientRequestId: clientRequestId,
+      );
       return Result.success(model.toEntity());
     } catch (e) {
       return Result.failure(ServerFailure(message: e.toString()));

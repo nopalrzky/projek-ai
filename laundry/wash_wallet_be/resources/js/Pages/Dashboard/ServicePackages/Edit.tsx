@@ -119,7 +119,6 @@ const ServicePackageEdit = ({
     const handleUpdate = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
-        // Validation
         if (servicePackageItems.length === 0) {
             alert("Minimal harus ada 1 item dalam paket");
             return;
@@ -133,10 +132,8 @@ const ServicePackageEdit = ({
             return;
         }
 
-        // Update form data with service package items
         setData("servicePackageItems", servicePackageItems);
 
-        // Submit to server
         put(route("service-packages.update", servicePackage.id), {
             preserveScroll: true,
             onSuccess: () => {

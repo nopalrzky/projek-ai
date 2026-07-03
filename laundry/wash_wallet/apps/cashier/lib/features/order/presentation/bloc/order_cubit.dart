@@ -19,7 +19,7 @@ import '../../domain/usecases/get_weighing_draft_usecase.dart';
 import '../../domain/usecases/clear_weighing_draft_usecase.dart';
 import 'order_state.dart';
 
-class OrderCubit extends Cubit<OrderState> {
+class OrderCubit extends Cubit<OrderState> with TablePaginationCubitMixin<OrderState> {
   final GetAllUsecase _getAllUsecase;
   final GetByIdUsecase _getByIdUsecase;
   final StoreUsecase _storeUsecase;
@@ -72,6 +72,8 @@ class OrderCubit extends Cubit<OrderState> {
        _getNewOrderCountUsecase = getNewOrderCountUsecase,
        super(const OrderInitial());
 
+  int _requestGeneration = 0;
+
   Future<void> getAll({
     int page = 1,
     int perPage = 15,
@@ -90,7 +92,10 @@ class OrderCubit extends Cubit<OrderState> {
     String sortBy = 'orderDate',
     String sortDirection = 'desc',
   }) async {
-    emit(const OrderLoading());
+    final generation = ++_requestGeneration;
+    if (page == 1) {
+      emit(const OrderLoading());
+    }
 
     final result = await _getAllUsecase(
       page: page,
@@ -111,15 +116,101 @@ class OrderCubit extends Cubit<OrderState> {
       sortDirection: sortDirection,
     );
 
+    if (generation != _requestGeneration) return;
+
     result.when(
-      success: (orders) => emit(
-        OrdersLoaded(
-          orders: orders,
-          hasReachedMax: orders.length < perPage,
-          currentPage: page,
-        ),
-      ),
+      success: (data) {
+        if (page == 1) {
+          emit(
+            OrdersLoaded(
+              orders: data.items,
+              hasReachedMax: data.hasReachedMax,
+              currentPage: data.currentPage,
+              lastPage: data.lastPage,
+              total: data.total,
+              from: data.from,
+              to: data.to,
+              perPage: data.perPage,
+            ),
+          );
+        } else {
+          final currentState = state;
+          if (currentState is OrdersLoaded) {
+            emit(
+              currentState.copyWith(
+                orders: currentState.orders + data.items,
+                hasReachedMax: data.hasReachedMax,
+                currentPage: data.currentPage,
+                lastPage: data.lastPage,
+                total: data.total,
+                from: data.from,
+                to: data.to,
+                perPage: data.perPage,
+              ),
+            );
+          }
+        }
+      },
       failure: (failure) => emit(OrderError(failure.message)),
+    );
+  }
+
+  /// Called exclusively by [AppPagination.onPageChanged] on tablet.
+  /// Always REPLACES orders — never appends.
+  Future<void> changePage(
+    int page, {
+    String search = "",
+    String? status,
+    String? paymentStatus,
+    int? outletId,
+    int? customerId,
+    int? employeeId,
+    String? orderDateFrom,
+    String? orderDateTo,
+    String? estimatedCompletionFrom,
+    String? estimatedCompletionTo,
+    double? totalAmountMin,
+    double? totalAmountMax,
+    String sortBy = 'orderDate',
+    String sortDirection = 'desc',
+  }) {
+    final current = state;
+    if (current is! OrdersLoaded) return Future.value();
+    return changePageGeneric<Order>(
+      page: page,
+      currentPage: current.currentPage,
+      lastPage: current.lastPage,
+      request: () => _getAllUsecase(
+        page: page,
+        perPage: current.perPage,
+        search: search,
+        status: status,
+        paymentStatus: paymentStatus,
+        outletId: outletId,
+        customerId: customerId,
+        employeeId: employeeId,
+        orderDateFrom: orderDateFrom,
+        orderDateTo: orderDateTo,
+        estimatedCompletionFrom: estimatedCompletionFrom,
+        estimatedCompletionTo: estimatedCompletionTo,
+        totalAmountMin: totalAmountMin,
+        totalAmountMax: totalAmountMax,
+        sortBy: sortBy,
+        sortDirection: sortDirection,
+      ),
+      markPageLoading: () => current.copyWith(isPageLoading: true),
+      buildLoaded: (data) => OrdersLoaded(
+        orders: data.items,
+        hasReachedMax: data.hasReachedMax,
+        currentPage: data.currentPage,
+        lastPage: data.lastPage,
+        total: data.total,
+        from: data.from,
+        to: data.to,
+        perPage: data.perPage,
+        isPageLoading: false,
+      ),
+      buildError: (f) => OrderError(f.message),
     );
   }
 
@@ -136,10 +227,7 @@ class OrderCubit extends Cubit<OrderState> {
 
   Future<Order?> fetchOrderSilently(int id) async {
     final result = await _getByIdUsecase(id);
-    return result.when(
-      success: (order) => order,
-      failure: (_) => null,
-    );
+    return result.when(success: (order) => order, failure: (_) => null);
   }
 
   Future<void> store(StoreParams params, {required int outletId}) async {
@@ -158,11 +246,13 @@ class OrderCubit extends Cubit<OrderState> {
       },
       failure: (failure) async {
         if (failure is NetworkFailure || failure is ServerFailure) {
-          final draftResult = await _getDraftUsecase(GetDraftParams(
-            customerId: params.customerId,
-            outletId: outletId,
-            employeeId: params.employeeId,
-          ));
+          final draftResult = await _getDraftUsecase(
+            GetDraftParams(
+              customerId: params.customerId,
+              outletId: outletId,
+              employeeId: params.employeeId,
+            ),
+          );
           draftResult.when(
             success: (draft) {
               if (draft != null) {
@@ -195,7 +285,10 @@ class OrderCubit extends Cubit<OrderState> {
 
   Future<void> complete(int orderId) async {
     emit(const OrderLoading());
-    final result = await _completeUsecase(orderId, clientRequestId: IdempotencyKey.generate());
+    final result = await _completeUsecase(
+      orderId,
+      clientRequestId: IdempotencyKey.generate(),
+    );
     result.when(
       success: (order) => emit(
         OrderActionSuccess('Pesanan berhasil diselesaikan', order: order),
@@ -206,22 +299,26 @@ class OrderCubit extends Cubit<OrderState> {
 
   Future<void> accept(int orderId) async {
     emit(const OrderLoading());
-    final result = await _acceptUsecase(orderId, clientRequestId: IdempotencyKey.generate());
+    final result = await _acceptUsecase(
+      orderId,
+      clientRequestId: IdempotencyKey.generate(),
+    );
     result.when(
-      success: (order) => emit(
-        OrderActionSuccess('Pesanan berhasil diterima', order: order),
-      ),
+      success: (order) =>
+          emit(OrderActionSuccess('Pesanan berhasil diterima', order: order)),
       failure: (failure) => emit(OrderFailure(failure)),
     );
   }
 
   Future<void> reject(RejectParams params) async {
     emit(const OrderLoading());
-    final result = await _rejectUsecase(params, clientRequestId: IdempotencyKey.generate());
+    final result = await _rejectUsecase(
+      params,
+      clientRequestId: IdempotencyKey.generate(),
+    );
     result.when(
-      success: (order) => emit(
-        OrderActionSuccess('Pesanan berhasil ditolak', order: order),
-      ),
+      success: (order) =>
+          emit(OrderActionSuccess('Pesanan berhasil ditolak', order: order)),
       failure: (failure) => emit(OrderFailure(failure)),
     );
   }
@@ -232,19 +329,21 @@ class OrderCubit extends Cubit<OrderState> {
     result.when(
       success: (order) {
         clearWeighingDraft(
-          orderId: params.orderId, 
-          employeeId: params.employeeId, 
+          orderId: params.orderId,
+          employeeId: params.employeeId,
           outletId: order.outletId,
         );
         emit(OrderActionSuccess('Penimbangan berhasil disimpan', order: order));
       },
       failure: (failure) async {
         if (failure is NetworkFailure || failure is ServerFailure) {
-          final draftResult = await _getWeighingDraftUsecase(GetWeighingDraftParams(
-            orderId: params.orderId,
-            employeeId: params.employeeId,
-            outletId: outletId,
-          ));
+          final draftResult = await _getWeighingDraftUsecase(
+            GetWeighingDraftParams(
+              orderId: params.orderId,
+              employeeId: params.employeeId,
+              outletId: outletId,
+            ),
+          );
           draftResult.when(
             success: (draft) {
               if (draft != null) {
@@ -265,11 +364,13 @@ class OrderCubit extends Cubit<OrderState> {
 
   Future<void> start(int orderId) async {
     emit(const OrderLoading());
-    final result = await _startUsecase(orderId, clientRequestId: IdempotencyKey.generate());
+    final result = await _startUsecase(
+      orderId,
+      clientRequestId: IdempotencyKey.generate(),
+    );
     result.when(
-      success: (order) => emit(
-        OrderActionSuccess('Pesanan berhasil dimulai', order: order),
-      ),
+      success: (order) =>
+          emit(OrderActionSuccess('Pesanan berhasil dimulai', order: order)),
       failure: (failure) => emit(OrderFailure(failure)),
     );
   }

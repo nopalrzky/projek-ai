@@ -43,6 +43,9 @@ class Account extends Model
     protected function casts(): array
     {
         return [
+            'owner_id'         => 'integer',
+            'outlet_id'        => 'integer',
+            'parent_id'        => 'integer',
             'level'            => 'integer',
             'is_system'        => 'boolean',
             'is_transactional' => 'boolean',

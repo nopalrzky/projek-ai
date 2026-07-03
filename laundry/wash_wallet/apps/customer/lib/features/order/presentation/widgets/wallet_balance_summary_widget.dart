@@ -29,9 +29,7 @@ class WalletBalanceSummaryWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(context.radius.md),
-        border: Border.all(
-          color: textColor.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: textColor.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -40,10 +38,7 @@ class WalletBalanceSummaryWidget extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(
-                    Icons.account_balance_wallet,
-                    color: textColor,
-                  ),
+                  Icon(Icons.account_balance_wallet, color: textColor),
                   SizedBox(width: context.space.sm),
                   Text(
                     'Saldo Wallet Anda',

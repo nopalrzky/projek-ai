@@ -21,12 +21,9 @@ class OperationalSidebarHeader extends StatelessWidget {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 24.0),
         child: Center(
-          child: logoWidget ??
-              Icon(
-                Icons.business,
-                size: 32,
-                color: context.colors.primary,
-              ),
+          child:
+              logoWidget ??
+              Icon(Icons.business, size: 32, color: context.colors.primary),
         ),
       );
     }
@@ -35,10 +32,7 @@ class OperationalSidebarHeader extends StatelessWidget {
       padding: const EdgeInsets.all(24.0),
       child: Row(
         children: [
-          if (logoWidget != null) ...[
-            logoWidget!,
-            const SizedBox(width: 16),
-          ],
+          if (logoWidget != null) ...[logoWidget!, const SizedBox(width: 16)],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

@@ -186,7 +186,10 @@ class SetupOutletSettingScreen extends StatelessWidget {
                   ),
                   if (isReadOnly)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.secondaryContainer,
                         borderRadius: BorderRadius.circular(4),
@@ -194,7 +197,9 @@ class SetupOutletSettingScreen extends StatelessWidget {
                       child: Text(
                         'Read-only',
                         style: context.typography.labelSmall.copyWith(
-                          color: Theme.of(context).colorScheme.onSecondaryContainer,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSecondaryContainer,
                           fontSize: 10,
                         ),
                       ),

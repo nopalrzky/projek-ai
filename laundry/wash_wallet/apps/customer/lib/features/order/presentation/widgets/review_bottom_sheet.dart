@@ -51,7 +51,9 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                 return IconButton(
                   icon: Icon(
                     isSelected ? Icons.star_rounded : Icons.star_border_rounded,
-                    color: isSelected ? Colors.amber : context.colors.textTertiary,
+                    color: isSelected
+                        ? Colors.amber
+                        : context.colors.textTertiary,
                     size: 40,
                   ),
                   onPressed: () {
@@ -79,12 +81,12 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                       ? null
                       : () {
                           context.read<OrderCubit>().submitReview(
-                                SubmitReviewParams(
-                                  orderId: widget.order.id,
-                                  rating: _rating,
-                                  comment: _commentController.text,
-                                ),
-                              );
+                            SubmitReviewParams(
+                              orderId: widget.order.id,
+                              rating: _rating,
+                              comment: _commentController.text,
+                            ),
+                          );
                         },
                   isFullWidth: true,
                 );

@@ -39,15 +39,15 @@ class WaNotificationPreview extends Equatable {
 
   @override
   List<Object?> get props => [
-        orderId,
-        customerName,
-        customerPhone,
-        hasPhone,
-        messagePreview,
-        coinPrice,
-        hasEnoughCoin,
-        coinSource,
-        outletCoinBalance,
-        ownerCoinBalance,
-      ];
+    orderId,
+    customerName,
+    customerPhone,
+    hasPhone,
+    messagePreview,
+    coinPrice,
+    hasEnoughCoin,
+    coinSource,
+    outletCoinBalance,
+    ownerCoinBalance,
+  ];
 }

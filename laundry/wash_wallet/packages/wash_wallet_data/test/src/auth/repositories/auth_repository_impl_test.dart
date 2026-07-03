@@ -5,9 +5,23 @@ import 'package:wash_wallet_core/wash_wallet_core.dart';
 
 class MockAuthRemoteDatasource implements AuthRemoteDatasource {
   Future<AuthEmployeeModel> Function()? getMeMock;
-  Future<(String, AuthEmployeeModel)> Function({required String username, required String password})? loginMock;
-  Future<AuthEmployeeModel> Function({required String pin, required String pinConfirmation})? setupPinMock;
-  Future<(String, AuthEmployeeModel)> Function({int? employeeId, String? username, required String pin, String? deviceName})? verifyPinMock;
+  Future<(String, AuthEmployeeModel)> Function({
+    required String username,
+    required String password,
+  })?
+  loginMock;
+  Future<AuthEmployeeModel> Function({
+    required String pin,
+    required String pinConfirmation,
+  })?
+  setupPinMock;
+  Future<(String, AuthEmployeeModel)> Function({
+    int? employeeId,
+    String? username,
+    required String pin,
+    String? deviceName,
+  })?
+  verifyPinMock;
 
   @override
   Future<AuthEmployeeModel> getMe() {
@@ -16,20 +30,39 @@ class MockAuthRemoteDatasource implements AuthRemoteDatasource {
   }
 
   @override
-  Future<(String, AuthEmployeeModel)> login({required String username, required String password}) {
-    if (loginMock != null) return loginMock!(username: username, password: password);
+  Future<(String, AuthEmployeeModel)> login({
+    required String username,
+    required String password,
+  }) {
+    if (loginMock != null)
+      return loginMock!(username: username, password: password);
     throw UnimplementedError();
   }
 
   @override
-  Future<AuthEmployeeModel> setupPin({required String pin, required String pinConfirmation}) {
-    if (setupPinMock != null) return setupPinMock!(pin: pin, pinConfirmation: pinConfirmation);
+  Future<AuthEmployeeModel> setupPin({
+    required String pin,
+    required String pinConfirmation,
+  }) {
+    if (setupPinMock != null)
+      return setupPinMock!(pin: pin, pinConfirmation: pinConfirmation);
     throw UnimplementedError();
   }
 
   @override
-  Future<(String, AuthEmployeeModel)> verifyPin({int? employeeId, String? username, required String pin, String? deviceName}) {
-    if (verifyPinMock != null) return verifyPinMock!(employeeId: employeeId, username: username, pin: pin, deviceName: deviceName);
+  Future<(String, AuthEmployeeModel)> verifyPin({
+    int? employeeId,
+    String? username,
+    required String pin,
+    String? deviceName,
+  }) {
+    if (verifyPinMock != null)
+      return verifyPinMock!(
+        employeeId: employeeId,
+        username: username,
+        pin: pin,
+        deviceName: deviceName,
+      );
     throw UnimplementedError();
   }
 
@@ -65,7 +98,8 @@ class MockAuthLocalDatasource implements AuthLocalDatasource {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-class MockRememberedEmployeeLocalDatasource implements RememberedEmployeeLocalDatasource {
+class MockRememberedEmployeeLocalDatasource
+    implements RememberedEmployeeLocalDatasource {
   int saveAccountCallCount = 0;
   AuthEmployeeModel? lastSavedAccount;
 
@@ -122,7 +156,8 @@ void main() {
 
     test('clears token and returns AuthFailure on 401', () async {
       mockLocal.getTokenMock = () async => 'token';
-      mockRemote.getMeMock = () async => throw ApiException(message: 'Unauthenticated', statusCode: 401);
+      mockRemote.getMeMock = () async =>
+          throw ApiException(message: 'Unauthenticated', statusCode: 401);
       mockLocal.clearAllMock = () async {};
 
       final result = await repository.checkAuthStatus();
@@ -136,7 +171,8 @@ void main() {
 
     test('returns success with local data on NetworkException', () async {
       mockLocal.getTokenMock = () async => 'token';
-      mockRemote.getMeMock = () async => throw NetworkException(message: 'Offline');
+      mockRemote.getMeMock = () async =>
+          throw NetworkException(message: 'Offline');
       mockLocal.getEmployeeMock = () async => tEmployeeModel;
 
       final result = await repository.checkAuthStatus();
@@ -147,10 +183,11 @@ void main() {
         failure: (_) => fail('Should be success due to local data fallback'),
       );
     });
-    
+
     test('returns success with local data on ServerException (500)', () async {
       mockLocal.getTokenMock = () async => 'token';
-      mockRemote.getMeMock = () async => throw ApiException(message: 'Server error', statusCode: 500);
+      mockRemote.getMeMock = () async =>
+          throw ApiException(message: 'Server error', statusCode: 500);
       mockLocal.getEmployeeMock = () async => tEmployeeModel;
 
       final result = await repository.checkAuthStatus();
@@ -165,9 +202,10 @@ void main() {
 
   group('login', () {
     test('tidak memanggil saveAccount pada remembered datasource', () async {
-      mockRemote.loginMock = ({required String username, required String password}) async {
-        return ('token', tEmployeeModel);
-      };
+      mockRemote.loginMock =
+          ({required String username, required String password}) async {
+            return ('token', tEmployeeModel);
+          };
 
       final result = await repository.login(username: 'test', password: 'pass');
 
@@ -178,11 +216,15 @@ void main() {
 
   group('setupPin', () {
     test('tidak memanggil saveAccount pada remembered datasource', () async {
-      mockRemote.setupPinMock = ({required String pin, required String pinConfirmation}) async {
-        return tEmployeeModel;
-      };
+      mockRemote.setupPinMock =
+          ({required String pin, required String pinConfirmation}) async {
+            return tEmployeeModel;
+          };
 
-      final result = await repository.setupPin(pin: '123456', pinConfirmation: '123456');
+      final result = await repository.setupPin(
+        pin: '123456',
+        pinConfirmation: '123456',
+      );
 
       expect(mockRemembered.saveAccountCallCount, 0);
       expect(result.isSuccess, true);
@@ -191,9 +233,15 @@ void main() {
 
   group('verifyPin', () {
     test('tidak memanggil saveAccount pada remembered datasource', () async {
-      mockRemote.verifyPinMock = ({int? employeeId, String? username, required String pin, String? deviceName}) async {
-        return ('token', tEmployeeModel);
-      };
+      mockRemote.verifyPinMock =
+          ({
+            int? employeeId,
+            String? username,
+            required String pin,
+            String? deviceName,
+          }) async {
+            return ('token', tEmployeeModel);
+          };
 
       final result = await repository.verifyPin(pin: '123456');
 
@@ -206,7 +254,9 @@ void main() {
     test('memanggil saveAccount pada remembered datasource', () async {
       mockLocal.getEmployeeMock = () async => tEmployeeModel;
 
-      final result = await repository.saveRememberedAccount(tEmployeeModel.toEntity());
+      final result = await repository.saveRememberedAccount(
+        tEmployeeModel.toEntity(),
+      );
 
       expect(mockRemembered.saveAccountCallCount, 1);
       expect(mockRemembered.lastSavedAccount?.id, tEmployeeModel.id);
@@ -216,7 +266,9 @@ void main() {
     test('gagal jika employee tidak ada di local cache', () async {
       mockLocal.getEmployeeMock = () async => null;
 
-      final result = await repository.saveRememberedAccount(tEmployeeModel.toEntity());
+      final result = await repository.saveRememberedAccount(
+        tEmployeeModel.toEntity(),
+      );
 
       expect(mockRemembered.saveAccountCallCount, 0);
       expect(result.isFailure, true);

@@ -228,7 +228,7 @@ class ExpenseService extends BaseService
 
                 $outlet = $this->outlet->findOrFail($data['outletId']);
 
-                if ($outlet->owner_id !== $this->resolveOwnerId()) {
+                if ((int) $outlet->owner_id !== (int) $this->resolveOwnerId()) {
                     throw new Exception('Akses ditolak. Anda hanya dapat mengakses outlet milik Anda sendiri.');
                 }
 

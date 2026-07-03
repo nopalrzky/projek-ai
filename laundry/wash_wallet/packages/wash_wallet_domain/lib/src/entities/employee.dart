@@ -64,7 +64,9 @@ class Employee extends Equatable {
       createdAt: model.createdAt,
       updatedAt: model.updatedAt,
       deletedAt: model.deletedAt,
-      accessibleOutlets: model.accessibleOutlets?.map<OutletAccess>((e) => e.toEntity()).toList(),
+      accessibleOutlets: model.accessibleOutlets
+          ?.map<OutletAccess>((e) => e.toEntity())
+          .toList(),
     );
   }
 

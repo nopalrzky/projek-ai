@@ -19,11 +19,11 @@ class Home extends Equatable {
 
   @override
   List<Object?> get props => [
-        employeeName,
-        employeePhone,
-        cashBalance,
-        ordersInProduction,
-        ordersNotPickedUp,
-        ordersPickedUp,
-      ];
+    employeeName,
+    employeePhone,
+    cashBalance,
+    ordersInProduction,
+    ordersNotPickedUp,
+    ordersPickedUp,
+  ];
 }

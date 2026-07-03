@@ -77,7 +77,9 @@ class EmployeeModel with _$EmployeeModel {
     createdAt: entity.createdAt,
     updatedAt: entity.updatedAt,
     deletedAt: entity.deletedAt,
-    accessibleOutlets: entity.accessibleOutlets?.map((e) => OutletAccessModel.fromEntity(e)).toList(),
+    accessibleOutlets: entity.accessibleOutlets
+        ?.map((e) => OutletAccessModel.fromEntity(e))
+        .toList(),
   );
 }
 

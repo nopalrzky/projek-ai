@@ -1,214 +1,234 @@
 import 'package:flutter/material.dart';
-import 'app_colors.dart';
+
+import 'app_dark_colors.dart';
 import 'semantic_colors.dart';
 
 class DarkSemanticColors extends SemanticColors {
   const DarkSemanticColors();
 
   @override
-  Color get primary => AppColors.teal400;
+  Color get primary => AppDarkColors.primary500;
 
   @override
-  Color get onPrimary => AppColors.neutral900;
+  Color get onPrimary => AppDarkColors.textPrimary;
 
   @override
-  Color get primaryDark => AppColors.teal600;
+  Color get primaryDark => AppDarkColors.primary300;
 
   @override
-  Color get primaryLight => AppColors.teal800;
+  Color get primaryLight => AppDarkColors.primary200;
 
   @override
-  Color get primarySurface => AppColors.teal900.withValues(alpha: 0.2);
+  Color get primarySurface => AppDarkColors.primary200;
 
   @override
-  Color get secondary => AppColors.teal300;
+  Color get secondary => AppDarkColors.secondary500;
 
   @override
-  Color get onSecondary => AppColors.neutral900;
+  Color get onSecondary => AppDarkColors.textPrimary;
 
   @override
-  Color get secondaryDark => AppColors.teal500;
+  Color get secondaryDark => AppDarkColors.secondary300;
 
   @override
-  Color get secondaryLight => AppColors.teal700;
+  Color get secondaryLight => AppDarkColors.secondary800;
 
   @override
-  Color get secondarySurface => AppColors.teal900.withValues(alpha: 0.15);
+  Color get secondarySurface => AppDarkColors.secondary100;
 
   @override
-  Color get background => AppColors.neutral900;
+  Color get background => AppDarkColors.background;
 
   @override
-  Color get surface => AppColors.neutral800;
+  Color get surface => AppDarkColors.surface;
 
   @override
-  Color get surfaceElevated => AppColors.neutral700;
+  Color get surfaceElevated => AppDarkColors.surfaceElevated;
 
   @override
-  Color get surfaceVariant => AppColors.neutral800.withValues(alpha: 0.6);
+  Color get surfaceVariant => AppDarkColors.surfaceMuted;
 
   @override
-  Color get overlay => AppColors.neutral900.withValues(alpha: 0.8);
+  Color get surfaceMuted => AppDarkColors.surfaceMuted;
 
   @override
-  Color get border => AppColors.neutral600;
+  Color get overlay => AppDarkColors.gray50.withValues(alpha: 0.82);
 
   @override
-  Color get borderStrong => AppColors.neutral500;
+  Color get border => AppDarkColors.border;
 
   @override
-  Color get outline => AppColors.neutral600;
+  Color get borderStrong => AppDarkColors.borderHover;
 
   @override
-  Color get divider => AppColors.neutral700;
+  Color get outline => AppDarkColors.border;
 
   @override
-  Color get textPrimary => AppColors.neutral50;
+  Color get divider => AppDarkColors.borderLight;
 
   @override
-  Color get textSecondary => AppColors.neutral300;
+  Color get borderLight => AppDarkColors.borderLight;
 
   @override
-  Color get textTertiary => AppColors.neutral400;
+  Color get borderHover => AppDarkColors.borderHover;
 
   @override
-  Color get textDisabled => AppColors.neutral600;
+  Color get textPrimary => AppDarkColors.textPrimary;
 
   @override
-  Color get textOnPrimary => AppColors.neutral900;
+  Color get textSecondary => AppDarkColors.textSecondary;
 
   @override
-  Color get neutralMuted => AppColors.neutral600;
+  Color get textTertiary => AppDarkColors.textTertiary;
 
   @override
-  Color get neutralForeground => AppColors.neutral200;
+  Color get textDisabled => AppDarkColors.gray400;
 
   @override
-  Color get disabled => AppColors.neutral700;
+  Color get textOnPrimary => AppDarkColors.textPrimary;
 
   @override
-  Color get disabledBorder => AppColors.neutral600;
+  Color get neutralMuted => AppDarkColors.gray500;
 
   @override
-  Color get hover => AppColors.neutral0.withValues(alpha: 0.08);
+  Color get neutralForeground => AppDarkColors.gray800;
 
   @override
-  Color get pressed => AppColors.neutral0.withValues(alpha: 0.12);
+  Color get disabled => AppDarkColors.gray300;
 
   @override
-  Color get focus => AppColors.teal400;
+  Color get disabledBorder => AppDarkColors.gray400;
 
   @override
-  Color get success => AppColors.success500;
+  Color get hover => AppDarkColors.textPrimary.withValues(alpha: 0.08);
 
   @override
-  Color get successLight => AppColors.success900;
+  Color get pressed => AppDarkColors.textPrimary.withValues(alpha: 0.12);
 
   @override
-  Color get successDark => AppColors.success600;
+  Color get focus => AppDarkColors.primary600;
 
   @override
-  Color get successSurface => AppColors.success900.withValues(alpha: 0.2);
+  Color get success => AppDarkColors.success500;
 
   @override
-  Color get onSuccess => AppColors.neutral900;
+  Color get successLight => AppDarkColors.success700;
 
   @override
-  Color get warning => AppColors.warning500;
+  Color get successDark => AppDarkColors.success300;
 
   @override
-  Color get warningLight => AppColors.warning900;
+  Color get successSurface => AppDarkColors.success500.withValues(alpha: 0.12);
 
   @override
-  Color get warningDark => AppColors.warning600;
+  Color get onSuccess => AppDarkColors.gray50;
 
   @override
-  Color get warningSurface => AppColors.warning900.withValues(alpha: 0.2);
+  Color get warning => AppDarkColors.warning500;
 
   @override
-  Color get onWarning => AppColors.neutral900;
+  Color get warningLight => AppDarkColors.warning700;
 
   @override
-  Color get error => AppColors.error500;
+  Color get warningDark => AppDarkColors.warning300;
 
   @override
-  Color get errorLight => AppColors.error900;
+  Color get warningSurface => AppDarkColors.warning500.withValues(alpha: 0.12);
 
   @override
-  Color get errorDark => AppColors.error600;
+  Color get onWarning => AppDarkColors.gray50;
 
   @override
-  Color get errorSurface => AppColors.error900.withValues(alpha: 0.2);
+  Color get error => AppDarkColors.error500;
 
   @override
-  Color get onError => AppColors.neutral900;
+  Color get errorLight => AppDarkColors.error700;
 
   @override
-  Color get info => AppColors.info500;
+  Color get errorDark => AppDarkColors.error300;
 
   @override
-  Color get infoLight => AppColors.info900;
+  Color get errorSurface => AppDarkColors.error500.withValues(alpha: 0.12);
 
   @override
-  Color get infoDark => AppColors.info600;
+  Color get onError => AppDarkColors.textPrimary;
 
   @override
-  Color get infoSurface => AppColors.info900.withValues(alpha: 0.2);
+  Color get info => AppDarkColors.info500;
 
   @override
-  Color get onInfo => AppColors.neutral900;
+  Color get infoLight => AppDarkColors.info700;
 
   @override
-  Color get revenue => AppColors.success500;
+  Color get infoDark => AppDarkColors.info300;
 
   @override
-  Color get expense => AppColors.error500;
+  Color get infoSurface => AppDarkColors.info500.withValues(alpha: 0.12);
 
   @override
-  Color get pending => AppColors.warning500;
+  Color get onInfo => AppDarkColors.gray50;
 
   @override
-  Color get completed => AppColors.success900.withValues(alpha: 0.3);
+  Color get revenue => AppDarkColors.success500;
 
   @override
-  Color get cancelled => AppColors.neutral600;
+  Color get expense => AppDarkColors.error500;
 
   @override
-  Color get lowStock => AppColors.warning500;
+  Color get pending => AppDarkColors.warning500;
 
   @override
-  Color get outOfStock => AppColors.error500;
+  Color get completed => AppDarkColors.success500.withValues(alpha: 0.16);
 
-  // Surface tiers — dark overrides
   @override
-  Color get surfaceSubtle => AppColors.neutral800;
+  Color get cancelled => AppDarkColors.gray500;
 
   @override
-  Color get surfaceSelected => AppColors.teal900.withValues(alpha: 0.25);
+  Color get lowStock => AppDarkColors.warning500;
 
   @override
-  Color get surfaceDeep => AppColors.neutral700;
+  Color get outOfStock => AppDarkColors.error500;
 
-  // Icon containers — dark overrides
   @override
-  Color get iconContainerPrimary => AppColors.teal900.withValues(alpha: 0.2);
+  Color get surfaceSubtle => AppDarkColors.surfaceMuted;
 
   @override
-  Color get iconContainerNeutral => AppColors.neutral700;
+  Color get surfaceSelected => AppDarkColors.suggestionSelected;
 
   @override
-  Color get iconContainerSuccess => AppColors.success900.withValues(alpha: 0.2);
+  Color get surfaceDeep => AppDarkColors.background;
 
   @override
-  Color get iconContainerWarning => AppColors.warning900.withValues(alpha: 0.2);
+  Color get iconContainerPrimary =>
+      AppDarkColors.primary500.withValues(alpha: 0.12);
 
   @override
-  Color get iconContainerError => AppColors.error900.withValues(alpha: 0.2);
+  Color get iconContainerNeutral => AppDarkColors.gray300;
 
   @override
-  Color get iconContainerInfo => AppColors.info900.withValues(alpha: 0.2);
+  Color get iconContainerSuccess =>
+      AppDarkColors.success500.withValues(alpha: 0.12);
 
-  // Focus ring
   @override
-  Color get focusRing => AppColors.teal400.withValues(alpha: 0.3);
+  Color get iconContainerWarning =>
+      AppDarkColors.warning500.withValues(alpha: 0.12);
+
+  @override
+  Color get iconContainerError =>
+      AppDarkColors.error500.withValues(alpha: 0.12);
+
+  @override
+  Color get iconContainerInfo => AppDarkColors.info500.withValues(alpha: 0.12);
+
+  @override
+  Color get focusRing => AppDarkColors.ring;
+
+  @override
+  Color get accent => AppDarkColors.accent500;
+
+  @override
+  Color get onAccent => AppDarkColors.gray50;
+
+  @override
+  Color get accentSurface => AppDarkColors.accent500.withValues(alpha: 0.12);
 }

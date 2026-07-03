@@ -38,20 +38,20 @@ class PickupDateSelector extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isSelected
                     ? context.colors.primary
-                    : context.colors.surfaceVariant.withOpacity(0.5),
+                    : context.colors.surfaceVariant.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(context.radius.lg),
                 border: Border.all(
                   color: isSelected
                       ? context.colors.primary
-                      : context.colors.border.withOpacity(0.5),
+                      : context.colors.border.withValues(alpha: 0.5),
                 ),
                 boxShadow: isSelected
                     ? [
                         BoxShadow(
-                          color: context.colors.primary.withOpacity(0.3),
+                          color: context.colors.primary.withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
-                        )
+                        ),
                       ]
                     : [],
               ),
@@ -62,7 +62,7 @@ class PickupDateSelector extends StatelessWidget {
                     DateFormat('E').format(date),
                     style: context.typography.labelSmall.copyWith(
                       color: isSelected
-                          ? context.colors.onPrimary.withOpacity(0.8)
+                          ? context.colors.onPrimary.withValues(alpha: 0.8)
                           : context.colors.textSecondary,
                       fontWeight: FontWeight.w500,
                     ),

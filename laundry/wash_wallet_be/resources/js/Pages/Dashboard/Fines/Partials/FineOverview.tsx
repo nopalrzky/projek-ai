@@ -12,7 +12,6 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { FineOverviewProps } from "../types";
 
 const FineOverview: React.FC<FineOverviewProps> = ({ fine }) => {
-    // Calculate statistics from fineLogs
     const statistics = useMemo(() => {
         const logs = fine.fineLogs || [];
         const totalLogs = logs.length;

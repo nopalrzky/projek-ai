@@ -209,7 +209,6 @@ export interface DashboardIndexProps {
     outlets: OutletOption[];
 }
 
-// Kept for existing AssetShow component
 export interface TransactionalAccount {
     id: number;
     code: string;

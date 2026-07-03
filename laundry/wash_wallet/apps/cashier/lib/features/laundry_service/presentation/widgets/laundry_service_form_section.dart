@@ -194,7 +194,6 @@ class LaundryServiceFormSection extends StatelessWidget {
     );
   }
 
-
   Widget _buildCategoryDropdown(BuildContext context) {
     return BlocBuilder<CategoryCubit, CategoryState>(
       builder: (context, state) {
@@ -290,7 +289,10 @@ class LaundryServiceFormSection extends StatelessWidget {
 
         if (state is UnitsLoaded) {
           items = state.units
-              .map((u) => DropdownMenuItem(value: u.id, child: Text(u.symbol ?? '')))
+              .map(
+                (u) =>
+                    DropdownMenuItem(value: u.id, child: Text(u.symbol ?? '')),
+              )
               .toList();
         }
 
@@ -348,4 +350,3 @@ class LaundryServiceFormSection extends StatelessWidget {
     );
   }
 }
-

@@ -130,9 +130,7 @@ const About = () => {
 
     return (
         <GuestLayout>
-            {/* Hero Section */}
             <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 px-4 sm:px-6">
-                {/* Dynamic Gradient Background */}
                 <div
                     className="absolute inset-0 transition-all duration-500"
                     style={{
@@ -145,7 +143,6 @@ const About = () => {
                     }}
                 />
 
-                {/* Floating Icons */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     {Array.from({ length: 15 }, (_, i) => (
                         <div
@@ -186,7 +183,6 @@ const About = () => {
 
                 <div className="relative z-10 container-fluid py-16">
                     <div className="text-center max-w-4xl mx-auto animate-fadeInUp">
-                        {/* Badge */}
                         <div
                             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full backdrop-blur-md border transition-all duration-300 hover:scale-105 hover:shadow-xl mb-8"
                             style={{
@@ -207,7 +203,6 @@ const About = () => {
                             </span>
                         </div>
 
-                        {/* Main Headline */}
                         <h1
                             className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-[1.1] tracking-tight mb-6 text-balance"
                             style={{ color: "var(--color-text-primary)" }}
@@ -260,7 +255,6 @@ const About = () => {
                             🚀
                         </p>
 
-                        {/* Location & Year Info */}
                         <div className="flex flex-wrap gap-4 justify-center mb-10">
                             <div
                                 className="flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-sm border"
@@ -308,7 +302,6 @@ const About = () => {
                             </div>
                         </div>
 
-                        {/* CTA Button */}
                         <Button
                             size="xl"
                             variant="primary"
@@ -326,7 +319,6 @@ const About = () => {
                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700" />
                         </Button>
 
-                        {/* Trust Signal */}
                         <div className="mt-12 pt-8 space-y-4">
                             <div
                                 className="h-px w-24 mx-auto"
@@ -347,7 +339,6 @@ const About = () => {
                     </div>
                 </div>
 
-                {/* Bottom Fade */}
                 <div
                     className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
                     style={{
@@ -356,7 +347,6 @@ const About = () => {
                 />
             </section>
 
-            {/* About Washwallet Section */}
             <section className="py-20 sm:py-24 bg-surface">
                 <div className="container-fluid max-w-6xl">
                     <div className="text-center mb-16 animate-fadeInUp">
@@ -435,7 +425,6 @@ const About = () => {
                             menyenangkan para pengusaha laundry.
                         </p>
 
-                        {/* Quote Box */}
                         <Card
                             variant="elevated"
                             className="relative mt-8 animate-fadeInUp"
@@ -513,7 +502,6 @@ const About = () => {
                 </div>
             </section>
 
-            {/* Why Washwallet Section */}
             <section className="py-20 sm:py-24 bg-background">
                 <div className="container-fluid">
                     <div className="text-center mb-16 animate-fadeInUp">
@@ -597,7 +585,6 @@ const About = () => {
                 </div>
             </section>
 
-            {/* Vision & Mission Section */}
             <section className="py-20 sm:py-24 bg-surface">
                 <div className="container-fluid max-w-6xl">
                     <div className="text-center mb-16 animate-fadeInUp">
@@ -676,7 +663,6 @@ const About = () => {
                         ))}
                     </div>
 
-                    {/* Core Values */}
                     <div className="mt-16">
                         <h3
                             className="text-2xl font-bold text-center mb-8"
@@ -728,7 +714,6 @@ const About = () => {
                 </div>
             </section>
 
-            {/* Journey Section */}
             <section className="py-20 sm:py-24 bg-background relative overflow-hidden">
                 <div
                     className="absolute inset-0 opacity-5"
@@ -828,7 +813,6 @@ const About = () => {
                                     </CardContent>
                                 </Card>
 
-                                {/* Connector Line */}
                                 {index < milestones.length - 1 && (
                                     <div
                                         className="h-8 w-1 mx-auto my-4"
@@ -844,7 +828,6 @@ const About = () => {
                 </div>
             </section>
 
-            {/* Final CTA Section */}
             <section className="py-20 sm:py-24 relative overflow-hidden bg-surface">
                 <div
                     className="absolute inset-0 opacity-30"

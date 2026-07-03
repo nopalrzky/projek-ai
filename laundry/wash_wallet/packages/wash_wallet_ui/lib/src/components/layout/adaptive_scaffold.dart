@@ -52,11 +52,15 @@ class AdaptiveScaffold extends StatelessWidget {
         bottomNavigationBar: AppBottomBar.navigation(
           currentIndex: currentIndex,
           onTap: onDestinationSelected,
-          items: destinations.map((d) => AppBottomBarItem(
-            label: d.label,
-            icon: d.icon,
-            activeIcon: d.selectedIcon ?? d.icon,
-          )).toList(),
+          items: destinations
+              .map(
+                (d) => AppBottomBarItem(
+                  label: d.label,
+                  icon: d.icon,
+                  activeIcon: d.selectedIcon ?? d.icon,
+                ),
+              )
+              .toList(),
         ),
       );
     }
@@ -74,21 +78,22 @@ class AdaptiveScaffold extends StatelessWidget {
             indicatorColor: Theme.of(context).colorScheme.primaryContainer,
             leading: railLeadingWidget,
             trailing: railTrailingWidget,
-            destinations: destinations.map((d) => NavigationRailDestination(
-              icon: Icon(d.icon),
-              selectedIcon: Icon(d.selectedIcon ?? d.icon),
-              label: Text(d.label),
-              padding: const EdgeInsets.symmetric(vertical: 4),
-            )).toList(),
+            destinations: destinations
+                .map(
+                  (d) => NavigationRailDestination(
+                    icon: Icon(d.icon),
+                    selectedIcon: Icon(d.selectedIcon ?? d.icon),
+                    label: Text(d.label),
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                  ),
+                )
+                .toList(),
           ),
           const VerticalDivider(thickness: 1, width: 1),
           Expanded(child: body),
           if (showSecondaryBody && secondaryBody != null) ...[
             const VerticalDivider(thickness: 1, width: 1),
-            SizedBox(
-              width: secondaryBodyWidth,
-              child: secondaryBody!,
-            ),
+            SizedBox(width: secondaryBodyWidth, child: secondaryBody!),
           ],
         ],
       ),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../theme/extensions/theme_context_extension.dart';
 import '../../theme/density/app_density.dart';
+import '../../theme/responsive/app_breakpoints.dart';
 import '../empty_state/app_empty_state.dart';
 import 'models/data_table_column_def.dart';
 import 'models/data_table_action.dart';
+import '../pagination/app_pagination.dart';
 
 class AppDataTable<T> extends StatefulWidget {
   final List<DataTableColumnDef<T>> columns;
@@ -16,17 +18,22 @@ class AppDataTable<T> extends StatefulWidget {
   final bool selectable;
   final Set<T>? selectedRows;
   final void Function(Set<T>)? onSelectionChanged;
-  final double rowHeight;
+  final double? rowHeight;
   final bool stickyHeader;
-  final AppDensityMode densityMode;
+  final AppDensityMode? densityMode;
   final void Function(DataTableColumnDef<T> column, bool ascending)? onSort;
   final String? sortColumnId;
   final bool sortAscending;
+  final double headerHeight;
+  final double? columnGap;
 
   // Pagination
   final int? totalCount;
   final int? currentPage;
   final int? pageSize;
+  final int? lastPage;
+  final int? from;
+  final int? to;
   final void Function(int page)? onPageChanged;
 
   final void Function(T row)? onRowTap;
@@ -44,15 +51,20 @@ class AppDataTable<T> extends StatefulWidget {
     this.selectable = false,
     this.selectedRows,
     this.onSelectionChanged,
-    this.rowHeight = 56.0,
+    this.rowHeight,
     this.stickyHeader = true,
-    this.densityMode = AppDensityMode.compact,
+    this.densityMode,
     this.onSort,
     this.sortColumnId,
     this.sortAscending = true,
+    this.headerHeight = 52.0,
+    this.columnGap,
     this.totalCount,
     this.currentPage,
     this.pageSize,
+    this.lastPage,
+    this.from,
+    this.to,
     this.onPageChanged,
     this.onRowTap,
     this.isRowHighlighted,
@@ -63,6 +75,27 @@ class AppDataTable<T> extends StatefulWidget {
 }
 
 class _AppDataTableState<T> extends State<AppDataTable<T>> {
+  AppDensityMode _resolvedDensityMode(BuildContext context) =>
+      widget.densityMode ??
+      AppDensity.modeForSizeClass(AppBreakpoints.of(context));
+
+  double _resolvedRowHeight(BuildContext context) =>
+      widget.rowHeight ??
+      AppDensity.tableRowHeight(_resolvedDensityMode(context));
+
+  double _resolvedColumnGap(BuildContext context) =>
+      widget.columnGap ??
+      AppDensity.tableColumnGap(_resolvedDensityMode(context));
+
+  double _rowActionWidth(BuildContext context) {
+    final actionCount = widget.rowActions?.length ?? 0;
+    if (actionCount == 0) return 0;
+    final mode = _resolvedDensityMode(context);
+    final actionSize = AppDensity.tableRowActionSize(mode);
+    final gap = AppDensity.tableRowActionGap(mode);
+    return (actionCount * actionSize) + ((actionCount - 1) * gap);
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.isLoading && widget.rows.isEmpty) {
@@ -73,7 +106,9 @@ class _AppDataTableState<T> extends State<AppDataTable<T>> {
       return Center(
         child: Text(
           widget.errorMessage!,
-          style: context.typography.bodyMedium.copyWith(color: context.colors.error),
+          style: context.typography.bodyMedium.copyWith(
+            color: context.colors.error,
+          ),
         ),
       );
     }
@@ -92,12 +127,15 @@ class _AppDataTableState<T> extends State<AppDataTable<T>> {
       children: [
         if (widget.isLoading) const LinearProgressIndicator(),
         _buildHeaderRow(context),
-        const Divider(height: 1),
         Expanded(
           child: ListView.separated(
             itemCount: widget.rows.length,
-            separatorBuilder: (context, index) => const Divider(height: 1),
-            itemBuilder: (context, index) => _buildRow(context, widget.rows[index]),
+            separatorBuilder: (context, index) => Divider(
+              height: 1,
+              color: context.colors.outlineVariant.withValues(alpha: 0.65),
+            ),
+            itemBuilder: (context, index) =>
+                _buildRow(context, widget.rows[index]),
           ),
         ),
         if (widget.totalCount != null && widget.currentPage != null)
@@ -108,8 +146,19 @@ class _AppDataTableState<T> extends State<AppDataTable<T>> {
     return Container(
       decoration: BoxDecoration(
         color: context.colors.surface,
-        border: Border.all(color: context.colors.outlineVariant),
+        border: Border.all(
+          color: context.colors.outlineVariant.withValues(alpha: 0.85),
+        ),
         borderRadius: BorderRadius.circular(context.radius.md),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: context.isDarkMode ? 0.18 : 0.04,
+            ),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(context.radius.md),
@@ -120,14 +169,21 @@ class _AppDataTableState<T> extends State<AppDataTable<T>> {
 
   Widget _buildHeaderRow(BuildContext context) {
     return Container(
-      height: widget.rowHeight,
-      color: context.colors.surfaceContainerHighest.withValues(alpha: 0.5),
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      height: widget.headerHeight,
+      padding: EdgeInsets.symmetric(horizontal: context.space.md),
+      decoration: BoxDecoration(
+        color: context.colors.surfaceSubtle,
+        border: Border(
+          bottom: BorderSide(
+            color: context.colors.outlineVariant.withValues(alpha: 0.85),
+          ),
+        ),
+      ),
       child: Row(
         children: [
           if (widget.selectable)
             Padding(
-              padding: const EdgeInsets.only(right: 16.0),
+              padding: EdgeInsets.only(right: context.space.md),
               child: Checkbox(
                 value: widget.selectedRows?.length == widget.rows.length,
                 onChanged: (val) {
@@ -141,54 +197,64 @@ class _AppDataTableState<T> extends State<AppDataTable<T>> {
                 },
               ),
             ),
-          ...widget.columns.map((col) {
-            Widget headerCell = Text(
-              col.header,
-              style: context.typography.labelMedium.copyWith(
-                fontWeight: FontWeight.bold,
-                color: context.colors.onSurfaceVariant,
-              ),
-              textAlign: col.headerAlign,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            );
-
-            if (col.sortable) {
-              final isSorted = widget.sortColumnId == col.id;
-              headerCell = InkWell(
-                onTap: () {
-                  if (widget.onSort != null) {
-                    widget.onSort!(col, isSorted ? !widget.sortAscending : true);
-                  }
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    headerCell,
-                    const SizedBox(width: 4),
-                    Icon(
-                      isSorted
-                          ? (widget.sortAscending ? Icons.arrow_upward : Icons.arrow_downward)
-                          : Icons.unfold_more,
-                      size: 14,
-                      color: isSorted ? context.colors.primary : context.colors.onSurfaceVariant,
-                    ),
-                  ],
+          ..._buildCellsWithGap(
+            context,
+            widget.columns.map((col) {
+              Widget headerCell = Text(
+                col.header,
+                style: context.typography.labelMedium.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: context.colors.onSurfaceVariant,
                 ),
+                textAlign: col.headerAlign,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               );
-            }
 
-            return col.width != null
-                ? SizedBox(width: col.width, child: headerCell)
-                : Expanded(flex: col.flex, child: headerCell);
-          }),
+              if (col.sortable) {
+                final isSorted = widget.sortColumnId == col.id;
+                headerCell = InkWell(
+                  onTap: () {
+                    if (widget.onSort != null) {
+                      widget.onSort!(
+                        col,
+                        isSorted ? !widget.sortAscending : true,
+                      );
+                    }
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      headerCell,
+                      const SizedBox(width: 4),
+                      Icon(
+                        isSorted
+                            ? (widget.sortAscending
+                                  ? Icons.arrow_upward
+                                  : Icons.arrow_downward)
+                            : Icons.unfold_more,
+                        size: 14,
+                        color: isSorted
+                            ? context.colors.primary
+                            : context.colors.onSurfaceVariant,
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return col.width != null
+                  ? SizedBox(width: col.width, child: headerCell)
+                  : Expanded(flex: col.flex, child: headerCell);
+            }).toList(),
+          ),
           if (widget.rowActions != null && widget.rowActions!.isNotEmpty)
             SizedBox(
-              width: widget.rowActions!.length * 44.0,
+              width: _rowActionWidth(context),
               child: Text(
                 'Aksi',
                 style: context.typography.labelMedium.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
                   color: context.colors.onSurfaceVariant,
                 ),
                 textAlign: TextAlign.center,
@@ -200,115 +266,169 @@ class _AppDataTableState<T> extends State<AppDataTable<T>> {
   }
 
   Widget _buildRow(BuildContext context, T row) {
-    final isSelected = widget.selectable && (widget.selectedRows?.contains(row) ?? false);
+    final isSelected =
+        widget.selectable && (widget.selectedRows?.contains(row) ?? false);
     final isHighlighted = widget.isRowHighlighted?.call(row) ?? false;
-    
-    Color bgColor = Colors.transparent;
+
+    Color bgColor = context.colors.surface;
     if (isSelected) {
-      bgColor = context.colors.primaryContainer.withValues(alpha: 0.3);
+      bgColor = context.colors.primarySurface;
     } else if (isHighlighted) {
-      bgColor = context.colors.secondarySurface.withValues(alpha: 0.2);
+      bgColor = context.colors.surfaceSelected;
     }
 
-    return InkWell(
-      onTap: widget.onRowTap != null ? () => widget.onRowTap!(row) : null,
-      child: Container(
-        height: widget.rowHeight,
-        color: bgColor,
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Row(
-          children: [
-            if (widget.selectable)
-              Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: Checkbox(
-                  value: isSelected,
-                  onChanged: (val) {
-                    if (widget.onSelectionChanged != null && widget.selectedRows != null) {
-                      final newSelection = Set<T>.from(widget.selectedRows!);
-                      if (val == true) {
-                        newSelection.add(row);
-                      } else {
-                        newSelection.remove(row);
-                      }
-                      widget.onSelectionChanged!(newSelection);
-                    }
-                  },
-                ),
-              ),
-            ...widget.columns.map((col) {
-              final cell = col.width != null
-                  ? SizedBox(width: col.width, child: col.cellBuilder(context, row))
-                  : Expanded(flex: col.flex, child: col.cellBuilder(context, row));
-              return cell;
-            }),
-            if (widget.rowActions != null && widget.rowActions!.isNotEmpty)
-              SizedBox(
-                width: widget.rowActions!.length * 44.0,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: widget.rowActions!.map((action) {
-                    final visible = action.isVisible?.call(row) ?? true;
-                    if (!visible) return const SizedBox(width: 44, height: 44);
-                    
-                    final enabled = action.isEnabled?.call(row) ?? true;
-                    
-                    return Tooltip(
-                      message: action.tooltip,
-                      child: IconButton(
-                        icon: Icon(action.icon, size: 20),
-                        color: enabled ? (action.color ?? context.colors.onSurfaceVariant) : context.colors.onSurface.withValues(alpha: 0.38),
-                        onPressed: enabled ? () => action.onTap(row) : null,
-                        constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-                        padding: EdgeInsets.zero,
+    return Material(
+      color: bgColor,
+      child: InkWell(
+        onTap: widget.onRowTap != null ? () => widget.onRowTap!(row) : null,
+        hoverColor: context.colors.primarySurface.withValues(alpha: 0.45),
+        splashColor: context.colors.primarySurface,
+        child: SizedBox(
+          height: _resolvedRowHeight(context),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: context.space.md),
+            child: Row(
+              children: [
+                if (widget.selectable)
+                  Padding(
+                    padding: EdgeInsets.only(right: context.space.md),
+                    child: Checkbox(
+                      value: isSelected,
+                      onChanged: (val) {
+                        if (widget.onSelectionChanged != null &&
+                            widget.selectedRows != null) {
+                          final newSelection = Set<T>.from(
+                            widget.selectedRows!,
+                          );
+                          if (val == true) {
+                            newSelection.add(row);
+                          } else {
+                            newSelection.remove(row);
+                          }
+                          widget.onSelectionChanged!(newSelection);
+                        }
+                      },
+                    ),
+                  ),
+                ..._buildCellsWithGap(
+                  context,
+                  widget.columns.map((col) {
+                    final cell = DefaultTextStyle.merge(
+                      style: context.typography.bodyMedium.copyWith(
+                        color: context.colors.onSurface,
                       ),
+                      child: col.cellBuilder(context, row),
                     );
+
+                    return col.width != null
+                        ? SizedBox(width: col.width, child: cell)
+                        : Expanded(flex: col.flex, child: cell);
                   }).toList(),
                 ),
-              ),
-          ],
+                if (widget.rowActions != null && widget.rowActions!.isNotEmpty)
+                  SizedBox(
+                    width: _rowActionWidth(context),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: _buildRowActionButtons(context, row),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
+  List<Widget> _buildRowActionButtons(BuildContext context, T row) {
+    final mode = _resolvedDensityMode(context);
+    final actionSize = AppDensity.tableRowActionSize(mode);
+    final actionGap = AppDensity.tableRowActionGap(mode);
+    final actions = widget.rowActions ?? [];
+
+    final buttons = <Widget>[];
+    for (var i = 0; i < actions.length; i++) {
+      final action = actions[i];
+      final visible = action.isVisible?.call(row) ?? true;
+      if (!visible) {
+        buttons.add(SizedBox(width: actionSize, height: actionSize));
+      } else {
+        final enabled = action.isEnabled?.call(row) ?? true;
+
+        buttons.add(
+          Tooltip(
+            message: action.tooltip,
+            child: IconButton(
+              icon: Icon(action.icon, size: 18),
+              color: enabled
+                  ? (action.color ?? context.colors.onSurfaceVariant)
+                  : context.colors.onSurface.withValues(alpha: 0.38),
+              onPressed: enabled ? () => action.onTap(row) : null,
+              constraints: BoxConstraints(
+                minWidth: actionSize,
+                minHeight: actionSize,
+              ),
+              padding: EdgeInsets.zero,
+              style: IconButton.styleFrom(
+                backgroundColor: enabled
+                    ? context.colors.surfaceSubtle
+                    : Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(context.radius.sm),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      if (i < actions.length - 1) {
+        buttons.add(SizedBox(width: actionGap));
+      }
+    }
+
+    return buttons;
+  }
+
   Widget _buildPagination(BuildContext context) {
-    final totalPages = widget.pageSize != null && widget.pageSize! > 0 
-        ? (widget.totalCount! / widget.pageSize!).ceil() 
-        : 1;
-        
+    if (widget.totalCount == null ||
+        widget.currentPage == null ||
+        widget.lastPage == null) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       decoration: BoxDecoration(
         color: context.colors.surface,
-        border: Border(top: BorderSide(color: context.colors.outlineVariant)),
+        border: Border(
+          top: BorderSide(
+            color: context.colors.outlineVariant.withValues(alpha: 0.85),
+          ),
+        ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Text(
-            'Total: ${widget.totalCount}',
-            style: context.typography.bodySmall.copyWith(color: context.colors.onSurfaceVariant),
-          ),
-          const Spacer(),
-          IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: widget.currentPage! > 1 && widget.onPageChanged != null
-                ? () => widget.onPageChanged!(widget.currentPage! - 1)
-                : null,
-          ),
-          Text(
-            'Page ${widget.currentPage} of $totalPages',
-            style: context.typography.bodySmall,
-          ),
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: widget.currentPage! < totalPages && widget.onPageChanged != null
-                ? () => widget.onPageChanged!(widget.currentPage! + 1)
-                : null,
-          ),
-        ],
+      child: AppPagination(
+        currentPage: widget.currentPage!,
+        lastPage: widget.lastPage!,
+        total: widget.totalCount!,
+        from: widget.from,
+        to: widget.to,
+        isLoading: widget.isLoading,
+        onPageChanged: widget.onPageChanged,
       ),
     );
+  }
+
+  List<Widget> _buildCellsWithGap(BuildContext context, List<Widget> cells) {
+    final gap = _resolvedColumnGap(context);
+    if (gap <= 0 || cells.isEmpty) return cells;
+    final result = <Widget>[];
+    for (int i = 0; i < cells.length; i++) {
+      result.add(cells[i]);
+      if (i < cells.length - 1) {
+        result.add(SizedBox(width: gap));
+      }
+    }
+    return result;
   }
 }

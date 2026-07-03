@@ -8,7 +8,10 @@ import '../bloc/unit_cubit.dart';
 class UnitProvider {
   UnitProvider._();
 
-  static UnitRemoteDatasource createRemoteDatasource(Dio dio, ApiEndpoints endpoints) {
+  static UnitRemoteDatasource createRemoteDatasource(
+    Dio dio,
+    ApiEndpoints endpoints,
+  ) {
     return UnitRemoteDatasourceImpl(dio, endpoints);
   }
 

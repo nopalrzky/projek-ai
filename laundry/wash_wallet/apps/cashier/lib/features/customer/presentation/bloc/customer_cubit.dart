@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wash_wallet_core/wash_wallet_core.dart';
+import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 import '../../domain/usecases/get_all_usecase.dart';
 import '../../domain/usecases/get_by_id_usecase.dart';
 import '../../domain/usecases/store_usecase.dart';
@@ -8,7 +10,7 @@ import '../../domain/usecases/store_membership_contract_usecase.dart';
 import '../../domain/usecases/store_customer_subscription_usecase.dart';
 import 'customer_state.dart';
 
-class CustomerCubit extends Cubit<CustomerState> {
+class CustomerCubit extends Cubit<CustomerState> with TablePaginationCubitMixin<CustomerState> {
   final GetAllUsecase _getAllUsecase;
   final GetByIdUsecase _getByIdUsecase;
   final StoreUsecase _storeUsecase;
@@ -62,13 +64,18 @@ class CustomerCubit extends Cubit<CustomerState> {
     final result = await _getAllUsecase(params);
 
     result.when(
-      success: (customers) {
+      success: (data) {
         if (page == 1) {
           emit(
             CustomersLoaded(
-              customers: customers,
-              hasReachedMax: customers.length < 15,
-              currentPage: page,
+              customers: data.items,
+              hasReachedMax: data.hasReachedMax,
+              currentPage: data.currentPage,
+              lastPage: data.lastPage,
+              total: data.total,
+              from: data.from,
+              to: data.to,
+              perPage: data.perPage,
             ),
           );
         } else {
@@ -76,15 +83,67 @@ class CustomerCubit extends Cubit<CustomerState> {
           if (currentState is CustomersLoaded) {
             emit(
               currentState.copyWith(
-                customers: currentState.customers + customers,
-                hasReachedMax: customers.isEmpty || customers.length < 15,
-                currentPage: page,
+                customers: currentState.customers + data.items,
+                hasReachedMax: data.hasReachedMax,
+                currentPage: data.currentPage,
+                lastPage: data.lastPage,
+                total: data.total,
+                from: data.from,
+                to: data.to,
+                perPage: data.perPage,
               ),
             );
           }
         }
       },
       failure: (failure) => emit(CustomerFailure(failure)),
+    );
+  }
+
+  /// Called exclusively by [AppPagination.onPageChanged] on tablet.
+  /// Always REPLACES customers — never appends.
+  Future<void> changePage(
+    int page, {
+    required int outletId,
+    String? search,
+    String? phone,
+    String? gender,
+    bool? isActive,
+    String sortBy = 'created_at',
+    String sortDirection = 'desc',
+  }) {
+    final current = state;
+    if (current is! CustomersLoaded) return Future.value();
+    return changePageGeneric<Customer>(
+      page: page,
+      currentPage: current.currentPage,
+      lastPage: current.lastPage,
+      request: () => _getAllUsecase(
+        GetAllParams(
+          outletId: outletId,
+          page: page,
+          perPage: current.perPage,
+          search: search,
+          phone: phone,
+          gender: gender,
+          isActive: isActive,
+          sortBy: sortBy,
+          sortDirection: sortDirection,
+        ),
+      ),
+      markPageLoading: () => current.copyWith(isPageLoading: true),
+      buildLoaded: (data) => CustomersLoaded(
+        customers: data.items,
+        hasReachedMax: data.hasReachedMax,
+        currentPage: data.currentPage,
+        lastPage: data.lastPage,
+        total: data.total,
+        from: data.from,
+        to: data.to,
+        perPage: data.perPage,
+        isPageLoading: false,
+      ),
+      buildError: (f) => CustomerFailure(ServerFailure(message: f.message)),
     );
   }
 
@@ -97,6 +156,11 @@ class CustomerCubit extends Cubit<CustomerState> {
       success: (customer) => emit(CustomerDetailLoaded(customer)),
       failure: (failure) => emit(CustomerFailure(failure)),
     );
+  }
+
+  Future<Customer?> fetchCustomerSilently(int id) async {
+    final result = await _getByIdUsecase(id);
+    return result.when(success: (customer) => customer, failure: (_) => null);
   }
 
   Future<void> store({
@@ -177,7 +241,8 @@ class CustomerCubit extends Cubit<CustomerState> {
     final result = await _destroyUsecase(id);
 
     result.when(
-      success: (_) => emit(const CustomerActionSuccess('Pelanggan berhasil dihapus')),
+      success: (_) =>
+          emit(const CustomerActionSuccess('Pelanggan berhasil dihapus')),
       failure: (failure) => emit(CustomerFailure(failure)),
     );
   }

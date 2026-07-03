@@ -3,7 +3,7 @@ import 'package:wash_wallet_core/wash_wallet_core.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 
 abstract class CategoryRemoteDatasource {
-  Future<List<CategoryModel>> getAll({
+  Future<PaginatedData<CategoryModel>> getAll({
     int? outletId,
     int page = 1,
     int perPage = 15,
@@ -40,7 +40,7 @@ class CategoryRemoteDatasourceImpl implements CategoryRemoteDatasource {
   CategoryRemoteDatasourceImpl(this._dio, this._endpoints);
 
   @override
-  Future<List<CategoryModel>> getAll({
+  Future<PaginatedData<CategoryModel>> getAll({
     int? outletId,
     int page = 1,
     int perPage = 15,
@@ -68,7 +68,14 @@ class CategoryRemoteDatasourceImpl implements CategoryRemoteDatasource {
       final body = _validateResponse(response);
 
       final List data = body['data'] as List? ?? [];
-      return data.map((e) => CategoryModel.fromJson(e)).toList();
+      final meta = body['meta'] as Map<String, dynamic>? ?? {};
+      final items = data.map((e) => CategoryModel.fromJson(e)).toList();
+      return PaginatedData<CategoryModel>.fromMeta(
+        items: items,
+        meta: meta,
+        requestedPage: page,
+        requestedPerPage: perPage,
+      );
     } catch (e) {
       throw _handleError(e);
     }

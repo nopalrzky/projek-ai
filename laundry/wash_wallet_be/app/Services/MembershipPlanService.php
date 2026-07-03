@@ -256,7 +256,7 @@ class MembershipPlanService extends BaseService
             return true;
         }
 
-        if ($user->hasRole('owner') && $membershipPlan->outlet->owner_id === $user->id) {
+        if ($user->hasRole('owner') && (int) $membershipPlan->outlet->owner_id === (int) $user->id) {
             return true;
         }
 

@@ -19,10 +19,7 @@ import 'address_selector_bottom_sheet.dart';
 class CourierPickupSectionWidget extends StatelessWidget {
   final int outletId;
 
-  const CourierPickupSectionWidget({
-    super.key,
-    required this.outletId,
-  });
+  const CourierPickupSectionWidget({super.key, required this.outletId});
 
   void _showAddressSelector(BuildContext context) {
     showModalBottomSheet(
@@ -104,17 +101,19 @@ class CourierPickupSectionWidget extends StatelessWidget {
                                   children: [
                                     Text(
                                       'Alamat Belum Tersedia',
-                                      style: context.typography.titleMedium.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: context.colors.error,
-                                      ),
+                                      style: context.typography.titleMedium
+                                          .copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: context.colors.error,
+                                          ),
                                     ),
                                     SizedBox(height: context.space.xs),
                                     Text(
                                       'Anda belum memiliki alamat. Silakan tambah alamat terlebih dahulu untuk mengetahui harga ongkir.',
-                                      style: context.typography.bodySmall.copyWith(
-                                        color: context.colors.error,
-                                      ),
+                                      style: context.typography.bodySmall
+                                          .copyWith(
+                                            color: context.colors.error,
+                                          ),
                                     ),
                                   ],
                                 ),
@@ -125,12 +124,17 @@ class CourierPickupSectionWidget extends StatelessWidget {
                           AppButton.outline(
                             label: 'Tambah Alamat',
                             onPressed: () async {
-                              final newAddress = await context.push<CustomerAddress?>(
-                                '/customer-addresses/create',
-                              );
+                              final newAddress = await context
+                                  .push<CustomerAddress?>(
+                                    '/customer-addresses/create',
+                                  );
                               if (newAddress != null && context.mounted) {
-                                context.read<OrderCubit>().selectAddress(newAddress);
-                                context.read<CustomerAddressListCubit>().getAll();
+                                context.read<OrderCubit>().selectAddress(
+                                  newAddress,
+                                );
+                                context
+                                    .read<CustomerAddressListCubit>()
+                                    .getAll();
                               }
                             },
                             isFullWidth: true,
@@ -156,9 +160,10 @@ class CourierPickupSectionWidget extends StatelessWidget {
                                   children: [
                                     Text(
                                       orderState.selectedAddress!.label,
-                                      style: context.typography.titleMedium.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      style: context.typography.titleMedium
+                                          .copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                     ),
                                     Text(
                                       orderState.selectedAddress!.street,
@@ -175,7 +180,10 @@ class CourierPickupSectionWidget extends StatelessWidget {
                                   ),
                                 ),
                         ),
-                        Icon(Icons.chevron_right, color: context.colors.textSecondary),
+                        Icon(
+                          Icons.chevron_right,
+                          color: context.colors.textSecondary,
+                        ),
                       ],
                     ),
                   ),
@@ -187,8 +195,9 @@ class CourierPickupSectionWidget extends StatelessWidget {
             SizedBox(height: context.space.lg),
             BlocBuilder<CourierPricingCubit, CourierPricingState>(
               builder: (context, pricingState) {
-                final disabledDays = pricingState.settingSummary?.disabledDays ?? const [];
-                
+                final disabledDays =
+                    pricingState.settingSummary?.disabledDays ?? const [];
+
                 return BlocBuilder<CourierScheduleCubit, CourierScheduleState>(
                   builder: (context, scheduleState) {
                     return ScheduleSelectorWidget(
@@ -201,13 +210,15 @@ class CourierPickupSectionWidget extends StatelessWidget {
                       isLoading: scheduleState is CourierScheduleLoading,
                       onDateSelected: (date) {
                         context.read<OrderCubit>().setDate(date);
-                        final dayOfWeek = DateFormat('EEEE').format(date).toLowerCase();
+                        final dayOfWeek = DateFormat(
+                          'EEEE',
+                        ).format(date).toLowerCase();
                         context.read<CourierScheduleCubit>().getAll(
-                              outletId: outletId,
-                              dayOfWeek: dayOfWeek,
-                              type: 'pickup',
-                              date: DateFormat('yyyy-MM-dd').format(date),
-                            );
+                          outletId: outletId,
+                          dayOfWeek: dayOfWeek,
+                          type: 'pickup',
+                          date: DateFormat('yyyy-MM-dd').format(date),
+                        );
                       },
                       onScheduleSelected: (schedule) {
                         context.read<OrderCubit>().selectSchedule(schedule);

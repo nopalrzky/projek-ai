@@ -9,7 +9,7 @@ class PettyCashRepositoryImpl implements PettyCashRepository {
   PettyCashRepositoryImpl(this._remoteDatasource);
 
   @override
-  Future<Result<List<PettyCash>>> getAll({
+  Future<Result<PaginatedData<PettyCash>>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -21,7 +21,7 @@ class PettyCashRepositoryImpl implements PettyCashRepository {
     String sortDirection = 'desc',
   }) async {
     try {
-      final models = await _remoteDatasource.getAll(
+      final paginatedData = await _remoteDatasource.getAll(
         page: page,
         perPage: perPage,
         search: search,
@@ -33,7 +33,15 @@ class PettyCashRepositoryImpl implements PettyCashRepository {
         sortDirection: sortDirection,
       );
 
-      return Result.success(models.map((e) => e.toEntity()).toList());
+      return Result.success(PaginatedData<PettyCash>(
+        items: paginatedData.items.map((e) => e.toEntity()).toList(),
+        currentPage: paginatedData.currentPage,
+        lastPage: paginatedData.lastPage,
+        perPage: paginatedData.perPage,
+        total: paginatedData.total,
+        from: paginatedData.from,
+        to: paginatedData.to,
+      ));
     } catch (e) {
       return Result.failure(_mapExceptionToFailure(e));
     }

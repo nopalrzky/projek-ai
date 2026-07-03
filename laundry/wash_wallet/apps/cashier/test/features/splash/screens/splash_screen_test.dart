@@ -16,15 +16,31 @@ import 'package:wash_wallet_ui/src/theme/extensions/app_radius_extension.dart';
 import 'package:wash_wallet_ui/src/theme/extensions/app_spacing_extension.dart';
 import 'package:wash_wallet_ui/src/theme/extensions/app_typography_extension.dart';
 
+class _MockChangePasswordUseCase implements ChangePasswordUseCase {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _MockUpdateProfileUseCase implements UpdateProfileUseCase {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 class _MockLoginUsecase implements LoginUsecase {
-  @override dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
+
 class _MockLogoutUsecase implements LogoutUsecase {
-  @override dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
+
 class _MockGetMeUsecase implements GetMeUsecase {
-  @override dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
+
 class _MockCheckAuthStatusUsecase implements CheckAuthStatusUsecase {
   final Result<AuthEmployee>? _result;
   _MockCheckAuthStatusUsecase([this._result]);
@@ -37,31 +53,56 @@ class _MockCheckAuthStatusUsecase implements CheckAuthStatusUsecase {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
+
 class _MockSetupPinUseCase implements SetupPinUseCase {
-  @override dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
+
 class _MockVerifyPinUseCase implements VerifyPinUseCase {
-  @override dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
+
 class _MockResetPinUseCase implements ResetPinUseCase {
-  @override dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
-class _MockSaveRememberedAccountUsecase implements SaveRememberedAccountUsecase {
-  @override Future<Result<void>> call(AuthEmployee employee) async => const Result.success(null);
+
+class _MockSaveRememberedAccountUsecase
+    implements SaveRememberedAccountUsecase {
+  @override
+  Future<Result<void>> call(AuthEmployee employee) async =>
+      const Result.success(null);
 }
+
 class _MockRegisterFcmTokenUsecase implements RegisterFcmTokenUsecase {
-  @override Future<Result<void>> call({required String token, String? deviceId, String? deviceName}) async => const Result.success(null);
+  @override
+  Future<Result<void>> call({
+    required String token,
+    String? deviceId,
+    String? deviceName,
+  }) async => const Result.success(null);
 }
+
 class _MockRemoveFcmTokenUsecase implements RemoveFcmTokenUsecase {
-  @override dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
+
 class _MockNotificationService implements NotificationService {
-  @override Future<bool> requestPermission() async => true;
-  @override Future<String> getDeviceId() async => 'device-id';
-  @override Future<String?> getFcmToken() async => 'fcm-token';
-  @override Future<void> connectPusher({required int outletId}) async {}
-  @override void registerTokenRefresh(void Function(String) onTokenRefresh) {}
-  @override dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  @override
+  Future<bool> requestPermission() async => true;
+  @override
+  Future<String> getDeviceId() async => 'device-id';
+  @override
+  Future<String?> getFcmToken() async => 'fcm-token';
+  @override
+  Future<void> connectPusher({required int outletId}) async {}
+  @override
+  void registerTokenRefresh(void Function(String) onTokenRefresh) {}
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 AuthCubit _makeAuthCubit(
@@ -76,6 +117,9 @@ AuthCubit _makeAuthCubit(
     setupPinUseCase: _MockSetupPinUseCase(),
     verifyPinUseCase: _MockVerifyPinUseCase(),
     resetPinUseCase: _MockResetPinUseCase(),
+
+    changePasswordUseCase: _MockChangePasswordUseCase(),
+    updateProfileUseCase: _MockUpdateProfileUseCase(),
     saveRememberedAccountUsecase: _MockSaveRememberedAccountUsecase(),
     registerFcmTokenUsecase: _MockRegisterFcmTokenUsecase(),
     removeFcmTokenUsecase: _MockRemoveFcmTokenUsecase(),
@@ -87,9 +131,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {
-    SharedPreferences.setMockInitialValues({
-      'is_onboarding_done': true,
-    });
+    SharedPreferences.setMockInitialValues({'is_onboarding_done': true});
   });
 
   const tOutletAccess = OutletAccess(
@@ -133,12 +175,30 @@ void main() {
       initialLocation: '/splash',
       routes: [
         GoRoute(path: '/splash', builder: (_, _) => const SplashScreen()),
-        GoRoute(path: '/home', builder: (_, _) => const Scaffold(body: Text('Home'))),
-        GoRoute(path: '/login', builder: (_, _) => const Scaffold(body: Text('Login'))),
-        GoRoute(path: '/setup-pin', builder: (_, _) => const Scaffold(body: Text('Setup PIN'))),
-        GoRoute(path: '/access-denied', builder: (_, _) => const Scaffold(body: Text('Access Denied'))),
-        GoRoute(path: '/onboarding', builder: (_, _) => const Scaffold(body: Text('Onboarding'))),
-        GoRoute(path: '/switch-employee', builder: (_, _) => const Scaffold(body: Text('Switch Employee'))),
+        GoRoute(
+          path: '/home',
+          builder: (_, _) => const Scaffold(body: Text('Home')),
+        ),
+        GoRoute(
+          path: '/login',
+          builder: (_, _) => const Scaffold(body: Text('Login')),
+        ),
+        GoRoute(
+          path: '/setup-pin',
+          builder: (_, _) => const Scaffold(body: Text('Setup PIN')),
+        ),
+        GoRoute(
+          path: '/access-denied',
+          builder: (_, _) => const Scaffold(body: Text('Access Denied')),
+        ),
+        GoRoute(
+          path: '/onboarding',
+          builder: (_, _) => const Scaffold(body: Text('Onboarding')),
+        ),
+        GoRoute(
+          path: '/switch-employee',
+          builder: (_, _) => const Scaffold(body: Text('Switch Employee')),
+        ),
       ],
     );
   }
@@ -156,10 +216,7 @@ void main() {
         ],
       ),
       builder: (context, child) {
-        return BlocProvider<AuthCubit>.value(
-          value: authCubit,
-          child: child!,
-        );
+        return BlocProvider<AuthCubit>.value(value: authCubit, child: child!);
       },
     );
   }
@@ -204,27 +261,38 @@ void main() {
     expect(find.text('Access Denied'), findsOneWidget);
   });
 
-  testWidgets('Unauthenticated without remembered account navigates to /login', (tester) async {
-    final authCubit = _makeAuthCubit(
-      const Unauthenticated(),
-      checkAuthResult: const Result.failure(AuthFailure(message: 'unauthenticated')),
-    );
-    await tester.pumpWidget(buildTestableWidget(authCubit));
-    await tester.pumpAndSettle();
-    expect(find.text('Login'), findsOneWidget);
-  });
+  testWidgets(
+    'Unauthenticated without remembered account navigates to /login',
+    (tester) async {
+      final authCubit = _makeAuthCubit(
+        const Unauthenticated(),
+        checkAuthResult: const Result.failure(
+          AuthFailure(message: 'unauthenticated'),
+        ),
+      );
+      await tester.pumpWidget(buildTestableWidget(authCubit));
+      await tester.pumpAndSettle();
+      expect(find.text('Login'), findsOneWidget);
+    },
+  );
 
-  testWidgets('Unauthenticated with remembered account navigates to /switch-employee', (tester) async {
-    SharedPreferences.setMockInitialValues({
-      'is_onboarding_done': true,
-      'cashier_remembered_employee_accounts_v1': '{"version":1,"accounts":[{"employeeId":1,"username":"test","name":"Test","outletId":1,"outletName":"Outlet 1","hasPin":true,"lastUsedAt":"2026-06-21T00:00:00.000Z"}]}',
-    });
-    final authCubit = _makeAuthCubit(
-      const Unauthenticated(),
-      checkAuthResult: const Result.failure(AuthFailure(message: 'unauthenticated')),
-    );
-    await tester.pumpWidget(buildTestableWidget(authCubit));
-    await tester.pumpAndSettle();
-    expect(find.text('Switch Employee'), findsOneWidget);
-  });
+  testWidgets(
+    'Unauthenticated with remembered account navigates to /switch-employee',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({
+        'is_onboarding_done': true,
+        'cashier_remembered_employee_accounts_v1':
+            '{"version":1,"accounts":[{"employeeId":1,"username":"test","name":"Test","outletId":1,"outletName":"Outlet 1","hasPin":true,"lastUsedAt":"2026-06-21T00:00:00.000Z"}]}',
+      });
+      final authCubit = _makeAuthCubit(
+        const Unauthenticated(),
+        checkAuthResult: const Result.failure(
+          AuthFailure(message: 'unauthenticated'),
+        ),
+      );
+      await tester.pumpWidget(buildTestableWidget(authCubit));
+      await tester.pumpAndSettle();
+      expect(find.text('Switch Employee'), findsOneWidget);
+    },
+  );
 }

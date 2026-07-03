@@ -6,10 +6,8 @@ part 'time_range_model.g.dart';
 
 @freezed
 class TimeRangeModel with _$TimeRangeModel {
-  const factory TimeRangeModel({
-    required String open,
-    required String close,
-  }) = _TimeRangeModel;
+  const factory TimeRangeModel({required String open, required String close}) =
+      _TimeRangeModel;
 
   const TimeRangeModel._();
 
@@ -17,9 +15,6 @@ class TimeRangeModel with _$TimeRangeModel {
       _$TimeRangeModelFromJson(json);
 
   TimeRange toEntity() {
-    return TimeRange(
-      open: open,
-      close: close,
-    );
+    return TimeRange(open: open, close: close);
   }
 }

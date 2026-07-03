@@ -16,7 +16,6 @@ import { SearchInputProps } from "./types";
 import Button from "@/Components/Button/Button";
 import { cn } from "@/lib/utils";
 
-// Types for autosuggest
 interface SuggestionItem {
     type: "recent" | "suggestion";
     value: string;
@@ -88,7 +87,6 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
                 ? "warning"
                 : status;
 
-        // Icon size mapping
         const iconSizeClasses = {
             xs: 12,
             sm: 14,
@@ -97,12 +95,10 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
             xl: 20,
         };
 
-        // Handle suggestions fetch
         const onSuggestionsFetchRequested = useCallback(
             ({ value: query }: SuggestionsFetchRequestedParams) => {
                 const sections: SectionData[] = [];
 
-                // Filter recent searches
                 if (showRecentSearches && query.length > 0) {
                     const filteredRecentSearches = recentSearches
                         .filter(
@@ -126,7 +122,6 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
                     }
                 }
 
-                // Filter suggestions
                 if (showSuggestions && query.length > 0) {
                     const filteredSuggestions = suggestions
                         .filter((suggestion) =>
@@ -159,12 +154,10 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
             ],
         );
 
-        // Handle suggestions clear
         const onSuggestionsClearRequested = useCallback(() => {
             setSuggestionSections([]);
         }, []);
 
-        // Handle suggestion selection
         const onSuggestionSelected = useCallback(
             (
                 event: React.FormEvent<any>,
@@ -183,19 +176,16 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
             [onRecentSearchClick, onSuggestionClick, onSearch],
         );
 
-        // Get suggestion value
         const getSuggestionValue = useCallback(
             (suggestion: SuggestionItem) => suggestion.value,
             [],
         );
 
-        // Get section suggestions
         const getSectionSuggestions = useCallback(
             (section: SectionData) => section.suggestions,
             [],
         );
 
-        // Render section title with dark mode support
         const renderSectionTitle = useCallback(
             (section: SectionData) => (
                 <div
@@ -211,7 +201,6 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
             [],
         );
 
-        // Highlight matches in text
         const highlightText = useCallback(
             (text: string, query: string) => {
                 if (!highlightMatches || !query) return text;
@@ -239,7 +228,6 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
             [highlightMatches],
         );
 
-        // Render suggestion with dark mode support
         const renderSuggestion = useCallback(
             (suggestion: SuggestionItem, { query }: RenderSuggestionParams) => (
                 <div className="flex items-center gap-3 transition-colors duration-150">
@@ -267,7 +255,6 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
             [highlightText],
         );
 
-        // Handle input change
         const handleChange = useCallback(
             (
                 event: React.FormEvent<any>,
@@ -275,7 +262,6 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
             ) => {
                 setSearchValue(newValue);
 
-                // Call original onChange
                 if (onChange) {
                     const syntheticEvent = {
                         target: { value: newValue },
@@ -287,7 +273,6 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
             [onChange],
         );
 
-        // Handle focus with dark mode
         const handleFocus = useCallback(
             (event: React.FocusEvent<HTMLInputElement>) => {
                 setIsFocused(true);
@@ -296,7 +281,6 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
             [onFocus],
         );
 
-        // Handle blur with dark mode
         const handleBlur = useCallback(
             (event: React.FocusEvent<HTMLElement>) => {
                 setTimeout(() => {
@@ -307,7 +291,6 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
             [onBlur],
         );
 
-        // Handle form submission
         const handleSubmit = useCallback(
             (e: React.FormEvent) => {
                 e.preventDefault();
@@ -316,14 +299,12 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
             [onSearch, searchValue],
         );
 
-        // Handle clear
         const handleClear = useCallback(() => {
             setSearchValue("");
             onClear?.();
             searchRef.current?.focus();
         }, [onClear]);
 
-        // Base classes for input with dark mode
         const baseClasses = cn(
             "transition-all duration-200 ease-in-out",
             "focus:outline-none focus:ring-2 focus:ring-offset-0",
@@ -331,7 +312,6 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
             fullWidth ? "w-full" : "w-auto",
         );
 
-        // Variant classes with dark mode support
         const variantClasses = {
             default: cn(
                 "border rounded-lg",
@@ -353,7 +333,6 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
                     "focus:ring-blue-500/20",
                 ],
                 disabled && "opacity-50",
-                // Dark mode styles via CSS variables
                 {
                     backgroundColor: "var(--color-surface)",
                     borderColor: isFocused
@@ -418,7 +397,6 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
             ),
         };
 
-        // Size classes
         const sizeClasses = {
             xs: "px-8 py-1 text-xs pl-8",
             sm: "px-9 py-1.5 text-sm pl-9",
@@ -434,7 +412,6 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
             className,
         );
 
-        // Autosuggest input props
         const inputProps: AutosuggestInputProps<SuggestionItem> = {
             id: inputId,
             placeholder,
@@ -481,14 +458,12 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
             sectionTitle: "",
         };
 
-        // Update search value when value prop changes
         useEffect(() => {
             if (value !== undefined && String(value) !== searchValue) {
                 setSearchValue(String(value));
             }
         }, [value, searchValue]);
 
-        // Optional type-to-search behavior, disabled when searchOnType is false.
         useEffect(() => {
             if (!searchOnType) {
                 return;
@@ -508,7 +483,6 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
                 className={cn("relative", containerClassName)}
                 ref={containerRef}
             >
-                {/* Label with dark mode */}
                 {label && (
                     <label
                         htmlFor={inputId}
@@ -527,9 +501,7 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
                     </label>
                 )}
 
-                {/* Search Input Container */}
                 <form onSubmit={handleSubmit} className="relative">
-                    {/* Search Icon */}
                     <div className="absolute left-0 top-0 h-full flex items-center pl-3 pointer-events-none z-10">
                         <div style={{ color: "var(--color-text-quaternary)" }}>
                             {searchIcon ? (
@@ -546,7 +518,6 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
                         </div>
                     </div>
 
-                    {/* Autosuggest Component */}
                     <Autosuggest
                         multiSection={true}
                         suggestions={suggestionSections}
@@ -582,9 +553,7 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
                         focusInputOnSuggestionClick={false}
                     />
 
-                    {/* Right Icons */}
                     <div className="absolute right-0 top-0 h-full flex items-center pr-3 gap-1 z-10">
-                        {/* Loading Spinner */}
                         {loading && (
                             <div
                                 className="animate-spin"
@@ -596,7 +565,6 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
                             </div>
                         )}
 
-                        {/* Clear Button */}
                         {searchValue && !loading && (
                             <Button
                                 variant="ghost"
@@ -625,7 +593,6 @@ const Search = forwardRef<HTMLInputElement, SearchInputProps>(
                     </div>
                 </form>
 
-                {/* Helper Messages with dark mode */}
                 <div className="mt-1 space-y-1">
                     {error && (
                         <p

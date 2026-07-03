@@ -41,7 +41,6 @@ const EmployeeLoansCreate = ({
             note: "",
         });
 
-    // Update selected account preview
     useEffect(() => {
         if (data.sourceAccountId) {
             const account = accounts.find(
@@ -53,7 +52,6 @@ const EmployeeLoansCreate = ({
         }
     }, [data.sourceAccountId, accounts]);
 
-    // Calculate total installments
     useEffect(() => {
         const amount = Number(data.amount);
         const installment = Number(data.installmentAmount);
@@ -77,17 +75,14 @@ const EmployeeLoansCreate = ({
         router.visit(route("employees.show", employee.id));
     };
 
-    // Generate Option Dropdown
     const accountOptions = [
         { value: "", label: "Pilih Sumber Dana..." },
         ...accounts.map((account) => ({
             value: account.id.toString(),
-            // Tampilkan kode dan nama agar admin tidak salah pilih
             label: `${account.code} - ${account.name}`,
         })),
     ];
 
-    // Helper untuk saran tanggal (3 bulan)
     const setSuggestedDueDate = () => {
         if (!data.loanDate) return;
         const date = new Date(data.loanDate);

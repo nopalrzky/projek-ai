@@ -48,7 +48,11 @@ class OrderLocalDatasourceImpl implements OrderLocalDatasource {
   @override
   Future<void> saveDraft(OrderDraftModel draft) async {
     try {
-      final key = _generateKey(draft.customerId, outletId: draft.outletId, employeeId: draft.employeeId);
+      final key = _generateKey(
+        draft.customerId,
+        outletId: draft.outletId,
+        employeeId: draft.employeeId,
+      );
       final jsonString = json.encode(draft.toJson());
       await _sharedPreferences.setString(key, jsonString);
     } catch (e) {
@@ -63,7 +67,11 @@ class OrderLocalDatasourceImpl implements OrderLocalDatasource {
     required int employeeId,
   }) async {
     try {
-      final v2Key = _generateKey(customerId, outletId: outletId, employeeId: employeeId);
+      final v2Key = _generateKey(
+        customerId,
+        outletId: outletId,
+        employeeId: employeeId,
+      );
       final v1Key = _generateKey(customerId);
 
       String? jsonString = _sharedPreferences.getString(v2Key);
@@ -87,9 +95,13 @@ class OrderLocalDatasourceImpl implements OrderLocalDatasource {
     required int employeeId,
   }) async {
     try {
-      final v2Key = _generateKey(customerId, outletId: outletId, employeeId: employeeId);
+      final v2Key = _generateKey(
+        customerId,
+        outletId: outletId,
+        employeeId: employeeId,
+      );
       final v1Key = _generateKey(customerId);
-      
+
       await _sharedPreferences.remove(v2Key);
       await _sharedPreferences.remove(v1Key);
     } catch (e) {
@@ -100,11 +112,17 @@ class OrderLocalDatasourceImpl implements OrderLocalDatasource {
   @override
   Future<void> saveWeighingDraft(WeighingDraftModel draft) async {
     try {
-      final key = _generateWeighingKey(draft.orderId, draft.employeeId, draft.outletId);
+      final key = _generateWeighingKey(
+        draft.orderId,
+        draft.employeeId,
+        draft.outletId,
+      );
       final jsonString = json.encode(draft.toJson());
       await _sharedPreferences.setString(key, jsonString);
     } catch (e) {
-      throw LocalStorageException(message: 'Failed to save weighing draft locally');
+      throw LocalStorageException(
+        message: 'Failed to save weighing draft locally',
+      );
     }
   }
 
@@ -124,7 +142,9 @@ class OrderLocalDatasourceImpl implements OrderLocalDatasource {
       }
       return null;
     } catch (e) {
-      throw LocalStorageException(message: 'Failed to load weighing draft locally');
+      throw LocalStorageException(
+        message: 'Failed to load weighing draft locally',
+      );
     }
   }
 
@@ -142,4 +162,3 @@ class OrderLocalDatasourceImpl implements OrderLocalDatasource {
     }
   }
 }
-

@@ -16,7 +16,6 @@ const OtpVerification: React.FC<RegisterStepProps> = ({
     const [resendTimer, setResendTimer] = useState(0);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-    // ── Countdown from expiresAt ────────────────────────────────────
     useEffect(() => {
         if (!data?.expiresAt) {
             setResendTimer(0);
@@ -32,7 +31,6 @@ const OtpVerification: React.FC<RegisterStepProps> = ({
         return () => clearInterval(id);
     }, [data?.expiresAt]);
 
-    // ── OTP pin input helpers ─────────────────────────────────────────
     const handleOtpChange = (index: number, value: string) => {
         if (!/^\d?$/.test(value)) return;
         const newOtp = [...otpCode];
@@ -51,7 +49,6 @@ const OtpVerification: React.FC<RegisterStepProps> = ({
         }
     };
 
-    // ── Verify ────────────────────────────────────────────────────────
     const handleVerifyOtp = async (otp?: string) => {
         const otpString = otp || otpCode.join("");
         if (otpString.length !== 6) return;
@@ -83,7 +80,6 @@ const OtpVerification: React.FC<RegisterStepProps> = ({
         }
     };
 
-    // ── Resend ────────────────────────────────────────────────────────
     const handleResendOtp = async () => {
         if (resendTimer > 0) return;
         try {
@@ -95,7 +91,6 @@ const OtpVerification: React.FC<RegisterStepProps> = ({
             });
 
             if (res.data.success) {
-                // Update expiry from new response
                 onNext({ ...data, expiresAt: res.data.data?.expires_at });
                 setOtpCode(["", "", "", "", "", ""]);
                 inputRefs.current[0]?.focus();

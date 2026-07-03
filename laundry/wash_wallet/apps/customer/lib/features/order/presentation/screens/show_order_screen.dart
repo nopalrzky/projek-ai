@@ -102,9 +102,7 @@ class _ShowOrderScreenState extends State<ShowOrderScreen> {
               if (state.isCancellingOrder)
                 Container(
                   color: Colors.black.withValues(alpha: 0.3),
-                  child: const Center(
-                    child: AppLoadingIndicator(),
-                  ),
+                  child: const Center(child: AppLoadingIndicator()),
                 ),
             ],
           );

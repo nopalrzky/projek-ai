@@ -16,6 +16,7 @@ import '../bloc/laundry_service_state.dart';
 import '../widgets/laundry_search_bar.dart';
 import '../widgets/laundry_filter_chips.dart';
 import '../widgets/laundry_service_list_view.dart';
+import 'show_laundry_service_screen.dart';
 
 class IndexLaundryServicesScreen extends StatefulWidget {
   final int outletId;
@@ -32,6 +33,7 @@ class _IndexLaundryServicesScreenState
   final TextEditingController _searchController = TextEditingController();
   int? _selectedCategoryId;
   int? _selectedUnitId;
+  int? _selectedServiceId;
 
   @override
   void initState() {
@@ -48,9 +50,7 @@ class _IndexLaundryServicesScreenState
   }
 
   void _loadCategories() {
-    context.read<CategoryCubit>().getAll(
-      outletId: widget.outletId,
-    );
+    context.read<CategoryCubit>().getAll(outletId: widget.outletId);
   }
 
   void _loadUnits() {
@@ -74,22 +74,29 @@ class _IndexLaundryServicesScreenState
     return AppLayout(
       userName: authState is Authenticated ? authState.employee.name : null,
       onLogout: () => context.read<AuthCubit>().logout(),
-      header: isCompact ? AppHeader(
-        title: 'Layanan Laundry',
-        type: AppHeaderType.standard,
-        backgroundColor: context.colors.surface,
-        onBackPressed: () => context.pop(),
-      ) : null,
-      floatingActionButton: isCompact ? FloatingActionButton.extended(
-        onPressed: () => _navigateToCreateScreen(),
-        backgroundColor: context.colors.primary,
-        elevation: 4,
-        icon: const Icon(Icons.add_rounded, color: Colors.white),
-        label: const Text(
-          'Tambah',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-        ),
-      ) : null,
+      header: isCompact
+          ? AppHeader(
+              title: 'Layanan Laundry',
+              type: AppHeaderType.standard,
+              backgroundColor: context.colors.surface,
+              onBackPressed: () => context.pop(),
+            )
+          : null,
+      floatingActionButton: isCompact
+          ? FloatingActionButton.extended(
+              onPressed: () => _navigateToCreateScreen(),
+              backgroundColor: context.colors.primary,
+              elevation: 4,
+              icon: const Icon(Icons.add_rounded, color: Colors.white),
+              label: const Text(
+                'Tambah',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            )
+          : null,
       body: BlocConsumer<LaundryServiceCubit, LaundryServiceState>(
         listener: (context, state) {
           if (state is LaundryServiceActionSuccess) {
@@ -97,10 +104,7 @@ class _IndexLaundryServicesScreenState
               SnackBar(
                 content: Row(
                   children: [
-                    const Icon(
-                      Icons.check_circle_rounded,
-                      color: Colors.white,
-                    ),
+                    const Icon(Icons.check_circle_rounded, color: Colors.white),
                     SizedBox(width: context.space.sm),
                     Text(state.message),
                   ],
@@ -156,9 +160,7 @@ class _IndexLaundryServicesScreenState
           },
         ),
         _buildFilterChips(context),
-        Expanded(
-          child: _buildMobileContent(context, state),
-        ),
+        Expanded(child: _buildMobileContent(context, state)),
       ],
     );
   }
@@ -168,10 +170,7 @@ class _IndexLaundryServicesScreenState
       return const AppLoadingIndicator();
     }
     if (state is LaundryServiceFailure) {
-      return AppErrorState(
-        message: state.failure.message,
-        onRetry: _loadData,
-      );
+      return AppErrorState(message: state.failure.message, onRetry: _loadData);
     }
     if (state is LaundryServicesLoaded) {
       if (state.services.isEmpty) {
@@ -207,107 +206,192 @@ class _IndexLaundryServicesScreenState
       builder: (context, categoryState) {
         return BlocBuilder<UnitCubit, UnitState>(
           builder: (context, unitState) {
-            final categories = categoryState is CategoriesLoaded ? categoryState.categories : <Category>[];
+            final categories = categoryState is CategoriesLoaded
+                ? categoryState.categories
+                : <Category>[];
             final units = unitState is UnitsLoaded ? unitState.units : <Unit>[];
-            
+
             final activeFilters = <ActiveFilter>[];
             if (_selectedCategoryId != null) {
-              final cat = categories.firstWhere((c) => c.id == _selectedCategoryId, orElse: () => categories.first);
-              activeFilters.add(ActiveFilter(filterId: 'category', filterLabel: 'Kategori', value: cat.id, valueLabel: cat.name));
+              final cat = categories.firstWhere(
+                (c) => c.id == _selectedCategoryId,
+                orElse: () => categories.first,
+              );
+              activeFilters.add(
+                ActiveFilter(
+                  filterId: 'category',
+                  filterLabel: 'Kategori',
+                  value: cat.id,
+                  valueLabel: cat.name,
+                ),
+              );
             }
             if (_selectedUnitId != null) {
-              final unit = units.firstWhere((u) => u.id == _selectedUnitId, orElse: () => units.first);
-              activeFilters.add(ActiveFilter(filterId: 'unit', filterLabel: 'Satuan', value: unit.id, valueLabel: unit.name ?? '-'));
+              final unit = units.firstWhere(
+                (u) => u.id == _selectedUnitId,
+                orElse: () => units.first,
+              );
+              activeFilters.add(
+                ActiveFilter(
+                  filterId: 'unit',
+                  filterLabel: 'Satuan',
+                  value: unit.id,
+                  valueLabel: unit.name ?? '-',
+                ),
+              );
             }
 
-            return AppDataView<LaundryService>(
-              breadcrumbs: const [
-                BreadcrumbItem(label: 'Home'),
-                BreadcrumbItem(label: 'Layanan Laundry'),
-              ],
-              pageTitle: 'Manajemen Layanan Laundry',
-              searchController: _searchController,
-              searchHint: 'Cari layanan...',
-              onSearch: _loadData,
-              onSearchClear: () {
-                _searchController.clear();
-                _loadData();
-              },
-              filterConfigs: [
-                FilterConfig(
-                  id: 'category',
-                  label: 'Kategori',
-                  type: FilterType.singleSelect,
-                  options: categories.map((c) => FilterOption(id: c.id.toString(), label: c.name, value: c.id)).toList(),
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: AppDataView<LaundryService>(
+                    breadcrumbs: const [
+                      BreadcrumbItem(label: 'Home'),
+                      BreadcrumbItem(label: 'Layanan Laundry'),
+                    ],
+                    pageTitle: 'Manajemen Layanan Laundry',
+                    searchController: _searchController,
+                    searchHint: 'Cari layanan...',
+                    onSearch: _loadData,
+                    onSearchClear: () {
+                      _searchController.clear();
+                      _loadData();
+                    },
+                    filterConfigs: [
+                      FilterConfig(
+                        id: 'category',
+                        label: 'Kategori',
+                        type: FilterType.singleSelect,
+                        options: categories
+                            .map(
+                              (c) => FilterOption(
+                                id: c.id.toString(),
+                                label: c.name,
+                                value: c.id,
+                              ),
+                            )
+                            .toList(),
+                      ),
+                      FilterConfig(
+                        id: 'unit',
+                        label: 'Satuan',
+                        type: FilterType.singleSelect,
+                        options: units
+                            .map(
+                              (u) => FilterOption(
+                                id: u.id.toString(),
+                                label: u.name ?? '-',
+                                value: u.id,
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ],
+                    activeFilters: activeFilters,
+                    onFilterApply: (filter) {
+                      setState(() {
+                        if (filter.filterId == 'category') {
+                          _selectedCategoryId = filter.value is int
+                              ? filter.value
+                              : int.tryParse(filter.value.toString());
+                        } else if (filter.filterId == 'unit') {
+                          _selectedUnitId = filter.value is int
+                              ? filter.value
+                              : int.tryParse(filter.value.toString());
+                        }
+                      });
+                      _loadData();
+                    },
+                    onFilterRemove: (filterId) {
+                      setState(() {
+                        if (filterId == 'category') {
+                          _selectedCategoryId = null;
+                        } else if (filterId == 'unit') {
+                          _selectedUnitId = null;
+                        }
+                      });
+                      _loadData();
+                    },
+                    onFilterReset: () {
+                      setState(() {
+                        _selectedCategoryId = null;
+                        _selectedUnitId = null;
+                      });
+                      _loadData();
+                    },
+                    primaryActionLabel: 'Tambah',
+                    primaryActionIcon: Icons.add,
+                    onPrimaryAction: _navigateToCreateScreen,
+                    columns: _buildTabletColumnDefs(context),
+                    rows: state is LaundryServicesLoaded ? state.services : [],
+                    isLoading: state is LaundryServiceLoading ||
+                        (state is LaundryServicesLoaded && state.isPageLoading),
+                    errorMessage: state is LaundryServiceFailure
+                        ? state.failure.message
+                        : null,
+                    emptyMessage: 'Belum ada layanan',
+                    totalCount: state is LaundryServicesLoaded ? state.total : null,
+                    currentPage: state is LaundryServicesLoaded ? state.currentPage : null,
+                    lastPage: state is LaundryServicesLoaded ? state.lastPage : null,
+                    from: state is LaundryServicesLoaded ? state.from : null,
+                    to: state is LaundryServicesLoaded ? state.to : null,
+                    onPageChanged: state is LaundryServicesLoaded
+                        ? (page) => context.read<LaundryServiceCubit>().changePage(
+                              page,
+                              outletId: widget.outletId,
+                              search: _searchController.text.isEmpty
+                                  ? null
+                                  : _searchController.text,
+                              categoryId: _selectedCategoryId,
+                              unitId: _selectedUnitId,
+                            )
+                        : null,
+                    rowActions: [
+                      DataTableRowAction<LaundryService>(
+                        icon: Icons.visibility_outlined,
+                        tooltip: 'Lihat',
+                        onTap: _handleTap,
+                      ),
+                      DataTableRowAction<LaundryService>(
+                        icon: Icons.edit_outlined,
+                        tooltip: 'Edit',
+                        onTap: _handleEdit,
+                      ),
+                      DataTableRowAction<LaundryService>(
+                        icon: Icons.delete_outline,
+                        tooltip: 'Hapus',
+                        onTap: (service) => _handleDelete(service.id),
+                      ),
+                    ],
+                    onRowTap: _handleTap,
+                    isRowHighlighted: (service) => service.id == _selectedServiceId,
+                  ),
                 ),
-                FilterConfig(
-                  id: 'unit',
-                  label: 'Satuan',
-                  type: FilterType.singleSelect,
-                  options: units.map((u) => FilterOption(id: u.id.toString(), label: u.name ?? '-', value: u.id)).toList(),
-                ),
-              ],
-              activeFilters: activeFilters,
-              onFilterApply: (filter) {
-                setState(() {
-                  if (filter.filterId == 'category') {
-                    _selectedCategoryId = filter.value is int ? filter.value : int.tryParse(filter.value.toString());
-                  } else if (filter.filterId == 'unit') {
-                    _selectedUnitId = filter.value is int ? filter.value : int.tryParse(filter.value.toString());
-                  }
-                });
-                _loadData();
-              },
-              onFilterRemove: (filterId) {
-                setState(() {
-                  if (filterId == 'category') {
-                    _selectedCategoryId = null;
-                  } else if (filterId == 'unit') {
-                    _selectedUnitId = null;
-                  }
-                });
-                _loadData();
-              },
-              onFilterReset: () {
-                setState(() {
-                  _selectedCategoryId = null;
-                  _selectedUnitId = null;
-                });
-                _loadData();
-              },
-              primaryActionLabel: 'Tambah',
-              primaryActionIcon: Icons.add,
-              onPrimaryAction: _navigateToCreateScreen,
-              columns: _buildTabletColumnDefs(context),
-              rows: state is LaundryServicesLoaded ? state.services : [],
-              isLoading: state is LaundryServiceLoading,
-              errorMessage: state is LaundryServiceFailure ? state.failure.message : null,
-              emptyMessage: 'Belum ada layanan',
-              rowActions: [
-                DataTableRowAction<LaundryService>(
-                  icon: Icons.visibility_outlined,
-                  tooltip: 'Lihat',
-                  onTap: _handleTap,
-                ),
-                DataTableRowAction<LaundryService>(
-                  icon: Icons.edit_outlined,
-                  tooltip: 'Edit',
-                  onTap: _handleEdit,
-                ),
-                DataTableRowAction<LaundryService>(
-                  icon: Icons.delete_outline,
-                  tooltip: 'Hapus',
-                  onTap: (service) => _handleDelete(service.id),
-                ),
+                if (_selectedServiceId != null) ...[
+                  VerticalDivider(width: 1, color: context.colors.outlineVariant),
+                  Expanded(
+                    flex: 1,
+                    child: ShowLaundryServiceScreen(
+                      key: ValueKey(_selectedServiceId),
+                      serviceId: _selectedServiceId!,
+                      isEmbedded: true,
+                      onClose: () => setState(() => _selectedServiceId = null),
+                    ),
+                  ),
+                ],
               ],
             );
-          }
+          },
         );
-      }
+      },
     );
   }
 
-  List<DataTableColumnDef<LaundryService>> _buildTabletColumnDefs(BuildContext context) {
+  List<DataTableColumnDef<LaundryService>> _buildTabletColumnDefs(
+    BuildContext context,
+  ) {
     final currencyFormat = NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp ',
@@ -331,7 +415,8 @@ class _IndexLaundryServicesScreenState
         id: 'price',
         header: 'Harga',
         width: 120,
-        cellBuilder: (context, service) => Text(currencyFormat.format(service.price)),
+        cellBuilder: (context, service) =>
+            Text(currencyFormat.format(service.price)),
       ),
       DataTableColumnDef<LaundryService>(
         id: 'unit',
@@ -345,7 +430,9 @@ class _IndexLaundryServicesScreenState
         width: 100,
         cellBuilder: (context, service) => StatusChip(
           label: service.isActive ? 'Aktif' : 'Nonaktif',
-          color: service.isActive ? context.colors.success : context.colors.error,
+          color: service.isActive
+              ? context.colors.success
+              : context.colors.error,
         ),
       ),
     ];
@@ -389,60 +476,40 @@ class _IndexLaundryServicesScreenState
   }
 
   void _navigateToCreateScreen() {
-    context.push('/settings/setup-outlet/laundry-services/create').then((_) => _loadData());
-  }
-
-  void _handleTap(LaundryService service) {
-    context.push('/settings/setup-outlet/laundry-services/${service.id}').then((_) => _loadData());
-  }
-
-  void _handleEdit(LaundryService service) {
-    context.push('/settings/setup-outlet/laundry-services/${service.id}/edit', extra: service)
+    context
+        .push('/laundry-services/create')
         .then((_) => _loadData());
   }
 
-  void _handleDelete(int id) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(context.radius.lg),
-        ),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: context.colors.error.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(Icons.delete_rounded, color: context.colors.error),
-            ),
-            SizedBox(width: context.space.sm),
-            const Text('Hapus Layanan'),
-          ],
-        ),
-        content: const Text(
-          'Apakah Anda yakin ingin menghapus layanan ini? Tindakan ini tidak dapat dibatalkan.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<LaundryServiceCubit>().destroy(id);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: context.colors.error,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Hapus'),
-          ),
-        ],
-      ),
+  void _handleTap(LaundryService service) {
+    if (AppBreakpoints.of(context) == WindowSizeClass.compact) {
+      context.push('/laundry-services/${service.id}').then((_) => _loadData());
+    } else {
+      setState(() => _selectedServiceId = service.id);
+    }
+  }
+
+  void _handleEdit(LaundryService service) {
+    context
+        .push(
+          '/laundry-services/${service.id}/edit',
+          extra: service,
+        )
+        .then((_) => _loadData());
+  }
+
+  void _handleDelete(int id) async {
+    final result = await AppDialog.destructive(
+      context,
+      title: 'Hapus Layanan',
+      message: 'Apakah Anda yakin ingin menghapus layanan ini? Tindakan ini tidak dapat dibatalkan.',
+      confirmLabel: 'Hapus',
     );
+    if (result == true && mounted) {
+      if (_selectedServiceId == id) {
+        setState(() => _selectedServiceId = null);
+      }
+      context.read<LaundryServiceCubit>().destroy(id);
+    }
   }
 }

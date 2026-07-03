@@ -69,11 +69,15 @@ class OperationalTabletShell extends StatefulWidget {
 }
 
 class _OperationalTabletShellState extends State<OperationalTabletShell> {
-  bool _isSidebarCollapsed = false;
+  bool? _sidebarCollapseOverride;
 
   void _toggleSidebar() {
+    final sizeClass = AppBreakpoints.of(context);
+    final isMedium = sizeClass == WindowSizeClass.medium;
+    final collapsed = _sidebarCollapseOverride ?? isMedium;
+
     setState(() {
-      _isSidebarCollapsed = !_isSidebarCollapsed;
+      _sidebarCollapseOverride = !collapsed;
     });
   }
 
@@ -83,13 +87,11 @@ class _OperationalTabletShellState extends State<OperationalTabletShell> {
     final isCompact = sizeClass == WindowSizeClass.compact;
 
     if (isCompact) {
-      return Scaffold(
-        body: widget.body,
-      );
+      return Scaffold(body: widget.body);
     }
 
     final isMedium = sizeClass == WindowSizeClass.medium;
-    final collapsed = isMedium || _isSidebarCollapsed;
+    final collapsed = _sidebarCollapseOverride ?? isMedium;
 
     return Scaffold(
       body: Row(
@@ -124,19 +126,19 @@ class _OperationalTabletShellState extends State<OperationalTabletShell> {
                   userAvatarUrl: widget.userAccount?.avatarUrl,
                   userAvatarWidget: widget.userAccount?.avatarWidget,
                   extraActions: [
-                    if (!isMedium)
-                      TopHeaderAction(
-                        icon: _isSidebarCollapsed ? Icons.menu : Icons.menu_open,
-                        onTap: _toggleSidebar,
-                        tooltip: _isSidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar',
-                      ),
+                    TopHeaderAction(
+                      icon: collapsed ? Icons.menu : Icons.menu_open,
+                      onTap: _toggleSidebar,
+                      tooltip: collapsed ? 'Expand Sidebar' : 'Collapse Sidebar',
+                    ),
                   ],
                 ),
                 Expanded(
                   child: Row(
                     children: [
                       Expanded(child: widget.body),
-                      if (widget.showSecondaryBody && widget.secondaryBody != null) ...[
+                      if (widget.showSecondaryBody &&
+                          widget.secondaryBody != null) ...[
                         const VerticalDivider(width: 1, thickness: 1),
                         SizedBox(
                           width: widget.config.secondaryBodyWidth,

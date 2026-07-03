@@ -8,10 +8,7 @@ import 'choice_card_widget.dart';
 class DeliveryTypeSelectorWidget extends StatelessWidget {
   final bool isCourierEnabled;
 
-  const DeliveryTypeSelectorWidget({
-    super.key,
-    this.isCourierEnabled = true,
-  });
+  const DeliveryTypeSelectorWidget({super.key, this.isCourierEnabled = true});
 
   @override
   Widget build(BuildContext context) {

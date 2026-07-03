@@ -98,7 +98,7 @@ class CourierScheduleController extends Controller
         try {
             $outletId = Auth::user()->outlet_id;
 
-            if ($schedule->outlet_id !== $outletId) {
+            if ((int) $schedule->outlet_id !== (int) $outletId) {
                 return $this->errorResponse('Unauthorized', 403);
             }
 
@@ -158,7 +158,7 @@ class CourierScheduleController extends Controller
     {
         try {
             $outletId = Auth::user()->outlet_id;
-            if ($schedule->outlet_id !== $outletId) {
+            if ((int) $schedule->outlet_id !== (int) $outletId) {
                 return $this->errorResponse('Unauthorized', 403);
             }
 
@@ -204,7 +204,7 @@ class CourierScheduleController extends Controller
         try {
             $outletId = Auth::user()->outlet_id;
 
-            if ($schedule->outlet_id !== $outletId) {
+            if ((int) $schedule->outlet_id !== (int) $outletId) {
                 return $this->errorResponse('Unauthorized', 403);
             }
 

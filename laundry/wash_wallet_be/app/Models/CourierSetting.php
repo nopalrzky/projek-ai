@@ -63,6 +63,7 @@ class CourierSetting extends Model
     protected function casts(): array
     {
         return [
+            'outlet_id'                => 'integer',
             'flat_fee'                => 'decimal:2',
             'base_fee'                => 'decimal:2',
             'per_km_fee'              => 'decimal:2',

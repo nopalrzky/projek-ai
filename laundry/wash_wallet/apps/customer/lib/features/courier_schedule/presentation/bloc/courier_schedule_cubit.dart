@@ -5,10 +5,9 @@ import 'courier_schedule_state.dart';
 class CourierScheduleCubit extends Cubit<CourierScheduleState> {
   final GetAllUsecase _getAllUsecase;
 
-  CourierScheduleCubit({
-    required GetAllUsecase getAllUsecase,
-  }) : _getAllUsecase = getAllUsecase,
-       super(const CourierScheduleInitial());
+  CourierScheduleCubit({required GetAllUsecase getAllUsecase})
+    : _getAllUsecase = getAllUsecase,
+      super(const CourierScheduleInitial());
 
   Future<void> getAll({
     required int outletId,

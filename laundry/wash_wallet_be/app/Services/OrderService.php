@@ -642,7 +642,7 @@ class OrderService extends BaseService
         $outlet = Outlet::with(['courierSetting', 'outletFeatures.feature'])->findOrFail($outletId);
 
         $featureActive = $outlet->outletFeatures->contains(
-            fn($f) => $f->feature?->key === 'courier_schedule' && ($f->status === 'unlocked' || $f->status === 'trial')
+            fn($f) => $f->feature?->key === 'courier_schedule' && ($f->status === 'active' || $f->status === 'trial')
         );
         $settingEnabled = $outlet->courierSetting ? (bool) $outlet->courierSetting->is_courier_enabled : false;
         $isCourierEnabled = $featureActive && $settingEnabled;

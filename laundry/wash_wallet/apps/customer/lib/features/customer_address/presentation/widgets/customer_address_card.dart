@@ -20,8 +20,8 @@ class CustomerAddressCard extends StatelessWidget {
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(context.radius.lg),
         border: Border.all(
-          color: address.isPrimary 
-              ? context.colors.primary.withValues(alpha: 0.5) 
+          color: address.isPrimary
+              ? context.colors.primary.withValues(alpha: 0.5)
               : context.colors.border,
           width: address.isPrimary ? 1.5 : 1,
         ),
@@ -46,20 +46,20 @@ class CustomerAddressCard extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.all(context.space.xs),
                     decoration: BoxDecoration(
-                      color: address.isPrimary 
-                          ? context.colors.primarySurface 
+                      color: address.isPrimary
+                          ? context.colors.primarySurface
                           : context.colors.background,
                       borderRadius: BorderRadius.circular(context.radius.md),
                     ),
                     child: Icon(
-                      address.label.toLowerCase().contains('rumah') 
-                          ? Icons.home_outlined 
+                      address.label.toLowerCase().contains('rumah')
+                          ? Icons.home_outlined
                           : address.label.toLowerCase().contains('kantor')
-                              ? Icons.business_outlined
-                              : Icons.location_on_outlined,
+                          ? Icons.business_outlined
+                          : Icons.location_on_outlined,
                       size: 18,
-                      color: address.isPrimary 
-                          ? context.colors.primary 
+                      color: address.isPrimary
+                          ? context.colors.primary
                           : context.colors.textSecondary,
                     ),
                   ),

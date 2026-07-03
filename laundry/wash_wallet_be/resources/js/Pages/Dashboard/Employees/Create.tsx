@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Head, useForm } from "@inertiajs/react";
 import { motion } from "framer-motion";
 import {
@@ -82,31 +82,42 @@ const EmployeeCreate = ({
             selectedProcessIds.includes(process.id),
         );
 
+    const requestSeqRef = useRef(0);
+    const currentOutletIdRef = useRef<number | null>(null);
+
     const loadPositionsByOutlet = useCallback(
         async (outletId: number) => {
-            if (outletId === 0) {
+            const seq = ++requestSeqRef.current;
+            currentOutletIdRef.current = outletId;
+
+            if (outletId === 0 || !outletId) {
                 setPositions([]);
                 return;
             }
 
-            try {
-                setLoadingPositions(true);
-                setPositionsError(null);
+            setLoadingPositions(true);
+            setPositionsError(null);
+            setPositions([]);
+            setData("positionIds", []);
 
+            try {
                 const fetchedPositions =
                     await positionService.getPositionsByOutletId(
                         outletId,
                         true,
                     );
-                setPositions(fetchedPositions);
-
-                setData("positionIds", []);
+                
+                if (seq === requestSeqRef.current && currentOutletIdRef.current === outletId) {
+                    setPositions(fetchedPositions);
+                    setLoadingPositions(false);
+                }
             } catch (error: any) {
-                console.error("Error loading positions:", error);
-                setPositionsError(error.message || "Gagal memuat posisi");
-                setPositions([]);
-            } finally {
-                setLoadingPositions(false);
+                if (seq === requestSeqRef.current && currentOutletIdRef.current === outletId) {
+                    console.error("Error loading positions:", error);
+                    setPositionsError(error.message || "Gagal memuat posisi");
+                    setPositions([]);
+                    setLoadingPositions(false);
+                }
             }
         },
         [setData],
@@ -116,8 +127,11 @@ const EmployeeCreate = ({
         if (data.outletId) {
             loadPositionsByOutlet(data.outletId);
         } else {
+            currentOutletIdRef.current = null;
+            requestSeqRef.current++;
             setPositions([]);
             setData("positionIds", []);
+            setPositionsError(null);
         }
     }, [data.outletId, loadPositionsByOutlet]);
 

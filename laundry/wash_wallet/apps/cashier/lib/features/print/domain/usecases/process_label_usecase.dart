@@ -15,6 +15,9 @@ class ProcessLabelUsecase {
   ProcessLabelUsecase(this._repository);
 
   Future<Result<PrintCoinInfo>> execute(ProcessLabelParams params) async {
-    return _repository.processLabel(params.orderId, clientRequestId: params.clientRequestId);
+    return _repository.processLabel(
+      params.orderId,
+      clientRequestId: params.clientRequestId,
+    );
   }
 }

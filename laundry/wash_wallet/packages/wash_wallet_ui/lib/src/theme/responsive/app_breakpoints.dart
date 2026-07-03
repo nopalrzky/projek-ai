@@ -22,8 +22,12 @@ class AppBreakpoints {
     }
   }
 
-  static bool isCompact(BuildContext context) => of(context) == WindowSizeClass.compact;
-  static bool isMedium(BuildContext context) => of(context) == WindowSizeClass.medium;
-  static bool isExpanded(BuildContext context) => of(context) == WindowSizeClass.expanded;
-  static bool isLarge(BuildContext context) => of(context) == WindowSizeClass.large;
+  static bool isCompact(BuildContext context) =>
+      of(context) == WindowSizeClass.compact;
+  static bool isMedium(BuildContext context) =>
+      of(context) == WindowSizeClass.medium;
+  static bool isExpanded(BuildContext context) =>
+      of(context) == WindowSizeClass.expanded;
+  static bool isLarge(BuildContext context) =>
+      of(context) == WindowSizeClass.large;
 }

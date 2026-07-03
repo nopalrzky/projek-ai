@@ -362,7 +362,7 @@ class NotificationService {
     _setBadgeCount(_badgeCount + 1);
     _newOrderController.add(payload);
     _playNotificationSound();
-    
+
     try {
       HapticFeedback.mediumImpact();
     } catch (_) {}

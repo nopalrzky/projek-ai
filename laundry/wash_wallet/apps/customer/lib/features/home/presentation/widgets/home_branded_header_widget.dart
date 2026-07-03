@@ -67,10 +67,11 @@ class HomeBrandedHeaderWidget extends StatelessWidget {
                                 Expanded(
                                   child: Text(
                                     addressValue,
-                                    style: context.typography.titleMedium.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                                    style: context.typography.titleMedium
+                                        .copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),

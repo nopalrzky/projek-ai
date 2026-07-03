@@ -176,36 +176,37 @@ class _AppBottomSheetContent extends StatelessWidget {
       bottom: AppBottomSheetLayout.useBottomSafeArea,
       child: ContentConstraint(
         child: Container(
-        decoration: BoxDecoration(
-          color: style.backgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          boxShadow: AppElevation.lg,
-        ),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: AppBottomSheetLayout.maxHeight(context),
+          decoration: BoxDecoration(
+            color: style.backgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            boxShadow: AppElevation.lg,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-            _buildDragHandle(context, style),
-
-            if (title != null || subtitle != null) _buildHeader(context, style),
-
-            Flexible(
-              child: SingleChildScrollView(
-                padding: AppBottomSheetLayout.contentPadding(context),
-                child: child,
-              ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: AppBottomSheetLayout.maxHeight(context),
             ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildDragHandle(context, style),
 
-            if (hasActions) _buildActionBar(context, style),
-          ],
+                if (title != null || subtitle != null)
+                  _buildHeader(context, style),
+
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: AppBottomSheetLayout.contentPadding(context),
+                    child: child,
+                  ),
+                ),
+
+                if (hasActions) _buildActionBar(context, style),
+              ],
+            ),
+          ),
         ),
       ),
-      ),
-    ),
-  );
+    );
   }
 
   Widget _buildDragHandle(BuildContext context, AppBottomSheetStyle style) {

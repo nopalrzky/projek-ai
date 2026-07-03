@@ -36,6 +36,8 @@ class CustomerSubscription extends Model
     protected function casts(): array
     {
         return [
+            'customer_id'        => 'integer',
+            'service_package_id' => 'integer',
             'price_paid'    => 'decimal:2',
             'purchase_date' => 'datetime',
             'expired_at'    => 'datetime',

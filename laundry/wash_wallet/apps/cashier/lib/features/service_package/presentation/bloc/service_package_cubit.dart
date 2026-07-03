@@ -1,9 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wash_wallet_core/wash_wallet_core.dart';
+import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 import '../../domain/usecases/get_by_id_usecase.dart';
 import '../../domain/usecases/get_all_usecase.dart';
 import 'service_package_state.dart';
 
-class ServicePackageCubit extends Cubit<ServicePackageState> {
+class ServicePackageCubit extends Cubit<ServicePackageState> with TablePaginationCubitMixin<ServicePackageState> {
   final GetAllUsecase _getAllUsecase;
   final GetByIdUsecase _getByIdUsecase;
 
@@ -46,29 +48,90 @@ class ServicePackageCubit extends Cubit<ServicePackageState> {
     final result = await _getAllUsecase(params);
 
     result.when(
-      success: (packages) {
+      success: (data) {
         final currentState = state;
         if (currentState is ServicePackagesLoaded && page > 1) {
           final updatedPackages = List.of(currentState.packages)
-            ..addAll(packages);
+            ..addAll(data.items);
           emit(
             ServicePackagesLoaded(
               packages: updatedPackages,
-              hasReachedMax: packages.length < perPage,
-              currentPage: page,
+              hasReachedMax: data.hasReachedMax,
+              currentPage: data.currentPage,
+              lastPage: data.lastPage,
+              total: data.total,
+              from: data.from,
+              to: data.to,
+              perPage: data.perPage,
             ),
           );
         } else {
           emit(
             ServicePackagesLoaded(
-              packages: packages,
-              hasReachedMax: packages.length < perPage,
-              currentPage: page,
+              packages: data.items,
+              hasReachedMax: data.hasReachedMax,
+              currentPage: data.currentPage,
+              lastPage: data.lastPage,
+              total: data.total,
+              from: data.from,
+              to: data.to,
+              perPage: data.perPage,
             ),
           );
         }
       },
       failure: (failure) => emit(ServicePackageFailure(failure)),
+    );
+  }
+
+  /// Called exclusively by [AppPagination.onPageChanged] on tablet.
+  /// Always REPLACES packages — never appends.
+  Future<void> changePage(
+    int page, {
+    String? search,
+    int? outletId,
+    bool? isActive,
+    double? minPrice,
+    double? maxPrice,
+    int? minValidityDays,
+    int? maxValidityDays,
+    String sortBy = 'createdAt',
+    String sortDirection = 'desc',
+  }) {
+    final current = state;
+    if (current is! ServicePackagesLoaded) return Future.value();
+    return changePageGeneric<ServicePackage>(
+      page: page,
+      currentPage: current.currentPage,
+      lastPage: current.lastPage,
+      request: () => _getAllUsecase(
+        GetAllParams(
+          page: page,
+          perPage: current.perPage,
+          search: search,
+          outletId: outletId,
+          isActive: isActive,
+          minPrice: minPrice,
+          maxPrice: maxPrice,
+          minValidityDays: minValidityDays,
+          maxValidityDays: maxValidityDays,
+          sortBy: sortBy,
+          sortDirection: sortDirection,
+        ),
+      ),
+      markPageLoading: () => current.copyWith(isPageLoading: true),
+      buildLoaded: (data) => ServicePackagesLoaded(
+        packages: data.items,
+        hasReachedMax: data.hasReachedMax,
+        currentPage: data.currentPage,
+        lastPage: data.lastPage,
+        total: data.total,
+        from: data.from,
+        to: data.to,
+        perPage: data.perPage,
+        isPageLoading: false,
+      ),
+      buildError: (f) => ServicePackageFailure(ServerFailure(message: f.message)),
     );
   }
 

@@ -325,7 +325,7 @@ class WalletWithdrawalService extends BaseService
                 $withdrawal = $this->getById($id);
                 $userId = $this->resolveOwnerId();
 
-                if ($withdrawal->user_id !== $userId) {
+                if ((int) $withdrawal->user_id !== (int) $userId) {
                     throw new Exception('Akses ditolak.');
                 }
 

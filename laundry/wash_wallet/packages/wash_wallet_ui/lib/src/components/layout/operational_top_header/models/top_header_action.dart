@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 class TopHeaderAction {
   /// The icon to display.
   final IconData icon;
-  
+
   /// Optional tooltip text.
   final String? tooltip;
-  
+
   /// The action to perform when tapped.
   final VoidCallback onTap;
-  
+
   /// Optional badge widget to overlay on the icon (e.g., for notifications).
   final Widget? badge;
 

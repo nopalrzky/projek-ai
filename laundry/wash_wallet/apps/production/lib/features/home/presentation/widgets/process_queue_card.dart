@@ -99,4 +99,3 @@ class _ProcessCard extends StatelessWidget {
     );
   }
 }
-

@@ -54,11 +54,30 @@ class AuthProvider {
     return CheckAuthStatusUsecase(repository);
   }
 
+  static SetupPinUseCase createSetupPinUsecase(AuthRepository repository) {
+    return SetupPinUseCase(repository);
+  }
+
+  static UpdateProfileUseCase createUpdateProfileUseCase(
+    AuthRepository repository,
+  ) {
+    return UpdateProfileUseCase(repository);
+  }
+
+  static ChangePasswordUseCase createChangePasswordUseCase(
+    AuthRepository repository,
+  ) {
+    return ChangePasswordUseCase(repository);
+  }
+
   static AuthCubit createAuthCubit({
     required LoginUsecase loginUsecase,
     required LogoutUsecase logoutUsecase,
     required GetMeUsecase getMeUsecase,
     required CheckAuthStatusUsecase checkAuthStatusUsecase,
+    required SetupPinUseCase setupPinUsecase,
+    required UpdateProfileUseCase updateProfileUseCase,
+    required ChangePasswordUseCase changePasswordUseCase,
     FcmTokenDatasource? fcmTokenDatasource,
   }) {
     return AuthCubit(
@@ -66,6 +85,9 @@ class AuthProvider {
       logoutUsecase: logoutUsecase,
       getMeUsecase: getMeUsecase,
       checkAuthStatusUsecase: checkAuthStatusUsecase,
+      setupPinUseCase: setupPinUsecase,
+      updateProfileUseCase: updateProfileUseCase,
+      changePasswordUseCase: changePasswordUseCase,
       fcmTokenDatasource: fcmTokenDatasource,
     );
   }
@@ -93,12 +115,18 @@ class AuthProvider {
     final logoutUsecase = createLogoutUsecase(repository);
     final getMeUsecase = createGetMeUsecase(repository);
     final checkAuthStatusUsecase = createCheckAuthStatusUsecase(repository);
+    final setupPinUsecase = createSetupPinUsecase(repository);
+    final updateProfileUseCase = createUpdateProfileUseCase(repository);
+    final changePasswordUseCase = createChangePasswordUseCase(repository);
 
     return createAuthCubit(
       loginUsecase: loginUsecase,
       logoutUsecase: logoutUsecase,
       getMeUsecase: getMeUsecase,
       checkAuthStatusUsecase: checkAuthStatusUsecase,
+      setupPinUsecase: setupPinUsecase,
+      updateProfileUseCase: updateProfileUseCase,
+      changePasswordUseCase: changePasswordUseCase,
       fcmTokenDatasource: fcmTokenDatasource,
     );
   }

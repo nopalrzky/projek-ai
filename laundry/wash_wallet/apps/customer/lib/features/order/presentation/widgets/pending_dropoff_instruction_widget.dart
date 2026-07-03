@@ -16,7 +16,8 @@ class PendingDropoffInstructionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final outlet = order.outlet;
-    final showCoords = outlet != null && outlet.latitude != null && outlet.longitude != null;
+    final showCoords =
+        outlet != null && outlet.latitude != null && outlet.longitude != null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,11 +56,23 @@ class PendingDropoffInstructionWidget extends StatelessWidget {
               SizedBox(height: context.space.md),
               _buildStepRow(context, '1', 'Bawa laundry Anda ke outlet'),
               SizedBox(height: context.space.sm),
-              _buildStepRow(context, '2', 'Kasir akan menerima dan menimbang laundry'),
+              _buildStepRow(
+                context,
+                '2',
+                'Kasir akan menerima dan menimbang laundry',
+              ),
               SizedBox(height: context.space.sm),
-              _buildStepRow(context, '3', 'Total harga akan ditentukan oleh kasir'),
+              _buildStepRow(
+                context,
+                '3',
+                'Total harga akan ditentukan oleh kasir',
+              ),
               SizedBox(height: context.space.sm),
-              _buildStepRow(context, '4', 'Pembayaran dilakukan setelah kasir meng-ACC order'),
+              _buildStepRow(
+                context,
+                '4',
+                'Pembayaran dilakukan setelah kasir meng-ACC order',
+              ),
             ],
           ),
         ),
@@ -134,12 +147,7 @@ class PendingDropoffInstructionWidget extends StatelessWidget {
           ),
         ),
         SizedBox(width: context.space.sm),
-        Expanded(
-          child: Text(
-            text,
-            style: context.typography.bodyMedium,
-          ),
-        ),
+        Expanded(child: Text(text, style: context.typography.bodyMedium)),
       ],
     );
   }

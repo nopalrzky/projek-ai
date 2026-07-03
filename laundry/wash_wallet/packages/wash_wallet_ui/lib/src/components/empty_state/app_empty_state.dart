@@ -95,11 +95,9 @@ class AppEmptyState extends StatelessWidget {
     final iconColor = _getIconColor(context);
     final containerBg = switch (variant) {
       AppEmptyStateVariant.generic ||
-      AppEmptyStateVariant.search =>
-        context.colors.iconContainerNeutral,
+      AppEmptyStateVariant.search => context.colors.iconContainerNeutral,
       AppEmptyStateVariant.order ||
-      AppEmptyStateVariant.customer =>
-        context.colors.iconContainerPrimary,
+      AppEmptyStateVariant.customer => context.colors.iconContainerPrimary,
       AppEmptyStateVariant.error => context.colors.iconContainerError,
     };
     final containerSize = size.iconSize < 64 ? 64.0 : size.iconSize;

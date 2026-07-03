@@ -147,7 +147,10 @@ class OrderRemoteDatasourceImpl implements OrderRemoteDatasource {
   }
 
   @override
-  Future<OrderModel> submitReview(int orderId, Map<String, dynamic> payload) async {
+  Future<OrderModel> submitReview(
+    int orderId,
+    Map<String, dynamic> payload,
+  ) async {
     try {
       final response = await _dio.post(
         '${_endpoints.order(orderId)}/review',

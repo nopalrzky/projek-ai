@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 
 class OrderSearchSection extends StatelessWidget {
@@ -47,4 +47,3 @@ class OrderSearchSection extends StatelessWidget {
     );
   }
 }
-

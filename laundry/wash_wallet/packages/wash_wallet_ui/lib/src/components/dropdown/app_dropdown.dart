@@ -10,7 +10,7 @@ class AppDropdown<T> extends StatelessWidget {
   final T? value;
   final List<T> items;
   final String Function(T item) itemLabel;
-  final ValueChanged<T> onChanged;
+  final void Function(T? value) onChanged;
   final bool enabled;
   final String? errorText;
   final String? helperText;
@@ -72,8 +72,6 @@ class AppDropdown<T> extends StatelessWidget {
       selectedItem: value,
     );
 
-    if (selected != null) {
-      onChanged(selected);
-    }
+    onChanged(selected);
   }
 }

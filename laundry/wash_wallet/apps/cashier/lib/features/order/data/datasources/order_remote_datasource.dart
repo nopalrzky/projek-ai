@@ -4,7 +4,7 @@ import 'package:wash_wallet_core/wash_wallet_core.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 
 abstract class OrderRemoteDatasource {
-  Future<List<OrderModel>> getAll({
+  Future<PaginatedData<OrderModel>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -32,11 +32,18 @@ abstract class OrderRemoteDatasource {
     required Map<String, dynamic> data,
   });
 
-  Future<OrderModel> complete({required int id, required String clientRequestId});
+  Future<OrderModel> complete({
+    required int id,
+    required String clientRequestId,
+  });
 
   Future<OrderModel> accept({required int id, required String clientRequestId});
 
-  Future<OrderModel> reject({required int id, String? reason, required String clientRequestId});
+  Future<OrderModel> reject({
+    required int id,
+    String? reason,
+    required String clientRequestId,
+  });
 
   Future<OrderModel> weigh({
     required int id,
@@ -58,7 +65,7 @@ class OrderRemoteDatasourceImpl
   OrderRemoteDatasourceImpl(this._dio, this._endpoints);
 
   @override
-  Future<List<OrderModel>> getAll({
+  Future<PaginatedData<OrderModel>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -102,14 +109,21 @@ class OrderRemoteDatasourceImpl
 
       _validateResponse(response);
 
-      final List data = response.data['data'];
+      final List data = response.data['data'] as List? ?? [];
+      final meta = response.data['meta'] as Map<String, dynamic>? ?? {};
 
       final normalizedData = data
           .map((item) => _normalizeJsonData(item as Map<String, dynamic>))
           .toList();
 
       try {
-        return normalizedData.map((e) => OrderModel.fromJson(e)).toList();
+        final items = normalizedData.map((e) => OrderModel.fromJson(e)).toList();
+        return PaginatedData<OrderModel>.fromMeta(
+          items: items,
+          meta: meta,
+          requestedPage: page,
+          requestedPerPage: perPage,
+        );
       } catch (parseError) {
         throw ApiException(
           message: 'Failed to parse order data: $parseError',
@@ -151,10 +165,14 @@ class OrderRemoteDatasourceImpl
   Future<OrderModel> store(Map<String, dynamic> data) async {
     try {
       final clientRequestId = data.remove('client_request_id') as String?;
-      final options = clientRequestId != null 
-          ? Options(headers: {'Client-Request-Id': clientRequestId}) 
+      final options = clientRequestId != null
+          ? Options(headers: {'Client-Request-Id': clientRequestId})
           : null;
-      final response = await _dio.post(_endpoints.orders, data: data, options: options);
+      final response = await _dio.post(
+        _endpoints.orders,
+        data: data,
+        options: options,
+      );
       _validateResponse(response);
 
       final normalizedData = _normalizeJsonData(
@@ -181,10 +199,14 @@ class OrderRemoteDatasourceImpl
   }) async {
     try {
       final clientRequestId = data.remove('client_request_id') as String?;
-      final options = clientRequestId != null 
-          ? Options(headers: {'Client-Request-Id': clientRequestId}) 
+      final options = clientRequestId != null
+          ? Options(headers: {'Client-Request-Id': clientRequestId})
           : null;
-      final response = await _dio.put('${_endpoints.orders}/$id', data: data, options: options);
+      final response = await _dio.put(
+        '${_endpoints.orders}/$id',
+        data: data,
+        options: options,
+      );
       _validateResponse(response);
 
       final normalizedData = _normalizeJsonData(
@@ -205,7 +227,10 @@ class OrderRemoteDatasourceImpl
   }
 
   @override
-  Future<OrderModel> complete({required int id, required String clientRequestId}) async {
+  Future<OrderModel> complete({
+    required int id,
+    required String clientRequestId,
+  }) async {
     try {
       final response = await _dio.post(
         '${_endpoints.orders}/$id/complete',
@@ -231,7 +256,10 @@ class OrderRemoteDatasourceImpl
   }
 
   @override
-  Future<OrderModel> accept({required int id, required String clientRequestId}) async {
+  Future<OrderModel> accept({
+    required int id,
+    required String clientRequestId,
+  }) async {
     try {
       final response = await _dio.post(
         '${_endpoints.orders}/$id/accept',
@@ -250,7 +278,11 @@ class OrderRemoteDatasourceImpl
   }
 
   @override
-  Future<OrderModel> reject({required int id, String? reason, required String clientRequestId}) async {
+  Future<OrderModel> reject({
+    required int id,
+    String? reason,
+    required String clientRequestId,
+  }) async {
     try {
       final response = await _dio.post(
         '${_endpoints.orders}/$id/reject',
@@ -278,7 +310,7 @@ class OrderRemoteDatasourceImpl
     try {
       final clientRequestId = data.remove('client_request_id') as String?;
       final Map<String, dynamic> flattenedData = {};
-      
+
       void flatten(dynamic value, String prefix) {
         if (value is Map) {
           value.forEach((key, val) {
@@ -308,7 +340,7 @@ class OrderRemoteDatasourceImpl
 
       final formData = FormData.fromMap(flattenedData);
 
-      final options = clientRequestId != null 
+      final options = clientRequestId != null
           ? Options(
               contentType: Headers.multipartFormDataContentType,
               headers: {'Client-Request-Id': clientRequestId},
@@ -333,7 +365,10 @@ class OrderRemoteDatasourceImpl
   }
 
   @override
-  Future<OrderModel> start({required int id, required String clientRequestId}) async {
+  Future<OrderModel> start({
+    required int id,
+    required String clientRequestId,
+  }) async {
     try {
       final response = await _dio.post(
         '${_endpoints.orders}/$id/start',

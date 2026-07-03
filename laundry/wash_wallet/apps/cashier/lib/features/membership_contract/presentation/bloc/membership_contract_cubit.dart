@@ -1,9 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wash_wallet_core/wash_wallet_core.dart';
+import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 import '../../domain/usecases/get_all_usecase.dart';
 import '../../domain/usecases/get_by_id_usecase.dart';
 import 'membership_contract_state.dart';
 
-class MembershipContractCubit extends Cubit<MembershipContractState> {
+class MembershipContractCubit extends Cubit<MembershipContractState>
+    with TablePaginationCubitMixin<MembershipContractState> {
   final GetAllUsecase _getAllUsecase;
   final GetByIdUsecase _getByIdUsecase;
 
@@ -53,29 +56,90 @@ class MembershipContractCubit extends Cubit<MembershipContractState> {
     final result = await _getAllUsecase(params);
 
     result.when(
-      success: (contracts) {
+      success: (data) {
         final currentState = state;
 
         if (currentState is MembershipContractsLoaded && params.page > 1) {
-          final merged = List.of(currentState.contracts)..addAll(contracts);
+          final merged = List.of(currentState.contracts)..addAll(data.items);
           emit(
             MembershipContractsLoaded(
               contracts: merged,
-              hasReachedMax: contracts.length < perPage,
-              currentPage: params.page,
+              hasReachedMax: data.hasReachedMax,
+              currentPage: data.currentPage,
+              lastPage: data.lastPage,
+              total: data.total,
+              from: data.from,
+              to: data.to,
+              perPage: data.perPage,
             ),
           );
         } else {
           emit(
             MembershipContractsLoaded(
-              contracts: contracts,
-              hasReachedMax: contracts.length < perPage,
-              currentPage: params.page,
+              contracts: data.items,
+              hasReachedMax: data.hasReachedMax,
+              currentPage: data.currentPage,
+              lastPage: data.lastPage,
+              total: data.total,
+              from: data.from,
+              to: data.to,
+              perPage: data.perPage,
             ),
           );
         }
       },
       failure: (failure) => emit(MembershipContractFailure(failure)),
+    );
+  }
+
+  /// Called exclusively by [AppPagination.onPageChanged] on tablet.
+  /// Always REPLACES membership contracts — never appends.
+  Future<void> changePage(
+    int page, {
+    String? search,
+    int? customerId,
+    int? outletId,
+    int? membershipPlanId,
+    String? status,
+    double? totalPaidMin,
+    double? totalPaidMax,
+    String sortBy = 'createdAt',
+    String sortDirection = 'desc',
+  }) {
+    final current = state;
+    if (current is! MembershipContractsLoaded) return Future.value();
+    return changePageGeneric<MembershipContract>(
+      page: page,
+      currentPage: current.currentPage,
+      lastPage: current.lastPage,
+      request: () => _getAllUsecase(
+        GetAllParams(
+          page: page,
+          perPage: current.perPage,
+          search: search,
+          customerId: customerId,
+          outletId: outletId,
+          membershipPlanId: membershipPlanId,
+          status: status,
+          totalPaidMin: totalPaidMin,
+          totalPaidMax: totalPaidMax,
+          sortBy: sortBy,
+          sortDirection: sortDirection,
+        ),
+      ),
+      markPageLoading: () => current.copyWith(isPageLoading: true),
+      buildLoaded: (data) => MembershipContractsLoaded(
+        contracts: data.items,
+        hasReachedMax: data.hasReachedMax,
+        currentPage: data.currentPage,
+        lastPage: data.lastPage,
+        total: data.total,
+        from: data.from,
+        to: data.to,
+        perPage: data.perPage,
+        isPageLoading: false,
+      ),
+      buildError: (f) => MembershipContractFailure(ServerFailure(message: f.message)),
     );
   }
 

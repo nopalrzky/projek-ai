@@ -13,7 +13,6 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     backdropOpacity = 80,
     center = false,
 }) => {
-    // Size classes
     const sizeClasses = useMemo(() => {
         const sizes = {
             xs: { spinner: "h-4 w-4 border-2", dots: "gap-1", text: "text-xs" },
@@ -46,13 +45,12 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         return sizes[size];
     }, [size]);
 
-    // Variant colors
     const variantClasses = useMemo(() => {
         const variants = {
             primary:
-                "border-blue-600 dark:border-blue-500 border-t-transparent",
+                "border-[var(--color-primary-500)] border-t-transparent",
             secondary:
-                "border-gray-600 dark:border-gray-400 border-t-transparent",
+                "border-[var(--color-text-secondary)] border-t-transparent",
             white: "border-white border-t-transparent",
             black: "border-black dark:border-white border-t-transparent",
             current: "border-current border-t-transparent",
@@ -60,11 +58,10 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         return variants[variant];
     }, [variant]);
 
-    // Dot colors
     const dotColors = useMemo(() => {
         const colors = {
-            primary: "bg-blue-600 dark:bg-blue-500",
-            secondary: "bg-gray-600 dark:bg-gray-400",
+            primary: "bg-[var(--color-primary-500)]",
+            secondary: "bg-[var(--color-text-secondary)]",
             white: "bg-white",
             black: "bg-black dark:bg-white",
             current: "bg-current",
@@ -72,7 +69,6 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         return colors[variant];
     }, [variant]);
 
-    // Render spinner based on type
     const renderSpinner = () => {
         switch (type) {
             case "dots":
@@ -87,14 +83,14 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
                                     size === "xs"
                                         ? "h-1.5 w-1.5"
                                         : size === "sm"
-                                        ? "h-2 w-2"
-                                        : size === "md"
-                                        ? "h-3 w-3"
-                                        : size === "lg"
-                                        ? "h-4 w-4"
-                                        : size === "xl"
-                                        ? "h-6 w-6"
-                                        : "h-8 w-8"
+                                          ? "h-2 w-2"
+                                          : size === "md"
+                                            ? "h-3 w-3"
+                                            : size === "lg"
+                                              ? "h-4 w-4"
+                                              : size === "xl"
+                                                ? "h-6 w-6"
+                                                : "h-8 w-8",
                                 )}
                                 style={{
                                     animationDelay: `${i * 0.15}s`,
@@ -112,14 +108,14 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
                             className={cn(
                                 "rounded-full animate-ping absolute",
                                 dotColors,
-                                sizeClasses.spinner
+                                sizeClasses.spinner,
                             )}
                         />
                         <div
                             className={cn(
                                 "rounded-full relative",
                                 dotColors,
-                                sizeClasses.spinner
+                                sizeClasses.spinner,
                             )}
                         />
                     </div>
@@ -137,14 +133,14 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
                                     size === "xs"
                                         ? "h-3 w-1"
                                         : size === "sm"
-                                        ? "h-4 w-1.5"
-                                        : size === "md"
-                                        ? "h-6 w-2"
-                                        : size === "lg"
-                                        ? "h-8 w-3"
-                                        : size === "xl"
-                                        ? "h-12 w-4"
-                                        : "h-16 w-5"
+                                          ? "h-4 w-1.5"
+                                          : size === "md"
+                                            ? "h-6 w-2"
+                                            : size === "lg"
+                                              ? "h-8 w-3"
+                                              : size === "xl"
+                                                ? "h-12 w-4"
+                                                : "h-16 w-5",
                                 )}
                                 style={{
                                     animationDelay: `${i * 0.15}s`,
@@ -162,7 +158,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
                         className={cn(
                             "rounded-full animate-spin",
                             sizeClasses.spinner,
-                            variantClasses
+                            variantClasses,
                         )}
                         role="status"
                         aria-label="Loading"
@@ -173,21 +169,20 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         }
     };
 
-    // Container
     const spinnerContent = (
         <div
             className={cn(
                 "flex flex-col items-center gap-3",
-                center && "justify-center"
+                center && "justify-center",
             )}
         >
             {renderSpinner()}
             {label && (
                 <p
                     className={cn(
-                        "font-medium text-gray-700 dark:text-gray-300",
+                        "font-medium text-[var(--color-text-secondary)]",
                         sizeClasses.text,
-                        variant === "white" && "text-white"
+                        variant === "white" && "text-white",
                     )}
                 >
                     {label}
@@ -196,14 +191,13 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         </div>
     );
 
-    // Fullscreen mode
     if (fullscreen) {
         return (
             <div
                 className={cn(
                     "fixed inset-0 z-50 flex items-center justify-center",
                     backdrop && `bg-black/${backdropOpacity} backdrop-blur-sm`,
-                    className
+                    className,
                 )}
             >
                 {spinnerContent}
@@ -211,13 +205,12 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         );
     }
 
-    // Inline mode
     return (
         <div
             className={cn(
                 "inline-flex",
                 center && "w-full justify-center",
-                className
+                className,
             )}
         >
             {spinnerContent}

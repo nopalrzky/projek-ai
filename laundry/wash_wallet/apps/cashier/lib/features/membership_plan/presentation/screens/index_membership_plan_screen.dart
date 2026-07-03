@@ -39,6 +39,7 @@ class _IndexMembershipPlanScreenState extends State<IndexMembershipPlanScreen> {
   void _loadData() {
     context.read<MembershipPlanCubit>().getAll(
       outletId: widget.outletId,
+      search: _searchController.text.isEmpty ? null : _searchController.text,
     );
   }
 
@@ -50,12 +51,14 @@ class _IndexMembershipPlanScreenState extends State<IndexMembershipPlanScreen> {
     return AppLayout(
       userName: authState is Authenticated ? authState.employee.name : null,
       onLogout: () => context.read<AuthCubit>().logout(),
-      header: isCompact ? AppHeader(
-        title: 'Membership Plan',
-        type: AppHeaderType.standard,
-        backgroundColor: context.colors.surface,
-        onBackPressed: () => context.pop(),
-      ) : null,
+      header: isCompact
+          ? AppHeader(
+              title: 'Membership Plan',
+              type: AppHeaderType.standard,
+              backgroundColor: context.colors.surface,
+              onBackPressed: () => context.pop(),
+            )
+          : null,
       body: BlocConsumer<MembershipPlanCubit, MembershipPlanState>(
         listener: (context, state) {
           if (state is MembershipPlanFailure) {
@@ -99,9 +102,7 @@ class _IndexMembershipPlanScreenState extends State<IndexMembershipPlanScreen> {
             setState(() {});
           },
         ),
-        Expanded(
-          child: _buildMobileContent(context, state),
-        ),
+        Expanded(child: _buildMobileContent(context, state)),
       ],
     );
   }
@@ -111,10 +112,7 @@ class _IndexMembershipPlanScreenState extends State<IndexMembershipPlanScreen> {
       return const AppLoadingIndicator();
     }
     if (state is MembershipPlanFailure) {
-      return AppErrorState(
-        message: state.failure.message,
-        onRetry: _loadData,
-      );
+      return AppErrorState(message: state.failure.message, onRetry: _loadData);
     }
     if (state is MembershipPlansLoaded) {
       final filteredPlans = _filterPlans(state.plans);
@@ -138,6 +136,7 @@ class _IndexMembershipPlanScreenState extends State<IndexMembershipPlanScreen> {
   }
 
   Widget _buildTabletTable(BuildContext context, MembershipPlanState state) {
+    final loadedState = state is MembershipPlansLoaded ? state : null;
     return AppDataView<MembershipPlan>(
       breadcrumbs: const [
         BreadcrumbItem(label: 'Home'),
@@ -150,13 +149,29 @@ class _IndexMembershipPlanScreenState extends State<IndexMembershipPlanScreen> {
       onSearchClear: () {
         _searchController.clear();
         _loadData();
-        setState(() {});
       },
       columns: _buildTabletColumnDefs(context),
-      rows: state is MembershipPlansLoaded ? _filterPlans(state.plans) : [],
-      isLoading: state is MembershipPlanLoading,
-      errorMessage: state is MembershipPlanFailure ? state.failure.message : null,
+      rows: loadedState?.plans ?? [],
+      isLoading: state is MembershipPlanLoading ||
+          (state is MembershipPlansLoaded && state.isPageLoading),
+      errorMessage: state is MembershipPlanFailure
+          ? state.failure.message
+          : null,
       emptyMessage: 'Belum ada membership plan',
+      totalCount: loadedState?.total,
+      currentPage: loadedState?.currentPage,
+      lastPage: loadedState?.lastPage,
+      from: loadedState?.from,
+      to: loadedState?.to,
+      onPageChanged: loadedState != null
+          ? (page) => context.read<MembershipPlanCubit>().changePage(
+                page,
+                outletId: widget.outletId,
+                search: _searchController.text.isEmpty
+                    ? null
+                    : _searchController.text,
+              )
+          : null,
       rowActions: [
         DataTableRowAction<MembershipPlan>(
           icon: Icons.visibility_outlined,
@@ -168,7 +183,9 @@ class _IndexMembershipPlanScreenState extends State<IndexMembershipPlanScreen> {
     );
   }
 
-  List<DataTableColumnDef<MembershipPlan>> _buildTabletColumnDefs(BuildContext context) {
+  List<DataTableColumnDef<MembershipPlan>> _buildTabletColumnDefs(
+    BuildContext context,
+  ) {
     final currencyFormat = NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp ',
@@ -234,6 +251,8 @@ class _IndexMembershipPlanScreenState extends State<IndexMembershipPlanScreen> {
   }
 
   void _handleTap(MembershipPlan plan) {
-    context.push('/settings/setup-outlet/membership-plans/${plan.id}').then((_) => _loadData());
+    context
+        .push('/membership-plans/${plan.id}')
+        .then((_) => _loadData());
   }
 }

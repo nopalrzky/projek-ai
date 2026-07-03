@@ -76,7 +76,9 @@ class ServiceCard extends StatelessWidget {
                 ] else ...[
                   if (!service.supportsCourier) ...[
                     SizedBox(height: context.space.xxs),
-                    ServiceNonCourierBadgeWidget(label: service.courierSupportLabel),
+                    ServiceNonCourierBadgeWidget(
+                      label: service.courierSupportLabel,
+                    ),
                   ],
                   SizedBox(height: context.space.xxs),
                   Wrap(
@@ -146,11 +148,17 @@ class ServiceCard extends StatelessWidget {
           ),
           if (isSelected)
             IconButton(
-              icon: Icon(Icons.delete_outline_rounded, color: context.colors.error),
+              icon: Icon(
+                Icons.delete_outline_rounded,
+                color: context.colors.error,
+              ),
               onPressed: onRemove,
             )
           else
-            Icon(Icons.add_circle_outline_rounded, color: context.colors.primary),
+            Icon(
+              Icons.add_circle_outline_rounded,
+              color: context.colors.primary,
+            ),
         ],
       ),
     );

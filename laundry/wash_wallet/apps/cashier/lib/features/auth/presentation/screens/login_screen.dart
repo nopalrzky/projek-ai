@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
@@ -210,4 +210,3 @@ class LoginScreen extends StatelessWidget {
     );
   }
 }
-

@@ -23,13 +23,13 @@ class OrderReview extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        orderId,
-        outletId,
-        rating,
-        comment,
-        maskedName,
-        createdAt,
-        formattedCreatedAt,
-      ];
+    id,
+    orderId,
+    outletId,
+    rating,
+    comment,
+    maskedName,
+    createdAt,
+    formattedCreatedAt,
+  ];
 }

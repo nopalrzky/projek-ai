@@ -10,7 +10,10 @@ import '../bloc/service_package_cubit.dart';
 class ServicePackageProvider {
   ServicePackageProvider._();
 
-  static ServicePackageRemoteDatasource createRemoteDatasource(Dio dio, ApiEndpoints endpoints) {
+  static ServicePackageRemoteDatasource createRemoteDatasource(
+    Dio dio,
+    ApiEndpoints endpoints,
+  ) {
     return ServicePackageRemoteDatasourceImpl(dio, endpoints);
   }
 

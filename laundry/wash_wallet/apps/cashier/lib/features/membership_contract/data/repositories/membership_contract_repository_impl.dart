@@ -9,7 +9,7 @@ class MembershipContractRepositoryImpl implements MembershipContractRepository {
   MembershipContractRepositoryImpl(this._remoteDatasource);
 
   @override
-  Future<Result<List<MembershipContract>>> getAll({
+  Future<Result<PaginatedData<MembershipContract>>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -23,7 +23,7 @@ class MembershipContractRepositoryImpl implements MembershipContractRepository {
     String sortDirection = 'desc',
   }) async {
     try {
-      final result = await _remoteDatasource.getAll(
+      final paginatedData = await _remoteDatasource.getAll(
         page: page,
         perPage: perPage,
         search: search,
@@ -37,7 +37,15 @@ class MembershipContractRepositoryImpl implements MembershipContractRepository {
         sortDirection: sortDirection,
       );
 
-      return Result.success(result.map((model) => model.toEntity()).toList());
+      return Result.success(PaginatedData<MembershipContract>(
+        items: paginatedData.items.map((model) => model.toEntity()).toList(),
+        currentPage: paginatedData.currentPage,
+        lastPage: paginatedData.lastPage,
+        perPage: paginatedData.perPage,
+        total: paginatedData.total,
+        from: paginatedData.from,
+        to: paginatedData.to,
+      ));
     } on ApiException catch (e) {
       return Result.failure(_mapApiExceptionToFailure(e));
     } on NetworkException catch (e) {

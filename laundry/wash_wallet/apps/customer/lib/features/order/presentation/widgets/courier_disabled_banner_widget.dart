@@ -19,10 +19,7 @@ class CourierDisabledBannerWidget extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.info_outline,
-            color: context.colors.warning,
-          ),
+          Icon(Icons.info_outline, color: context.colors.warning),
           SizedBox(width: context.space.sm),
           Expanded(
             child: Column(

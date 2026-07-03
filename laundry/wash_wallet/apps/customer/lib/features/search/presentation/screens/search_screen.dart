@@ -17,7 +17,7 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final _searchController = TextEditingController();
   final _historyService = SearchHistoryService();
-  
+
   List<String> _history = [];
   bool _isLoadingHistory = true;
 
@@ -58,9 +58,11 @@ class _SearchScreenState extends State<SearchScreen> {
     if (trimmedQuery.isEmpty) return;
 
     await _historyService.addToHistory(trimmedQuery);
-    
+
     if (!mounted) return;
-    context.pushReplacement('/discovery?query=${Uri.encodeComponent(trimmedQuery)}');
+    context.pushReplacement(
+      '/discovery?query=${Uri.encodeComponent(trimmedQuery)}',
+    );
   }
 
   void _clearSearch() {

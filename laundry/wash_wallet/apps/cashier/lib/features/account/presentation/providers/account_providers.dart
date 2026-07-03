@@ -9,7 +9,10 @@ import '../bloc/account_cubit.dart';
 class AccountProvider {
   AccountProvider._();
 
-  static AccountRemoteDatasource createRemoteDatasource(Dio dio, ApiEndpoints endpoints) {
+  static AccountRemoteDatasource createRemoteDatasource(
+    Dio dio,
+    ApiEndpoints endpoints,
+  ) {
     return AccountRemoteDatasourceImpl(dio: dio, endpoints: endpoints);
   }
 

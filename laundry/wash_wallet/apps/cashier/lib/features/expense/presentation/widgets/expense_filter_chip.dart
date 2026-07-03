@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 
 class ExpenseFilterChip extends StatelessWidget {
@@ -107,4 +107,3 @@ class ExpenseFilterChip extends StatelessWidget {
     );
   }
 }
-

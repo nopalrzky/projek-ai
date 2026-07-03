@@ -3,7 +3,7 @@ import 'package:wash_wallet_core/wash_wallet_core.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 
 abstract class ServicePackageRemoteDatasource {
-  Future<List<ServicePackageModel>> getAll({
+  Future<PaginatedData<ServicePackageModel>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -28,7 +28,7 @@ class ServicePackageRemoteDatasourceImpl
   ServicePackageRemoteDatasourceImpl(this._dio, this._endpoints);
 
   @override
-  Future<List<ServicePackageModel>> getAll({
+  Future<PaginatedData<ServicePackageModel>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -61,19 +61,26 @@ class ServicePackageRemoteDatasourceImpl
         queryParameters: queryParams,
       );
 
-      _validateResponse(response);
+      final body = _validateResponse(response);
 
-      final List data = response.data['data'];
+      final List data = body['data'] as List? ?? [];
+      final meta = body['meta'] as Map<String, dynamic>? ?? {};
 
       // Normalize data to handle type inconsistencies
       final normalizedData = data
-          .map((item) => _normalizeJsonData(item))
+          .map((item) => _normalizeJsonData(item as Map<String, dynamic>))
           .toList();
 
       try {
-        return normalizedData
+        final items = normalizedData
             .map((e) => ServicePackageModel.fromJson(e))
             .toList();
+        return PaginatedData<ServicePackageModel>.fromMeta(
+          items: items,
+          meta: meta,
+          requestedPage: page,
+          requestedPerPage: perPage,
+        );
       } catch (parseError) {
         throw ApiException(
           message: 'Failed to parse service package data: $parseError',
@@ -92,10 +99,10 @@ class ServicePackageRemoteDatasourceImpl
         _endpoints.servicePackage(servicePackageId),
       );
 
-      _validateResponse(response);
+      final body = _validateResponse(response);
 
       final data = _normalizeJsonData(
-        response.data['data'] as Map<String, dynamic>,
+        body['data'] as Map<String, dynamic>,
       );
 
       try {
@@ -176,7 +183,7 @@ class ServicePackageRemoteDatasourceImpl
     return normalized;
   }
 
-  void _validateResponse(Response response) {
+  Map<String, dynamic> _validateResponse(Response response) {
     if (response.statusCode == null ||
         response.statusCode! < 200 ||
         response.statusCode! >= 300) {
@@ -195,12 +202,16 @@ class ServicePackageRemoteDatasourceImpl
       );
     }
 
-    if (response.data['success'] != true) {
+    final body = response.data as Map<String, dynamic>;
+
+    if (body['success'] != true) {
       throw ApiException(
-        message: response.data['message']?.toString() ?? 'Request failed',
+        message: body['message']?.toString() ?? 'Request failed',
         statusCode: response.statusCode,
       );
     }
+
+    return body;
   }
 
   Exception _handleError(Object e) {

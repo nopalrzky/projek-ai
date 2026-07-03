@@ -14,6 +14,8 @@ _$AuthEmployeeModelImpl _$$AuthEmployeeModelImplFromJson(
   username: json['username'] as String,
   email: json['email'] as String?,
   phone: json['phone'] as String?,
+  gender: json['gender'] as String?,
+  address: json['address'] as String?,
   outletId: (json['outletId'] as num).toInt(),
   accessibleOutlets: (json['accessibleOutlets'] as List<dynamic>?)
       ?.map((e) => OutletAccessModel.fromJson(e as Map<String, dynamic>))
@@ -32,6 +34,8 @@ Map<String, dynamic> _$$AuthEmployeeModelImplToJson(
   'username': instance.username,
   'email': instance.email,
   'phone': instance.phone,
+  'gender': instance.gender,
+  'address': instance.address,
   'outletId': instance.outletId,
   'accessibleOutlets': instance.accessibleOutlets,
   'allPermissions': instance.allPermissions,

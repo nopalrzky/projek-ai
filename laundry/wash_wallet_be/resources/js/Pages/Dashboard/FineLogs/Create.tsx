@@ -32,6 +32,7 @@ import { Employee, Fine, FineLogFormData } from "@/types";
 import { formatCurrency } from "@/lib/utils";
 import fineLogService from "@/Services/fine_log.service";
 import { FineLogCreateProps } from "./types";
+import { useLatestAsync } from "@/Hooks/useLatestAsync";
 
 const FineLogCreate = ({ outlets, flash }: FineLogCreateProps) => {
     const { data, setData, post, processing, errors, clearErrors, reset } =
@@ -55,6 +56,9 @@ const FineLogCreate = ({ outlets, flash }: FineLogCreateProps) => {
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+    const { runLatest: runLatestEmployees } = useLatestAsync();
+    const { runLatest: runLatestFines } = useLatestAsync();
+
     const loadOptionsByOutlet = useCallback(async (outletId: number) => {
         if (!outletId) {
             setEmployees([]);
@@ -68,46 +72,46 @@ const FineLogCreate = ({ outlets, flash }: FineLogCreateProps) => {
             fineId: "",
         }));
 
-        try {
-            setLoadingEmployees(true);
-            setEmployeesError(null);
+        setLoadingEmployees(true);
+        setEmployeesError(null);
+        runLatestEmployees(
+            outletId,
+            async () => await axios.get(route("api.employees.index", { outletId })),
+            {
+                onSuccess: (employeeResponse) => setEmployees(employeeResponse.data?.data ?? []),
+                onError: (error: any) => {
+                    console.error("Error loading employees:", error);
+                    setEmployeesError(
+                        error.response?.data?.message ||
+                            error.message ||
+                            "Gagal memuat data karyawan",
+                    );
+                    setEmployees([]);
+                },
+                onFinally: () => setLoadingEmployees(false)
+            }
+        );
 
-            const employeeResponse = await axios.get(
-                route("api.employees.index", { outletId }),
-            );
-            setEmployees(employeeResponse.data?.data ?? []);
-        } catch (error: any) {
-            console.error("Error loading employees:", error);
-            setEmployeesError(
-                error.response?.data?.message ||
-                    error.message ||
-                    "Gagal memuat data karyawan",
-            );
-            setEmployees([]);
-        } finally {
-            setLoadingEmployees(false);
-        }
-
-        try {
-            setLoadingFines(true);
-            setFinesError(null);
-
-            const fineResponse = await axios.get(
-                route("api.fines.by-outlet", { outletId }),
-            );
-            setFines(fineResponse.data?.data ?? []);
-        } catch (error: any) {
-            console.error("Error loading fines:", error);
-            setFinesError(
-                error.response?.data?.message ||
-                    error.message ||
-                    "Gagal memuat jenis denda",
-            );
-            setFines([]);
-        } finally {
-            setLoadingFines(false);
-        }
-    }, []);
+        setLoadingFines(true);
+        setFinesError(null);
+        runLatestFines(
+            outletId,
+            async () => await axios.get(route("api.fines.by-outlet", { outletId })),
+            {
+                onSuccess: (fineResponse) => setFines(fineResponse.data?.data ?? []),
+                onError: (error: any) => {
+                    console.error("Error loading fines:", error);
+                    setFinesError(
+                        error.response?.data?.message ||
+                            error.message ||
+                            "Gagal memuat jenis denda",
+                    );
+                    setFines([]);
+                },
+                onFinally: () => setLoadingFines(false)
+            }
+        );
+    }, [runLatestEmployees, runLatestFines]);
 
     useEffect(() => {
         if (data.outletId) {

@@ -121,10 +121,9 @@ class _EditCustomerAddressScreenState extends State<EditCustomerAddressScreen> {
   Future<void> _showMapPicker() async {
     final result = await MapPickerBottomSheet.show(
       context,
-      initialLocation:
-          _latitude != null && _longitude != null
-              ? LatLng(_latitude!, _longitude!)
-              : null,
+      initialLocation: _latitude != null && _longitude != null
+          ? LatLng(_latitude!, _longitude!)
+          : null,
     );
 
     if (result != null) {
@@ -149,10 +148,9 @@ class _EditCustomerAddressScreenState extends State<EditCustomerAddressScreen> {
       recipientName: _recipientNameController.text.trim(),
       recipientPhone: _recipientPhoneController.text.trim(),
       street: _streetController.text.trim(),
-      notes:
-          _notesController.text.trim().isEmpty
-              ? null
-              : _notesController.text.trim(),
+      notes: _notesController.text.trim().isEmpty
+          ? null
+          : _notesController.text.trim(),
       latitude: _latitude,
       longitude: _longitude,
       isPrimary: _isPrimary,

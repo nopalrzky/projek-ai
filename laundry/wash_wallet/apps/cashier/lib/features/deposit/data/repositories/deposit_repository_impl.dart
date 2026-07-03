@@ -9,7 +9,7 @@ class DepositRepositoryImpl implements DepositRepository {
   DepositRepositoryImpl(this._remoteDatasource);
 
   @override
-  Future<Result<List<Deposit>>> getAll({
+  Future<Result<PaginatedData<Deposit>>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -21,7 +21,7 @@ class DepositRepositoryImpl implements DepositRepository {
     String sortDirection = 'desc',
   }) async {
     try {
-      final models = await _remoteDatasource.getAll(
+      final paginatedData = await _remoteDatasource.getAll(
         page: page,
         perPage: perPage,
         search: search,
@@ -33,7 +33,15 @@ class DepositRepositoryImpl implements DepositRepository {
         sortDirection: sortDirection,
       );
 
-      return Result.success(models.map((e) => e.toEntity()).toList());
+      return Result.success(PaginatedData<Deposit>(
+        items: paginatedData.items.map((e) => e.toEntity()).toList(),
+        currentPage: paginatedData.currentPage,
+        lastPage: paginatedData.lastPage,
+        perPage: paginatedData.perPage,
+        total: paginatedData.total,
+        from: paginatedData.from,
+        to: paginatedData.to,
+      ));
     } catch (e) {
       return Result.failure(_mapExceptionToFailure(e));
     }

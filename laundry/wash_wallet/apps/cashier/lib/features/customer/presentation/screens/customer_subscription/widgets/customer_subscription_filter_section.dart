@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 
 class CustomerSubscriptionFilterSection extends StatelessWidget {
@@ -40,9 +40,8 @@ class CustomerSubscriptionFilterSection extends StatelessWidget {
       items: items,
       itemLabel: (item) => item.label,
       onChanged: (item) {
-        onStatusChanged(item.value == 'all' ? null : item.value);
+        onStatusChanged(item?.value == 'all' ? null : item?.value);
       },
     );
   }
 }
-

@@ -55,7 +55,8 @@ class _TopupPaymentScreenState extends State<TopupPaymentScreen> {
   Widget build(BuildContext context) {
     return BlocListener<TopupCubit, TopupState>(
       listener: (context, state) {
-        if (state.status == TopupStatus.detailLoaded && state.detail?.status == 'success') {
+        if (state.status == TopupStatus.detailLoaded &&
+            state.detail?.status == 'success') {
           _pollingTimer?.cancel();
         }
       },
@@ -66,7 +67,9 @@ class _TopupPaymentScreenState extends State<TopupPaymentScreen> {
         ),
         body: BlocBuilder<TopupCubit, TopupState>(
           builder: (context, state) {
-            if (state.isLoading && _pollingTimer == null && state.detail == null) {
+            if (state.isLoading &&
+                _pollingTimer == null &&
+                state.detail == null) {
               return const Center(child: AppLoadingIndicator());
             }
 
@@ -95,7 +98,9 @@ class _TopupPaymentScreenState extends State<TopupPaymentScreen> {
             }
 
             if (state.status == TopupStatus.error) {
-              return Center(child: Text(state.errorMessage ?? 'Terjadi kesalahan'));
+              return Center(
+                child: Text(state.errorMessage ?? 'Terjadi kesalahan'),
+              );
             }
 
             return const Center(child: AppLoadingIndicator());

@@ -15,7 +15,10 @@ import '../bloc/customer_cubit.dart';
 class CustomerProvider {
   CustomerProvider._();
 
-  static CustomerRemoteDatasource createRemoteDatasource(Dio dio, ApiEndpoints endpoints) {
+  static CustomerRemoteDatasource createRemoteDatasource(
+    Dio dio,
+    ApiEndpoints endpoints,
+  ) {
     return CustomerRemoteDatasourceImpl(dio, endpoints);
   }
 

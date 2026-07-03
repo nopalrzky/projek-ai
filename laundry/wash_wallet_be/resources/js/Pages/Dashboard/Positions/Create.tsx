@@ -12,7 +12,7 @@ import { PositionCreateProps } from "./types";
 import { PositionFormData } from "@/types";
 import PageHeader from "@/Components/Page/PageHeader";
 
-const PositionCreate = ({ outlets }: PositionCreateProps) => {
+const PositionCreate = ({ outlets, permissionCatalog }: PositionCreateProps) => {
     const { data, setData, post, processing, errors, reset } =
         useForm<PositionFormData>({
             outletId: 0,
@@ -47,7 +47,7 @@ const PositionCreate = ({ outlets }: PositionCreateProps) => {
 
     const handleSelectAllGlobal = (select: boolean) => {
         if (select) {
-            const all = permissionGroups.flatMap((g) =>
+            const all = permissionCatalog.flatMap((g) =>
                 g.permissions.map((p) => p.key),
             );
             setData("permissions", all);
@@ -55,51 +55,6 @@ const PositionCreate = ({ outlets }: PositionCreateProps) => {
             setData("permissions", []);
         }
     };
-
-    const permissionGroups = [
-        {
-            title: "Manajemen Order",
-            permissions: [
-                { key: "order.create", label: "Buat Order" },
-                { key: "order.view", label: "Lihat Order" },
-                { key: "order.manage", label: "Kelola Order" },
-            ]
-        },
-        {
-            title: "Pembayaran & Kas",
-            permissions: [
-                { key: "payment.manage", label: "Kelola Pembayaran" },
-            ]
-        },
-        {
-            title: "Produksi",
-            permissions: [
-                { key: "production.view", label: "Lihat Produksi" },
-                { key: "production.manage", label: "Kelola Produksi" },
-            ]
-        },
-        {
-            title: "Kurir",
-            permissions: [
-                { key: "courier.view", label: "Lihat Kurir" },
-                { key: "courier.manage", label: "Kelola Kurir" },
-            ]
-        },
-        {
-            title: "Pelanggan",
-            permissions: [
-                { key: "customer.view", label: "Lihat Pelanggan" },
-                { key: "customer.manage", label: "Kelola Pelanggan" },
-            ]
-        },
-        {
-            title: "Layanan & Unit",
-            permissions: [
-                { key: "service.view", label: "Lihat Layanan" },
-                { key: "service.manage", label: "Kelola Layanan" },
-            ]
-        }
-    ];
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -349,7 +304,7 @@ const PositionCreate = ({ outlets }: PositionCreateProps) => {
                                                 type="checkbox"
                                                 id="global_select_all_permissions"
                                                 checked={
-                                                    permissionGroups.flatMap(
+                                                    permissionCatalog.flatMap(
                                                         (g) =>
                                                             g.permissions.map(
                                                                 (p) => p.key,
@@ -357,7 +312,7 @@ const PositionCreate = ({ outlets }: PositionCreateProps) => {
                                                     ).length > 0 &&
                                                     (data.permissions || [])
                                                         .length ===
-                                                        permissionGroups.flatMap(
+                                                        permissionCatalog.flatMap(
                                                             (g) =>
                                                                 g.permissions.map(
                                                                     (p) =>
@@ -394,7 +349,7 @@ const PositionCreate = ({ outlets }: PositionCreateProps) => {
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                        {permissionGroups.map((group) => {
+                                        {permissionCatalog.map((group) => {
                                             const groupKeys =
                                                 group.permissions.map(
                                                     (p) => p.key,
@@ -407,7 +362,7 @@ const PositionCreate = ({ outlets }: PositionCreateProps) => {
                                                 );
                                             return (
                                                 <div
-                                                    key={group.title}
+                                                    key={group.group}
                                                     className="p-5 rounded-xl border space-y-4"
                                                     style={{
                                                         borderColor:
@@ -423,7 +378,7 @@ const PositionCreate = ({ outlets }: PositionCreateProps) => {
                                                                 color: "var(--color-text-primary)",
                                                             }}
                                                         >
-                                                            {group.title}
+                                                            {group.group}
                                                         </h3>
                                                         <input
                                                             type="checkbox"

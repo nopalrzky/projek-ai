@@ -9,7 +9,7 @@ class UnitRepositoryImpl implements UnitRepository {
   UnitRepositoryImpl(this._remoteDatasource);
 
   @override
-  Future<Result<List<Unit>>> getAll({
+  Future<Result<PaginatedData<Unit>>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -26,7 +26,15 @@ class UnitRepositoryImpl implements UnitRepository {
         sortDirection: sortDirection,
         isActive: isActive,
       );
-      return Result.success(models.map((e) => e.toEntity()).toList());
+      return Result.success(PaginatedData<Unit>(
+        items: models.items.map((e) => e.toEntity()).toList(),
+        currentPage: models.currentPage,
+        lastPage: models.lastPage,
+        perPage: models.perPage,
+        total: models.total,
+        from: models.from,
+        to: models.to,
+      ));
     } on ApiException catch (e) {
       return Result.failure(_mapApiExceptionToFailure(e));
     } on NetworkException catch (e) {

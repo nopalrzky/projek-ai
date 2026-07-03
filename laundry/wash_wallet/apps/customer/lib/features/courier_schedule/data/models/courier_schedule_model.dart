@@ -61,10 +61,12 @@ class CourierScheduleDataModel extends CourierScheduleData {
   factory CourierScheduleDataModel.fromJsonResponse(Map<String, dynamic> body) {
     final meta = body['meta'] as Map<String, dynamic>? ?? {};
     final data = body['data'] as List? ?? [];
-    
+
     return CourierScheduleDataModel(
       schedules: data
-          .map((e) => CourierScheduleModel.fromJson(Map<String, dynamic>.from(e)))
+          .map(
+            (e) => CourierScheduleModel.fromJson(Map<String, dynamic>.from(e)),
+          )
           .toList(),
       defaultDate: meta['defaultDate'] as String?,
       defaultDayLabel: meta['defaultDayLabel'] as String?,
@@ -75,7 +77,9 @@ class CourierScheduleDataModel extends CourierScheduleData {
   factory CourierScheduleDataModel.fromList(List<dynamic> list) {
     return CourierScheduleDataModel(
       schedules: list
-          .map((e) => CourierScheduleModel.fromJson(Map<String, dynamic>.from(e)))
+          .map(
+            (e) => CourierScheduleModel.fromJson(Map<String, dynamic>.from(e)),
+          )
           .toList(),
     );
   }

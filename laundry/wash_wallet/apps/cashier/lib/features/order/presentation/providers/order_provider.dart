@@ -73,15 +73,21 @@ class OrderProvider {
     return ClearDraftUsecase(repository);
   }
 
-  static SaveWeighingDraftUsecase createSaveWeighingDraftUsecase(OrderRepository repository) {
+  static SaveWeighingDraftUsecase createSaveWeighingDraftUsecase(
+    OrderRepository repository,
+  ) {
     return SaveWeighingDraftUsecase(repository);
   }
 
-  static GetWeighingDraftUsecase createGetWeighingDraftUsecase(OrderRepository repository) {
+  static GetWeighingDraftUsecase createGetWeighingDraftUsecase(
+    OrderRepository repository,
+  ) {
     return GetWeighingDraftUsecase(repository);
   }
 
-  static ClearWeighingDraftUsecase createClearWeighingDraftUsecase(OrderRepository repository) {
+  static ClearWeighingDraftUsecase createClearWeighingDraftUsecase(
+    OrderRepository repository,
+  ) {
     return ClearWeighingDraftUsecase(repository);
   }
 

@@ -37,7 +37,7 @@ export const useLocationBias = ({
             "Indonesia",
         ].filter(Boolean);
 
-        if (addressParts.length < 2) { // Minimal Province + Indonesia or City + Indonesia
+        if (addressParts.length < 2) {
             setLocationBias(null);
             return;
         }

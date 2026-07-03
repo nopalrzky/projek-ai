@@ -63,10 +63,7 @@ class PaymentMethodOptionWidget extends StatelessWidget {
               ),
             ),
             if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: context.colors.primary,
-              ),
+              Icon(Icons.check_circle, color: context.colors.primary),
           ],
         ),
       ),

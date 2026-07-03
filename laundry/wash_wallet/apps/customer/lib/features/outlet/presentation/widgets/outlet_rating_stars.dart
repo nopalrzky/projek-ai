@@ -23,11 +23,7 @@ class OutletRatingStars extends StatelessWidget {
       children: List.generate(5, (index) {
         final starValue = index + 1;
         if (rating >= starValue) {
-          return Icon(
-            Icons.star_rounded,
-            size: iconSize,
-            color: activeColor,
-          );
+          return Icon(Icons.star_rounded, size: iconSize, color: activeColor);
         } else if (rating >= starValue - 0.5) {
           return Icon(
             Icons.star_half_rounded,
@@ -35,11 +31,7 @@ class OutletRatingStars extends StatelessWidget {
             color: activeColor,
           );
         } else {
-          return Icon(
-            Icons.star_rounded,
-            size: iconSize,
-            color: inactiveColor,
-          );
+          return Icon(Icons.star_rounded, size: iconSize, color: inactiveColor);
         }
       }),
     );

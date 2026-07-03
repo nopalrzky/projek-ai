@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 
@@ -94,4 +94,3 @@ class _CategorySearchBarState extends State<CategorySearchBar> {
     );
   }
 }
-

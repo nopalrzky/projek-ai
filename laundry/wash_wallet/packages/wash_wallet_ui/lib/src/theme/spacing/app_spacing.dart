@@ -54,7 +54,8 @@ class _InsetsAll {
 class _InsetsHorizontal {
   const _InsetsHorizontal();
 
-  EdgeInsets get xxs => const EdgeInsets.symmetric(horizontal: SpacingValues.xxs);
+  EdgeInsets get xxs =>
+      const EdgeInsets.symmetric(horizontal: SpacingValues.xxs);
   EdgeInsets get xs => const EdgeInsets.symmetric(horizontal: SpacingValues.xs);
   EdgeInsets get sm => const EdgeInsets.symmetric(horizontal: SpacingValues.sm);
   EdgeInsets get md => const EdgeInsets.symmetric(horizontal: SpacingValues.md);

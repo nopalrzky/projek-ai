@@ -52,10 +52,10 @@ class _ResetPinNewScreenState extends State<ResetPinNewScreen> {
 
   void _submitReset() {
     context.read<AuthCubit>().resetPin(
-          currentPin: widget.currentPin,
-          pin: _newPin,
-          pinConfirmation: _confirmPin,
-        );
+      currentPin: widget.currentPin,
+      pin: _newPin,
+      pinConfirmation: _confirmPin,
+    );
   }
 
   @override
@@ -65,9 +65,9 @@ class _ResetPinNewScreenState extends State<ResetPinNewScreen> {
           curr is PinResetSuccess || curr is AuthFailureState,
       listener: (context, state) {
         if (state is PinResetSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('PIN berhasil diubah')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('PIN berhasil diubah')));
           while (context.canPop()) {
             context.pop();
           }
@@ -89,7 +89,8 @@ class _ResetPinNewScreenState extends State<ResetPinNewScreen> {
         return Scaffold(
           appBar: AppBar(
             title: Text(
-                _isConfirmStep ? 'Konfirmasi PIN Baru' : 'Buat PIN Baru'),
+              _isConfirmStep ? 'Konfirmasi PIN Baru' : 'Buat PIN Baru',
+            ),
           ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),

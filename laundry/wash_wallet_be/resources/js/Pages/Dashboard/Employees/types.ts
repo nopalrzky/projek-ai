@@ -78,6 +78,19 @@ export interface EmployeeShowProps {
 export interface EmployeePageHeaderProps {
     employee: Employee;
     onEdit?: () => void;
+    onChangePassword?: () => void;
     onDelete?: () => void;
     isLoading?: boolean;
+}
+
+export interface ChangeEmployeePasswordFormData {
+    password: string;
+    passwordConfirmation: string;
+    [key: string]: string;
+}
+
+export interface ChangeEmployeePasswordModalProps {
+    isOpen: boolean;
+    employee?: Employee;
+    onClose: () => void;
 }

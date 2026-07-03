@@ -22,5 +22,10 @@ class ScheduleDeliveryParams extends Equatable {
   }
 
   @override
-  List<Object?> get props => [orderId, courierScheduleId, deliveryDate, deliveryAddress];
+  List<Object?> get props => [
+    orderId,
+    courierScheduleId,
+    deliveryDate,
+    deliveryAddress,
+  ];
 }

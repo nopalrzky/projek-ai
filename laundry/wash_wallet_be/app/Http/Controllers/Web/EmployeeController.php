@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Requests\Employee\StoreEmployeeRequest;
 use App\Http\Requests\Employee\UpdateEmployeeRequest;
+use App\Http\Requests\Employee\UpdateEmployeePasswordRequest;
 use App\Http\Requests\Employee\EmployeePosition\StoreEmployeePositionRequest;
 use App\Http\Requests\Employee\EmployeePosition\UpdateEmployeePositionRequest;
 use App\Http\Requests\Employee\EmployeeProcess\StoreEmployeeProcessRequest;
@@ -38,6 +39,7 @@ use App\Services\SalaryService;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -262,6 +264,31 @@ class EmployeeController extends Controller
 
             return redirect()->back()
                 ->withInput()
+                ->with('error', $e->getMessage());
+        }
+    }
+
+    public function updatePassword(UpdateEmployeePasswordRequest $request, int $employee): RedirectResponse
+    {
+        try {
+            $updatedEmployee = $this->employeeService->updatePassword(
+                $employee,
+                $request->validated('password')
+            );
+
+            return redirect()->back()
+                ->with('success', "Password karyawan '{$updatedEmployee->name}' berhasil diganti");
+        } catch (AuthorizationException $e) {
+            throw $e;
+        } catch (Throwable $e) {
+            Log::error('[EmployeeController] Failed to update employee password', [
+                'employee_id' => $employee,
+                'error'       => $e->getMessage(),
+                'user_id'     => Auth::id(),
+                'type'        => 'employee_controller_error',
+            ]);
+
+            return redirect()->back()
                 ->with('error', $e->getMessage());
         }
     }

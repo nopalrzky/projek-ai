@@ -36,13 +36,16 @@ class PrintCubit extends Cubit<PrintState> {
 
   void cancelConfirm(PrintInfo info) => emit(PrintInfoLoaded(info));
 
-  Future<void> processReceipt(int orderId, PrintInfo info, {String? clientRequestId}) async {
+  Future<void> processReceipt(
+    int orderId,
+    PrintInfo info, {
+    String? clientRequestId,
+  }) async {
     emit(PrintReceiptProcessing(info));
 
-    final result = await _processReceiptUsecase.execute(ProcessReceiptParams(
-      orderId: orderId,
-      clientRequestId: clientRequestId,
-    ));
+    final result = await _processReceiptUsecase.execute(
+      ProcessReceiptParams(orderId: orderId, clientRequestId: clientRequestId),
+    );
 
     result.when(
       success: (data) => emit(
@@ -50,20 +53,25 @@ class PrintCubit extends Cubit<PrintState> {
           info: info,
           coinDeducted: data.coinPrice,
           coinSource: data.coinSource ?? 'outlet',
-          remainingCoin: data.coinSource == 'owner' ? data.ownerCoinBalance : data.outletCoinBalance,
+          remainingCoin: data.coinSource == 'owner'
+              ? data.ownerCoinBalance
+              : data.outletCoinBalance,
         ),
       ),
       failure: (failure) => emit(PrintError(failure, info: info)),
     );
   }
 
-  Future<void> processLabel(int orderId, PrintInfo info, {String? clientRequestId}) async {
+  Future<void> processLabel(
+    int orderId,
+    PrintInfo info, {
+    String? clientRequestId,
+  }) async {
     emit(PrintLabelProcessing(info));
 
-    final result = await _processLabelUsecase.execute(ProcessLabelParams(
-      orderId: orderId,
-      clientRequestId: clientRequestId,
-    ));
+    final result = await _processLabelUsecase.execute(
+      ProcessLabelParams(orderId: orderId, clientRequestId: clientRequestId),
+    );
 
     result.when(
       success: (data) => emit(
@@ -71,7 +79,9 @@ class PrintCubit extends Cubit<PrintState> {
           info: info,
           coinDeducted: data.coinPrice,
           coinSource: data.coinSource ?? 'outlet',
-          remainingCoin: data.coinSource == 'owner' ? data.ownerCoinBalance : data.outletCoinBalance,
+          remainingCoin: data.coinSource == 'owner'
+              ? data.ownerCoinBalance
+              : data.outletCoinBalance,
         ),
       ),
       failure: (failure) => emit(PrintError(failure, info: info)),

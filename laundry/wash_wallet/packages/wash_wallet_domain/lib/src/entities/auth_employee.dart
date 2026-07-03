@@ -12,6 +12,9 @@ class AuthEmployee extends Equatable {
   final List<String> allPermissions;
   final bool hasPin;
 
+  final String? gender;
+  final String? address;
+
   const AuthEmployee({
     required this.id,
     required this.name,
@@ -22,12 +25,14 @@ class AuthEmployee extends Equatable {
     required this.accessibleOutlets,
     required this.allPermissions,
     required this.hasPin,
+    this.gender,
+    this.address,
   });
 
   bool hasPermission(String key) => allPermissions.contains(key);
   bool hasAnyPermission(List<String> keys) => keys.any(allPermissions.contains);
-  bool get hasOrderViewPermission => hasPermission('order.view');
-  List<int> get accessibleOutletIds => accessibleOutlets.map((o) => o.outletId).toList();
+  List<int> get accessibleOutletIds =>
+      accessibleOutlets.map((o) => o.outletId).toList();
 
   factory AuthEmployee.fromModel(dynamic model) {
     return AuthEmployee(
@@ -37,22 +42,30 @@ class AuthEmployee extends Equatable {
       email: model.email,
       phone: model.phone,
       outletId: model.outletId,
-      accessibleOutlets: model.accessibleOutlets?.map<OutletAccess>((e) => e.toEntity()).toList() ?? const [],
+      accessibleOutlets:
+          model.accessibleOutlets
+              ?.map<OutletAccess>((e) => e.toEntity())
+              .toList() ??
+          const [],
       allPermissions: List<String>.from(model.allPermissions ?? const []),
       hasPin: model.hasPin ?? false,
+      gender: model.gender,
+      address: model.address,
     );
   }
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        username,
-        email,
-        phone,
-        outletId,
-        accessibleOutlets,
-        allPermissions,
-        hasPin,
-      ];
+    id,
+    name,
+    username,
+    email,
+    phone,
+    outletId,
+    accessibleOutlets,
+    allPermissions,
+    hasPin,
+    gender,
+    address,
+  ];
 }

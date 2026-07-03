@@ -5,6 +5,12 @@ import '../entities/print_coin_info.dart';
 abstract class PrintRepository {
   Future<Result<PrintInfo>> getPrintInfo(int orderId);
 
-  Future<Result<PrintCoinInfo>> processReceipt(int orderId, {String? clientRequestId});
-  Future<Result<PrintCoinInfo>> processLabel(int orderId, {String? clientRequestId});
+  Future<Result<PrintCoinInfo>> processReceipt(
+    int orderId, {
+    String? clientRequestId,
+  });
+  Future<Result<PrintCoinInfo>> processLabel(
+    int orderId, {
+    String? clientRequestId,
+  });
 }

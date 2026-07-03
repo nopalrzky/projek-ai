@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wash_wallet_data/wash_wallet_data.dart';
+
 class SwitchEmployeeScreen extends StatefulWidget {
   const SwitchEmployeeScreen({super.key});
 
@@ -43,8 +44,8 @@ class _SwitchEmployeeScreenState extends State<SwitchEmployeeScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _accounts.isEmpty
-              ? _buildEmpty()
-              : _buildList(),
+          ? _buildEmpty()
+          : _buildList(),
     );
   }
 
@@ -68,26 +69,31 @@ class _SwitchEmployeeScreenState extends State<SwitchEmployeeScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        ..._accounts.map((acc) => ListTile(
-              leading: const CircleAvatar(child: Icon(Icons.person)),
-              title: Text(acc.name),
-              subtitle: Text(acc.outletName),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () => _removeAccount(acc.employeeId),
-              ),
-              onTap: () {
-                if (acc.hasPin) {
-                  context.push('/pin-entry', extra: {
+        ..._accounts.map(
+          (acc) => ListTile(
+            leading: const CircleAvatar(child: Icon(Icons.person)),
+            title: Text(acc.name),
+            subtitle: Text(acc.outletName),
+            trailing: IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: () => _removeAccount(acc.employeeId),
+            ),
+            onTap: () {
+              if (acc.hasPin) {
+                context.push(
+                  '/pin-entry',
+                  extra: {
                     'employeeId': acc.employeeId,
                     'username': acc.username,
                     'name': acc.name,
-                  });
-                } else {
-                  context.go('/login');
-                }
-              },
-            )),
+                  },
+                );
+              } else {
+                context.go('/login');
+              }
+            },
+          ),
+        ),
         const Divider(),
         ListTile(
           leading: const Icon(Icons.add),

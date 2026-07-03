@@ -123,60 +123,60 @@ class _CreateMembershipContractScreenState
     final isCompact = sizeClass == WindowSizeClass.compact;
 
     final content = BlocConsumer<CustomerCubit, CustomerState>(
-        listener: (context, state) {
-          if (state is CustomerActionSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.check_circle_rounded, color: Colors.white),
-                    SizedBox(width: context.space.sm),
-                    const Text('Membership berhasil ditambahkan'),
-                  ],
-                ),
-                backgroundColor: context.colors.success,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(context.radius.md),
-                ),
+      listener: (context, state) {
+        if (state is CustomerActionSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle_rounded, color: Colors.white),
+                  SizedBox(width: context.space.sm),
+                  const Text('Membership berhasil ditambahkan'),
+                ],
               ),
-            );
-            Navigator.pop(context, true);
-          }
-          if (state is CustomerFailure) {
-            setState(() => _isSubmitting = false);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.error_rounded, color: Colors.white),
-                    SizedBox(width: context.space.sm),
-                    Expanded(child: Text(state.failure.message)),
-                  ],
-                ),
-                backgroundColor: context.colors.error,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(context.radius.md),
-                ),
+              backgroundColor: context.colors.success,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(context.radius.md),
               ),
-            );
-          }
-        },
-        builder: (context, state) {
-          return Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildFormSection(),
-                SizedBox(height: context.space.xl),
-                _buildSubmitButton(state),
-              ],
             ),
           );
-        },
-      );
+          Navigator.pop(context, true);
+        }
+        if (state is CustomerFailure) {
+          setState(() => _isSubmitting = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.error_rounded, color: Colors.white),
+                  SizedBox(width: context.space.sm),
+                  Expanded(child: Text(state.failure.message)),
+                ],
+              ),
+              backgroundColor: context.colors.error,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(context.radius.md),
+              ),
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        return Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildFormSection(),
+              SizedBox(height: context.space.xl),
+              _buildSubmitButton(state),
+            ],
+          ),
+        );
+      },
+    );
 
     if (isCompact) {
       return AppLayout(
@@ -202,7 +202,10 @@ class _CreateMembershipContractScreenState
           subtitle: widget.customer.name,
           breadcrumbs: [
             const BreadcrumbItem(label: 'Pelanggan'),
-            BreadcrumbItem(label: 'Detail Pelanggan', onTap: () => Navigator.pop(context)),
+            BreadcrumbItem(
+              label: 'Detail Pelanggan',
+              onTap: () => Navigator.pop(context),
+            ),
             const BreadcrumbItem(label: 'Tambah Membership'),
           ],
         ),
@@ -212,9 +215,7 @@ class _CreateMembershipContractScreenState
               horizontal: context.space.lg,
               vertical: context.space.md,
             ),
-            child: ContentConstraint(
-              child: content,
-            ),
+            child: ContentConstraint(child: content),
           ),
         ),
       ],
@@ -351,7 +352,7 @@ class _CreateMembershipContractScreenState
                 _totalPaidController.text = NumberFormat(
                   '#,###',
                   'id_ID',
-                ).format(plan.price);
+                ).format(plan?.price ?? 0);
               });
             },
             errorText: _membershipPlanError,

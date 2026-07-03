@@ -3,7 +3,7 @@ import 'package:wash_wallet_core/wash_wallet_core.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 
 abstract class CustomerSubscriptionRemoteDatasource {
-  Future<List<CustomerSubscriptionModel>> getAll({
+  Future<PaginatedData<CustomerSubscriptionModel>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -50,7 +50,7 @@ class CustomerSubscriptionRemoteDatasourceImpl
   CustomerSubscriptionRemoteDatasourceImpl(this._dio, this._endpoints);
 
   @override
-  Future<List<CustomerSubscriptionModel>> getAll({
+  Future<PaginatedData<CustomerSubscriptionModel>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -93,15 +93,22 @@ class CustomerSubscriptionRemoteDatasourceImpl
 
       final body = _validateResponse(response);
       final List data = body['data'] as List? ?? [];
+      final meta = body['meta'] as Map<String, dynamic>? ?? {};
 
       final normalizedData = data
           .map((item) => _normalizeJsonData(item as Map<String, dynamic>))
           .toList();
 
       try {
-        return normalizedData
+        final items = normalizedData
             .map((e) => CustomerSubscriptionModel.fromJson(e))
             .toList();
+        return PaginatedData<CustomerSubscriptionModel>.fromMeta(
+          items: items,
+          meta: meta,
+          requestedPage: page,
+          requestedPerPage: perPage,
+        );
       } catch (parseError) {
         throw ApiException(
           message: 'Failed to parse customer subscription data: $parseError',

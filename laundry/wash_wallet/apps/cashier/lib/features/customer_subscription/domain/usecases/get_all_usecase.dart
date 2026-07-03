@@ -9,7 +9,7 @@ class GetAllUsecase {
 
   GetAllUsecase(this._repository);
 
-  Future<Result<List<CustomerSubscription>>> call(
+  Future<Result<PaginatedData<CustomerSubscription>>> call(
     GetCustomerSubscriptionsParams params,
   ) {
     return _repository.getAll(

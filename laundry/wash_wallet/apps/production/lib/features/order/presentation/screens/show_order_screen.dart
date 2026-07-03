@@ -8,7 +8,6 @@ import '../widgets/widgets.dart';
 import '../bloc/order_cubit.dart';
 import '../bloc/order_state.dart';
 import '../../../print/presentation/widgets/print_modal.dart';
-import '../../../../core/widgets/production_tablet_shell.dart';
 
 class ShowOrderScreen extends StatefulWidget {
   final int orderId;
@@ -129,56 +128,52 @@ class _ShowOrderScreenState extends State<ShowOrderScreen> {
       );
     }
 
-    return ProductionTabletShell(
-      currentRouteId: 'orders',
-      child: Scaffold(
-        body: Column(
-          children: [
-            PageContentHeader(
-              title: 'Detail Order',
-              subtitle: 'Order #${widget.orderId}',
-              breadcrumbs: [
-                BreadcrumbItem(
-                  label: 'Antrian Produksi',
-                  onTap: () => context.pop(),
-                ),
-                BreadcrumbItem(label: 'Order #${widget.orderId}'),
-              ],
-              actions: [
-                BlocBuilder<OrderCubit, OrderState>(
-                  builder: (context, state) {
-                    if (state is OrderDetailLoaded) {
-                      final order = state.order;
-                      final status = order.status.toLowerCase();
-                      final canPrint = status == 'in_progress' || status == 'completed';
-                      
-                      if (canPrint) {
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              showPrintModal(context, orderId: order.id);
-                            },
-                            icon: const Icon(Icons.print_outlined),
-                            label: const Text('Cetak Struk'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: context.colors.primary,
-                              foregroundColor: context.colors.onPrimary,
-                            ),
-                          ),
-                        );
-                      }
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-              ],
+    return Column(
+      children: [
+        PageContentHeader(
+          title: 'Detail Order',
+          subtitle: 'Order #${widget.orderId}',
+          breadcrumbs: [
+            BreadcrumbItem(
+              label: 'Antrian Produksi',
+              onTap: () => context.pop(),
             ),
-            Expanded(child: body),
+            BreadcrumbItem(label: 'Order #${widget.orderId}'),
+          ],
+          actions: [
+            BlocBuilder<OrderCubit, OrderState>(
+              builder: (context, state) {
+                if (state is OrderDetailLoaded) {
+                  final order = state.order;
+                  final status = order.status.toLowerCase();
+                  final canPrint =
+                      status == 'in_progress' || status == 'completed';
+
+                  if (canPrint) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          showPrintModal(context, orderId: order.id);
+                        },
+                        icon: const Icon(Icons.print_outlined),
+                        label: const Text('Cetak Struk'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: context.colors.primary,
+                          foregroundColor: context.colors.onPrimary,
+                        ),
+                      ),
+                    );
+                  }
+                }
+                return const SizedBox.shrink();
+              },
+            ),
           ],
         ),
-        bottomNavigationBar: bottomBar,
-      ),
+        Expanded(child: body),
+        bottomBar,
+      ],
     );
   }
 

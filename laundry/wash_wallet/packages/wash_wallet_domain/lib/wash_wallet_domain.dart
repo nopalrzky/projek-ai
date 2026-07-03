@@ -19,6 +19,8 @@ export 'src/usecases/auth/setup_pin_usecase.dart';
 export 'src/usecases/auth/verify_pin_usecase.dart';
 export 'src/usecases/auth/reset_pin_usecase.dart';
 export 'src/usecases/auth/save_remembered_account_usecase.dart';
+export 'src/usecases/auth/update_profile_usecase.dart';
+export 'src/usecases/auth/change_password_usecase.dart';
 export 'src/usecases/customer_auth/check_customer_auth_status_usecase.dart';
 export 'src/usecases/customer_auth/customer_logout_usecase.dart';
 export 'src/usecases/customer_auth/request_otp_usecase.dart';

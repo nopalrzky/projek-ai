@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 
 class OrderReviewNotesField extends StatelessWidget {
@@ -21,4 +21,3 @@ class OrderReviewNotesField extends StatelessWidget {
     );
   }
 }
-

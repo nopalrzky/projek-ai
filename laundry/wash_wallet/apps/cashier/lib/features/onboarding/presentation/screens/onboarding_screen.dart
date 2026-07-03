@@ -82,8 +82,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     if (_currentPage < _pages.length - 1)
-                      AppButton.ghost(label: 'Lewati', onPressed: _onSkip,
-                      )
+                      AppButton.ghost(label: 'Lewati', onPressed: _onSkip)
                     else
                       const SizedBox(height: 48),
                   ],
@@ -108,8 +107,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       children: List.generate(
                         _pages.length,
                         (index) =>
-                            _DotIndicator(isActive: index == _currentPage,
-                        ),
+                            _DotIndicator(isActive: index == _currentPage),
                       ),
                     ),
                     SizedBox(height: context.space.xl),

@@ -61,7 +61,10 @@ class _ShowServicePackageScreenState extends State<ShowServicePackageScreen> {
         }
 
         if (state is ServicePackageFailure) {
-          return AppErrorState(message: state.failure.message, onRetry: _loadData);
+          return AppErrorState(
+            message: state.failure.message,
+            onRetry: _loadData,
+          );
         }
 
         if (state is ServicePackageDetailLoaded) {
@@ -166,11 +169,7 @@ class _ShowServicePackageScreenState extends State<ShowServicePackageScreen> {
             const BreadcrumbItem(label: 'Detail Paket'),
           ],
         ),
-        Expanded(
-          child: ContentConstraint(
-            child: content,
-          ),
-        ),
+        Expanded(child: ContentConstraint(child: content)),
       ],
     );
   }

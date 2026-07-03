@@ -33,6 +33,7 @@ import expenseService from "@/Services/expense.service";
 import accountService from "@/Services/account.service";
 import { Account, ExpenseEditFormData } from "@/types";
 import { ExpenseEditProps } from "./types";
+import { useLatestAsync } from "@/Hooks/useLatestAsync";
 
 const ExpenseEdit = ({
     expense,
@@ -77,6 +78,9 @@ const ExpenseEdit = ({
         string | null
     >(null);
 
+    const { runLatest: runLatestExpenseAccounts } = useLatestAsync();
+    const { runLatest: runLatestSourceAccounts } = useLatestAsync();
+
     const loadAccountsByOutlet = useCallback(async (outletId: number) => {
         if (!outletId) {
             setExpenseAccounts([]);
@@ -84,38 +88,50 @@ const ExpenseEdit = ({
             return;
         }
 
-        try {
-            setLoadingExpenseAccounts(true);
-            setExpenseAccountsError(null);
+        setLoadingExpenseAccounts(true);
+        setExpenseAccountsError(null);
 
-            const fetchedExpenseAccounts =
-                await accountService.getExpenseAccountsByOutlet(outletId);
-            setExpenseAccounts(fetchedExpenseAccounts);
-        } catch (error: any) {
-            console.error("Error loading expense accounts:", error);
-            setExpenseAccountsError(error.message || "Gagal memuat akun beban");
-            setExpenseAccounts([]);
-        } finally {
-            setLoadingExpenseAccounts(false);
-        }
+        runLatestExpenseAccounts(
+            outletId,
+            async () => await accountService.getExpenseAccountsByOutlet(outletId),
+            {
+                onSuccess: (fetchedExpenseAccounts) => {
+                    setExpenseAccounts(fetchedExpenseAccounts);
+                },
+                onError: (error: any) => {
+                    console.error("Error loading expense accounts:", error);
+                    setExpenseAccountsError(error.message || "Gagal memuat akun beban");
+                    setExpenseAccounts([]);
+                },
+                onFinally: () => {
+                    setLoadingExpenseAccounts(false);
+                }
+            }
+        );
 
-        try {
-            setLoadingSourceAccounts(true);
-            setSourceAccountsError(null);
+        setLoadingSourceAccounts(true);
+        setSourceAccountsError(null);
 
-            const fetchedSourceAccounts =
-                await accountService.getFundingAccountsByOutlet(outletId);
-            setSourceAccounts(fetchedSourceAccounts);
-        } catch (error: any) {
-            console.error("Error loading source accounts:", error);
-            setSourceAccountsError(
-                error.message || "Gagal memuat akun sumber dana",
-            );
-            setSourceAccounts([]);
-        } finally {
-            setLoadingSourceAccounts(false);
-        }
-    }, []);
+        runLatestSourceAccounts(
+            outletId,
+            async () => await accountService.getFundingAccountsByOutlet(outletId),
+            {
+                onSuccess: (fetchedSourceAccounts) => {
+                    setSourceAccounts(fetchedSourceAccounts);
+                },
+                onError: (error: any) => {
+                    console.error("Error loading source accounts:", error);
+                    setSourceAccountsError(
+                        error.message || "Gagal memuat akun sumber dana",
+                    );
+                    setSourceAccounts([]);
+                },
+                onFinally: () => {
+                    setLoadingSourceAccounts(false);
+                }
+            }
+        );
+    }, [runLatestExpenseAccounts, runLatestSourceAccounts]);
 
     useEffect(() => {
         if (data.outletId && data.outletId !== expense.outletId) {

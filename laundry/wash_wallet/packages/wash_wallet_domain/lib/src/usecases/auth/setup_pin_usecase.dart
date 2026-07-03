@@ -6,10 +6,7 @@ class SetupPinParams {
   final String pin;
   final String pinConfirmation;
 
-  SetupPinParams({
-    required this.pin,
-    required this.pinConfirmation,
-  });
+  SetupPinParams({required this.pin, required this.pinConfirmation});
 }
 
 class SetupPinUseCase {

@@ -270,9 +270,6 @@ class _BottomBarItemWidget extends StatelessWidget {
   }
 
   Widget _buildBadge(BuildContext context) {
-    return AppBadge.danger(
-      label: item.badge!,
-      size: AppBadgeSize.sm,
-    );
+    return AppBadge.danger(label: item.badge!, size: AppBadgeSize.sm);
   }
 }

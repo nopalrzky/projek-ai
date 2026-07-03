@@ -411,6 +411,9 @@ Route::prefix('dashboard')->group(function () {
         Route::post('/{id}/reject', 'reject')->name('reject')->whereNumber('id');
         Route::delete('/{id}', 'destroy')->name('destroy')->whereNumber('id');
     });
+    Route::put('employees/{employee}/password', [EmployeeController::class, 'updatePassword'])
+        ->name('employees.password.update')
+        ->whereNumber('employee');
     Route::resource('employees', EmployeeController::class);
     Route::prefix('expenses')->name('expenses.')->controller(ExpenseController::class)->group(function () {
         Route::get('/', 'index')->name('index');

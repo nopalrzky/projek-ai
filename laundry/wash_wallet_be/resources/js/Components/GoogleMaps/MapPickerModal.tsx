@@ -100,7 +100,7 @@ const MapPickerModal: React.FC<MapPickerModalProps> = ({
             mapTypeControl: false,
             streetViewControl: false,
             fullscreenControl: false,
-            mapId: "DEMO_MAP_ID", // Required for AdvancedMarkerElement
+            mapId: "DEMO_MAP_ID",
         });
 
         const marker = new google.maps.marker.AdvancedMarkerElement({

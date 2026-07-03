@@ -10,7 +10,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
     : _remoteDatasource = remoteDatasource;
 
   @override
-  Future<Result<List<Expense>>> getAll({
+  Future<Result<PaginatedData<Expense>>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -28,7 +28,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
     String sortDirection = 'desc',
   }) async {
     try {
-      final expenseModels = await _remoteDatasource.getAll(
+      final paginatedData = await _remoteDatasource.getAll(
         page: page,
         perPage: perPage,
         search: search,
@@ -45,12 +45,18 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
         sortBy: sortBy,
         sortDirection: sortDirection,
       );
-      return Result.success(
-        expenseModels
+      return Result.success(PaginatedData<Expense>(
+        items: paginatedData.items
             .whereType<ExpenseModel>()
             .map((model) => model.toEntity())
             .toList(),
-      );
+        currentPage: paginatedData.currentPage,
+        lastPage: paginatedData.lastPage,
+        perPage: paginatedData.perPage,
+        total: paginatedData.total,
+        from: paginatedData.from,
+        to: paginatedData.to,
+      ));
     } on ApiException catch (e) {
       return Result.failure(_mapApiExceptionToFailure(e));
     } on NetworkException catch (e) {

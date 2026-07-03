@@ -214,6 +214,62 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  @override
+  Future<Result<AuthEmployee>> updateProfile({
+    required String name,
+    String? email,
+    String? phone,
+    String? gender,
+    String? address,
+  }) async {
+    try {
+      final employeeModel = await _remoteDatasource.updateProfile(
+        name: name,
+        email: email,
+        phone: phone,
+        gender: gender,
+        address: address,
+      );
+
+      await _localDatasource.saveEmployee(employeeModel);
+
+      return Result.success(employeeModel.toEntity());
+    } on ApiException catch (e) {
+      return Result.failure(_mapApiExceptionToFailure(e));
+    } on NetworkException catch (e) {
+      return Result.failure(NetworkFailure(message: e.message));
+    } catch (e) {
+      return Result.failure(
+        ServerFailure(message: 'Update profile failed: ${e.toString()}'),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String newPasswordConfirmation,
+  }) async {
+    try {
+      await _remoteDatasource.changePassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+        newPasswordConfirmation: newPasswordConfirmation,
+      );
+
+      return const Result.success(null);
+    } on ApiException catch (e) {
+      return Result.failure(_mapApiExceptionToFailure(e));
+    } on NetworkException catch (e) {
+      return Result.failure(NetworkFailure(message: e.message));
+    } catch (e) {
+      return Result.failure(
+        ServerFailure(message: 'Change password failed: ${e.toString()}'),
+      );
+    }
+  }
+
   Failure _mapApiExceptionToFailure(ApiException exception) {
     final statusCode = exception.statusCode;
 

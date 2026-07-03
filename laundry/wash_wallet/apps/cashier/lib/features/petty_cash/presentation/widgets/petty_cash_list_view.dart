@@ -39,12 +39,14 @@ class PettyCashListView extends StatelessWidget {
             crossAxisSpacing: context.space.md,
             mainAxisSpacing: context.space.md,
             childAspectRatio: 3.0,
-            children: pettyCashes.map((pettyCash) => 
-              PettyCashCard(
-                pettyCash: pettyCash,
-                onTap: () => onTap(pettyCash),
-              )
-            ).toList(),
+            children: pettyCashes
+                .map(
+                  (pettyCash) => PettyCashCard(
+                    pettyCash: pettyCash,
+                    onTap: () => onTap(pettyCash),
+                  ),
+                )
+                .toList(),
           ),
         ),
       ),

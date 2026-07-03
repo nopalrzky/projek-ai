@@ -9,10 +9,7 @@ class PickupOutletBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: context.space.sm,
-        vertical: 2,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: context.space.sm, vertical: 2),
       decoration: BoxDecoration(
         color: context.colors.secondarySurface,
         borderRadius: BorderRadius.circular(context.radius.sm),
@@ -20,11 +17,7 @@ class PickupOutletBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.store_outlined,
-            size: 12,
-            color: context.colors.secondary,
-          ),
+          Icon(Icons.store_outlined, size: 12, color: context.colors.secondary),
           SizedBox(width: context.space.xs),
           Text(
             outletName,

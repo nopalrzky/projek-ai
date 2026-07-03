@@ -10,7 +10,11 @@ class AuthCubit extends Cubit<AuthState> {
   final LogoutUsecase _logoutUsecase;
   final GetMeUsecase _getMeUsecase;
   final CheckAuthStatusUsecase _checkAuthStatusUsecase;
+  final SetupPinUseCase _setupPinUseCase;
+  final UpdateProfileUseCase _updateProfileUseCase;
+  final ChangePasswordUseCase _changePasswordUseCase;
   final FcmTokenDatasource? _fcmTokenDatasource;
+  bool _pinPromptSkippedThisSession = false;
   String? _registeredFcmToken;
 
   AuthCubit({
@@ -18,11 +22,17 @@ class AuthCubit extends Cubit<AuthState> {
     required LogoutUsecase logoutUsecase,
     required GetMeUsecase getMeUsecase,
     required CheckAuthStatusUsecase checkAuthStatusUsecase,
+    required SetupPinUseCase setupPinUseCase,
+    required UpdateProfileUseCase updateProfileUseCase,
+    required ChangePasswordUseCase changePasswordUseCase,
     FcmTokenDatasource? fcmTokenDatasource,
   }) : _loginUsecase = loginUsecase,
        _logoutUsecase = logoutUsecase,
        _getMeUsecase = getMeUsecase,
        _checkAuthStatusUsecase = checkAuthStatusUsecase,
+       _setupPinUseCase = setupPinUseCase,
+       _updateProfileUseCase = updateProfileUseCase,
+       _changePasswordUseCase = changePasswordUseCase,
        _fcmTokenDatasource = fcmTokenDatasource,
        super(const AuthInitial());
 
@@ -32,12 +42,30 @@ class AuthCubit extends Cubit<AuthState> {
     final result = await _checkAuthStatusUsecase();
 
     result.when(
-      success: (employee) {
-        emit(Authenticated(employee));
-        _onAuthenticated(employee);
-      },
+      success: (employee) => _handleAuthSuccess(employee),
       failure: (failure) => emit(const Unauthenticated()),
     );
+  }
+
+  void _handleAuthSuccess(AuthEmployee employee) {
+    if (!employee.hasPin && !_pinPromptSkippedThisSession) {
+      emit(AuthPinSetupPrompt(employee));
+      return;
+    }
+
+    emit(Authenticated(employee));
+    _onAuthenticated(employee);
+  }
+
+  void skipPinSetup() {
+    final currentState = state;
+    if (currentState is! AuthPinSetupPrompt) return;
+
+    _pinPromptSkippedThisSession = true;
+    final employee = currentState.employee;
+
+    emit(Authenticated(employee));
+    _onAuthenticated(employee);
   }
 
   Future<void> login({
@@ -49,15 +77,29 @@ class AuthCubit extends Cubit<AuthState> {
     final result = await _loginUsecase(username: username, password: password);
 
     result.when(
-      success: (employee) {
-        emit(Authenticated(employee));
-        _onAuthenticated(employee);
-      },
+      success: (employee) => _handleAuthSuccess(employee),
+      failure: (failure) => emit(AuthFailureState(failure)),
+    );
+  }
+
+  Future<void> setupPin({
+    required String pin,
+    required String pinConfirmation,
+  }) async {
+    emit(const AuthLoading());
+
+    final result = await _setupPinUseCase(
+      SetupPinParams(pin: pin, pinConfirmation: pinConfirmation),
+    );
+
+    result.when(
+      success: (employee) => _handleAuthSuccess(employee),
       failure: (failure) => emit(AuthFailureState(failure)),
     );
   }
 
   Future<void> logout() async {
+    _pinPromptSkippedThisSession = false;
     emit(const AuthLoading());
     await _onLogout();
 
@@ -75,11 +117,46 @@ class AuthCubit extends Cubit<AuthState> {
     final result = await _getMeUsecase();
 
     result.when(
-      success: (employee) {
-        emit(Authenticated(employee));
-        _onAuthenticated(employee);
-      },
+      success: (employee) => _handleAuthSuccess(employee),
       failure: (failure) => emit(const Unauthenticated()),
+    );
+  }
+
+  Future<void> updateProfile({
+    required String name,
+    String? email,
+    String? phone,
+    String? gender,
+    String? address,
+  }) async {
+    emit(const ProfileUpdating());
+    final result = await _updateProfileUseCase(
+      name: name,
+      email: email,
+      phone: phone,
+      gender: gender,
+      address: address,
+    );
+    result.when(
+      success: (employee) => emit(Authenticated(employee)),
+      failure: (failure) => emit(ProfileUpdateFailure(failure.message)),
+    );
+  }
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String newPasswordConfirmation,
+  }) async {
+    emit(const PasswordChanging());
+    final result = await _changePasswordUseCase(
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+      newPasswordConfirmation: newPasswordConfirmation,
+    );
+    result.when(
+      success: (_) => emit(const PasswordChangeSuccess()),
+      failure: (failure) => emit(PasswordChangeFailure(failure.message)),
     );
   }
 

@@ -4,10 +4,7 @@ import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 class HomeSearchEntryWidget extends StatelessWidget {
   final VoidCallback onTap;
 
-  const HomeSearchEntryWidget({
-    super.key,
-    required this.onTap,
-  });
+  const HomeSearchEntryWidget({super.key, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +26,7 @@ class HomeSearchEntryWidget extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(
-              Icons.search_rounded,
-              color: Colors.white,
-            ),
+            const Icon(Icons.search_rounded, color: Colors.white),
             SizedBox(width: context.space.md),
             Expanded(
               child: Text(

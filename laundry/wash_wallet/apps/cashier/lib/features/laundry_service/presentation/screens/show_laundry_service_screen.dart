@@ -11,7 +11,15 @@ import 'edit_laundry_service_screen.dart';
 class ShowLaundryServiceScreen extends StatefulWidget {
   final int serviceId;
 
-  const ShowLaundryServiceScreen({super.key, required this.serviceId});
+  final bool isEmbedded;
+  final VoidCallback? onClose;
+
+  const ShowLaundryServiceScreen({
+    super.key,
+    required this.serviceId,
+    this.isEmbedded = false,
+    this.onClose,
+  });
 
   @override
   State<ShowLaundryServiceScreen> createState() =>
@@ -25,12 +33,62 @@ class _ShowLaundryServiceScreenState extends State<ShowLaundryServiceScreen> {
     _loadData();
   }
 
-  void _loadData() {
-    context.read<LaundryServiceCubit>().getById(widget.serviceId);
+  LaundryService? _localService;
+  bool _isLoading = false;
+  String? _error;
+
+  void _loadData() async {
+    if (widget.isEmbedded) {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+      final service = await context
+          .read<LaundryServiceCubit>()
+          .fetchLaundryServiceSilently(widget.serviceId);
+      if (mounted) {
+        setState(() {
+          _localService = service;
+          _isLoading = false;
+          if (service == null) {
+            _error = 'Gagal memuat layanan';
+          }
+        });
+      }
+    } else {
+      context.read<LaundryServiceCubit>().getById(widget.serviceId);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isEmbedded) {
+      return BlocListener<LaundryServiceCubit, LaundryServiceState>(
+        listener: (context, state) {
+          if (state is LaundryServiceActionSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+            _loadData();
+          }
+        },
+        child: Column(
+          children: [
+            _buildEmbeddedHeader(),
+            Expanded(
+              child: _isLoading
+                  ? const AppLoadingIndicator()
+                  : _error != null
+                      ? AppErrorState(message: _error!, onRetry: _loadData)
+                      : _localService != null
+                          ? _buildDetailContent(_localService!)
+                          : const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      );
+    }
+
     final sizeClass = AppBreakpoints.of(context);
     final isCompact = sizeClass == WindowSizeClass.compact;
 
@@ -80,119 +138,14 @@ class _ShowLaundryServiceScreenState extends State<ShowLaundryServiceScreen> {
         }
 
         if (state is LaundryServiceFailure) {
-          return AppErrorState(message: state.failure.message, onRetry: _loadData);
+          return AppErrorState(
+            message: state.failure.message,
+            onRetry: _loadData,
+          );
         }
 
         if (state is LaundryServiceDetailLoaded) {
-          final service = state.service;
-          final currencyFormat = NumberFormat.currency(
-            locale: 'id_ID',
-            symbol: 'Rp ',
-            decimalDigits: 0,
-          );
-
-          return SingleChildScrollView(
-            padding: EdgeInsets.all(context.space.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildHeaderCard(context, service),
-                SizedBox(height: context.space.lg),
-
-                _buildInfoSection(
-                  context,
-                  title: 'Informasi Dasar',
-                  children: [
-                    _buildInfoRow(context, 'Nama Layanan', service.name),
-                    if (service.description != null &&
-                        service.description!.isNotEmpty)
-                      _buildInfoRow(context, 'Deskripsi', service.description!),
-                    _buildInfoRow(context, 'Slug', service.slug),
-                  ],
-                ),
-                SizedBox(height: context.space.lg),
-
-                _buildInfoSection(
-                  context,
-                  title: 'Kategori & Satuan',
-                  children: [
-                    _buildInfoRow(
-                      context,
-                      'Kategori',
-                      service.category?.name ?? 'N/A',
-                      icon: Icons.category_outlined,
-                    ),
-                    _buildInfoRow(
-                      context,
-                      'Satuan',
-                      service.unit?.name ?? 'N/A',
-                      icon: Icons.straighten_outlined,
-                    ),
-                  ],
-                ),
-                SizedBox(height: context.space.lg),
-
-                // Price & Duration
-                _buildInfoSection(
-                  context,
-                  title: 'Harga & Durasi',
-                  children: [
-                    _buildInfoRow(
-                      context,
-                      'Harga',
-                      currencyFormat.format(service.price),
-                      icon: Icons.attach_money_outlined,
-                      valueColor: context.colors.primary,
-                      valueWeight: FontWeight.bold,
-                    ),
-                    _buildInfoRow(
-                      context,
-                      'Durasi Pengerjaan',
-                      '${service.durationHours} jam',
-                      icon: Icons.access_time_outlined,
-                    ),
-                    _buildInfoRow(
-                      context,
-                      'Minimal Kuantitas',
-                      '${service.minQuantity}',
-                      icon: Icons.inventory_2_outlined,
-                    ),
-                  ],
-                ),
-                SizedBox(height: context.space.lg),
-
-                // Timestamps
-                _buildInfoSection(
-                  context,
-                  title: 'Informasi Tambahan',
-                  children: [
-                    if (service.createdAt != null)
-                      _buildInfoRow(
-                        context,
-                        'Dibuat',
-                        _formatDateTime(service.createdAt!),
-                        icon: Icons.calendar_today_outlined,
-                      ),
-                    if (service.updatedAt != null)
-                      _buildInfoRow(
-                        context,
-                        'Terakhir Diubah',
-                        _formatDateTime(service.updatedAt!),
-                        icon: Icons.update_outlined,
-                      ),
-                    if (service.deletedAt != null)
-                      _buildInfoRow(
-                        context,
-                        'Dihapus',
-                        _formatDateTime(service.deletedAt!),
-                        icon: Icons.delete_outline,
-                        valueColor: context.colors.error,
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          );
+          return _buildDetailContent(state.service);
         }
 
         return const SizedBox.shrink();
@@ -247,7 +200,7 @@ class _ShowLaundryServiceScreenState extends State<ShowLaundryServiceScreen> {
             ),
             body: content,
           );
-        }
+        },
       );
     }
 
@@ -259,19 +212,171 @@ class _ShowLaundryServiceScreenState extends State<ShowLaundryServiceScreen> {
               title: 'Detail Layanan',
               breadcrumbs: [
                 const BreadcrumbItem(label: 'Pengaturan'),
-                BreadcrumbItem(label: 'Layanan', onTap: () => Navigator.pop(context)),
+                BreadcrumbItem(
+                  label: 'Layanan',
+                  onTap: () => Navigator.pop(context),
+                ),
                 const BreadcrumbItem(label: 'Detail Layanan'),
               ],
               actions: buildActions(state),
             ),
-            Expanded(
-              child: ContentConstraint(
-                child: content,
-              ),
-            ),
+            Expanded(child: ContentConstraint(child: content)),
           ],
         );
-      }
+      },
+    );
+  }
+
+  Widget _buildDetailContent(LaundryService service) {
+    final currencyFormat = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(context.space.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildHeaderCard(context, service),
+          SizedBox(height: context.space.lg),
+
+          _buildInfoSection(
+            context,
+            title: 'Informasi Dasar',
+            children: [
+              _buildInfoRow(context, 'Nama Layanan', service.name),
+              if (service.description != null &&
+                  service.description!.isNotEmpty)
+                _buildInfoRow(context, 'Deskripsi', service.description!),
+              _buildInfoRow(context, 'Slug', service.slug),
+            ],
+          ),
+          SizedBox(height: context.space.lg),
+
+          _buildInfoSection(
+            context,
+            title: 'Kategori & Satuan',
+            children: [
+              _buildInfoRow(
+                context,
+                'Kategori',
+                service.category?.name ?? 'N/A',
+                icon: Icons.category_outlined,
+              ),
+              _buildInfoRow(
+                context,
+                'Satuan',
+                service.unit?.name ?? 'N/A',
+                icon: Icons.straighten_outlined,
+              ),
+            ],
+          ),
+          SizedBox(height: context.space.lg),
+
+          // Price & Duration
+          _buildInfoSection(
+            context,
+            title: 'Harga & Durasi',
+            children: [
+              _buildInfoRow(
+                context,
+                'Harga',
+                currencyFormat.format(service.price),
+                icon: Icons.attach_money_outlined,
+                valueColor: context.colors.primary,
+                valueWeight: FontWeight.bold,
+              ),
+              _buildInfoRow(
+                context,
+                'Durasi Pengerjaan',
+                '${service.durationHours} jam',
+                icon: Icons.access_time_outlined,
+              ),
+              _buildInfoRow(
+                context,
+                'Minimal Kuantitas',
+                '${service.minQuantity}',
+                icon: Icons.inventory_2_outlined,
+              ),
+            ],
+          ),
+          SizedBox(height: context.space.lg),
+
+          // Timestamps
+          _buildInfoSection(
+            context,
+            title: 'Informasi Tambahan',
+            children: [
+              if (service.createdAt != null)
+                _buildInfoRow(
+                  context,
+                  'Dibuat',
+                  _formatDateTime(service.createdAt!),
+                  icon: Icons.calendar_today_outlined,
+                ),
+              if (service.updatedAt != null)
+                _buildInfoRow(
+                  context,
+                  'Terakhir Diubah',
+                  _formatDateTime(service.updatedAt!),
+                  icon: Icons.update_outlined,
+                ),
+              if (service.deletedAt != null)
+                _buildInfoRow(
+                  context,
+                  'Dihapus',
+                  _formatDateTime(service.deletedAt!),
+                  icon: Icons.delete_outline,
+                  valueColor: context.colors.error,
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmbeddedHeader() {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: context.space.md,
+        vertical: context.space.sm,
+      ),
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        border: Border(
+          bottom: BorderSide(color: context.colors.outlineVariant),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'Detail Layanan',
+              style: context.typography.titleMedium,
+            ),
+          ),
+          if (_localService != null) ...[
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: () => _navigateToEdit(_localService!),
+              tooltip: 'Edit Layanan',
+            ),
+            IconButton(
+              icon: Icon(Icons.delete_outline, color: context.colors.error),
+              onPressed: () => _handleDelete(_localService!.id),
+              tooltip: 'Hapus',
+            ),
+          ],
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: widget.onClose,
+            tooltip: 'Tutup',
+          ),
+        ],
+      ),
     );
   }
 
@@ -450,49 +555,20 @@ class _ShowLaundryServiceScreenState extends State<ShowLaundryServiceScreen> {
     ).then((_) => _loadData());
   }
 
-  void _handleDelete(int id) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(context.radius.lg),
-        ),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: context.colors.error.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(Icons.delete_rounded, color: context.colors.error),
-            ),
-            SizedBox(width: context.space.sm),
-            const Text('Hapus Layanan'),
-          ],
-        ),
-        content: const Text(
-          'Apakah Anda yakin ingin menghapus layanan ini? Tindakan ini tidak dapat dibatalkan.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<LaundryServiceCubit>().destroy(id);
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: context.colors.error,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Hapus'),
-          ),
-        ],
-      ),
+  void _handleDelete(int id) async {
+    final result = await AppDialog.destructive(
+      context,
+      title: 'Hapus Layanan',
+      message: 'Apakah Anda yakin ingin menghapus layanan ini? Tindakan ini tidak dapat dibatalkan.',
+      confirmLabel: 'Hapus',
     );
+    if (result == true && mounted) {
+      context.read<LaundryServiceCubit>().destroy(id);
+      if (widget.isEmbedded && widget.onClose != null) {
+        widget.onClose!();
+      } else {
+        Navigator.pop(context);
+      }
+    }
   }
 }

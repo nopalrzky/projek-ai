@@ -3,7 +3,7 @@ import 'package:wash_wallet_core/wash_wallet_core.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 
 abstract class OrderItemRemoteDataSource {
-  Future<List<OrderItemModel>> getAll({
+  Future<PaginatedData<OrderItemModel>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -35,7 +35,7 @@ class OrderItemRemoteDataSourceImpl implements OrderItemRemoteDataSource {
   OrderItemRemoteDataSourceImpl(this._dio, this._endpoints);
 
   @override
-  Future<List<OrderItemModel>> getAll({
+  Future<PaginatedData<OrderItemModel>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -77,20 +77,26 @@ class OrderItemRemoteDataSourceImpl implements OrderItemRemoteDataSource {
 
       _validateResponse(response);
 
-      final List data = response.data['data'];
-
-      final normalizedData = data
-          .map((item) => _normalizeJsonData(item as Map<String, dynamic>))
-          .toList();
-
-      try {
-        return normalizedData.map((e) => OrderItemModel.fromJson(e)).toList();
-      } catch (parseError) {
-        throw ApiException(
-          message: 'Failed to parse order item data: $parseError',
-          statusCode: 500,
-        );
-      }
+      final body = response.data;
+            final List data = body['data'] as List? ?? [];
+            final meta = body['meta'] as Map<String, dynamic>? ?? {};
+            final normalizedData = data
+                .map((item) => _normalizeJsonData(item as Map<String, dynamic>))
+                .toList();
+            try {
+              final items = normalizedData.map((e) => OrderItemModel.fromJson(e)).toList();
+              return PaginatedData<OrderItemModel>.fromMeta(
+                items: items,
+                meta: meta,
+                requestedPage: page,
+                requestedPerPage: perPage,
+              );
+            } catch (parseError) {
+              throw ApiException(
+                message: 'Failed to parse order_item data: $parseError',
+                statusCode: 500,
+              );
+            }
     } catch (e) {
       throw _handleError(e);
     }

@@ -6,6 +6,7 @@ import {
     Position,
     PositionFilters,
 } from "@/types";
+import { PermissionCatalogGroup } from "@/types/permission";
 
 /**
  * Position Index page props
@@ -30,6 +31,7 @@ export interface PositionIndexProps {
  */
 export interface PositionCreateProps {
     outlets: Outlet[];
+    permissionCatalog: PermissionCatalogGroup[];
     flash?: {
         success?: string;
         error?: string;
@@ -42,6 +44,7 @@ export interface PositionCreateProps {
 export interface PositionEditProps {
     position: Position;
     outlets: Outlet[];
+    permissionCatalog: PermissionCatalogGroup[];
     flash?: {
         success?: string;
         error?: string;

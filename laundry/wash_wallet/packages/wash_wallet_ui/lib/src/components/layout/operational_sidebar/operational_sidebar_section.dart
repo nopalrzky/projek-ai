@@ -20,7 +20,9 @@ class OperationalSidebarSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final visibleItems = section.items.where((item) => item.isVisible == null || item.isVisible!()).toList();
+    final visibleItems = section.items
+        .where((item) => item.isVisible == null || item.isVisible!())
+        .toList();
     if (visibleItems.isEmpty) return const SizedBox.shrink();
 
     Widget itemsWidget = Column(

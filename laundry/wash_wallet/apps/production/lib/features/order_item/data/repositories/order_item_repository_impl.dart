@@ -10,7 +10,7 @@ class OrderItemRepositoryImpl implements OrderItemRepository {
   OrderItemRepositoryImpl(this._remoteDatasource);
 
   @override
-  Future<Result<List<OrderItem>>> getAll({
+  Future<Result<PaginatedData<OrderItem>>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -45,7 +45,15 @@ class OrderItemRepositoryImpl implements OrderItemRepository {
         sortBy: sortBy,
         sortDirection: sortDirection,
       );
-      return Result.success(models.map((e) => e.toEntity()).toList());
+      return Result.success(PaginatedData<OrderItem>(
+        items: models.items.map((e) => e.toEntity()).toList(),
+        currentPage: models.currentPage,
+        lastPage: models.lastPage,
+        perPage: models.perPage,
+        total: models.total,
+        from: models.from,
+        to: models.to,
+      ));
     } on ApiException catch (e) {
       return Result.failure(_mapApiExceptionToFailure(e));
     } on NetworkException catch (e) {

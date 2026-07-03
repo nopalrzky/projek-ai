@@ -39,6 +39,8 @@ class OrderItemCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                           color: context.colors.textPrimary,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       SizedBox(height: context.space.xs),
                       Text(
@@ -75,21 +77,25 @@ class OrderItemCard extends StatelessWidget {
             ],
             SizedBox(height: context.space.md),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  _formatCurrency(order.totalAmount),
-                  style: context.typography.headlineLarge.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: context.colors.primary,
+                Expanded(
+                  child: Text(
+                    _formatCurrency(order.totalAmount),
+                    style: context.typography.headlineLarge.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: context.colors.primary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                if (showProcessButton && onProcess != null)
+                if (showProcessButton && onProcess != null) ...[
+                  SizedBox(width: context.space.sm),
                   AppButton.primary(
                     label: 'Kerjakan',
                     onPressed: onProcess,
                     size: AppButtonSize.sm,
                   ),
+                ],
               ],
             ),
           ],
@@ -97,7 +103,6 @@ class OrderItemCard extends StatelessWidget {
       ),
     );
   }
-
 
   Widget _buildInfoRow(
     BuildContext context, {
@@ -114,6 +119,8 @@ class OrderItemCard extends StatelessWidget {
             style: context.typography.bodySmall.copyWith(
               color: context.colors.textSecondary,
             ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
@@ -147,4 +154,3 @@ class OrderItemCard extends StatelessWidget {
     return formatter.format(amount);
   }
 }
-

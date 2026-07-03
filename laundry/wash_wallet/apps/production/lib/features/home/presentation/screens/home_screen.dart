@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 import '../../../../core/widgets/app_dynamic_bottom_bar.dart';
-import '../../../../core/widgets/production_tablet_shell.dart';
 import '../bloc/home_cubit.dart';
 import '../bloc/home_state.dart';
 import '../widgets/production_summary_card.dart';
@@ -55,26 +54,26 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         }
 
-        return ProductionTabletShell(
-          currentRouteId: 'home',
-          child: SingleChildScrollView(
-            padding: context.space.insetsHorizontal.lg,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                PageContentHeader(
-                  title: 'Dashboard Produksi',
-                  subtitle: outletName.isNotEmpty
-                      ? '$employeeName • $outletName'
-                      : employeeName,
-                  breadcrumbs: const [
-                    BreadcrumbItem(label: 'Dashboard Produksi'),
-                  ],
-                ),
-                _buildBody(context, state),
+        return Column(
+          children: [
+            PageContentHeader(
+              title: 'Dashboard Produksi',
+              subtitle: outletName.isNotEmpty
+                  ? '$employeeName • $outletName'
+                  : employeeName,
+              breadcrumbs: const [
+                BreadcrumbItem(label: 'Dashboard Produksi'),
               ],
             ),
-          ),
+            Expanded(
+              child: ContentConstraint(
+                child: SingleChildScrollView(
+                  padding: context.space.insetsHorizontal.lg,
+                  child: _buildBody(context, state),
+                ),
+              ),
+            ),
+          ],
         );
       },
     );

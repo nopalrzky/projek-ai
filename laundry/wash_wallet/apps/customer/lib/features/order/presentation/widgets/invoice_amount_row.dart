@@ -31,10 +31,7 @@ class InvoiceAmountRow extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: style),
-          Text(
-            formatter.format(amount),
-            style: style,
-          ),
+          Text(formatter.format(amount), style: style),
         ],
       ),
     );

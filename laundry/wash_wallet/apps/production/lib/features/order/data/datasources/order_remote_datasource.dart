@@ -8,7 +8,7 @@ Future<T> withRetry<T>(Future<T> Function() request) async {
 }
 
 abstract class OrderRemoteDatasource {
-  Future<List<OrderModel>> getAll({
+  Future<PaginatedData<OrderModel>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -53,7 +53,7 @@ class OrderRemoteDatasourceImpl
   OrderRemoteDatasourceImpl(this._dio, this._endpoints);
 
   @override
-  Future<List<OrderModel>> getAll({
+  Future<PaginatedData<OrderModel>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -139,20 +139,26 @@ class OrderRemoteDatasourceImpl
 
       _validateResponse(response);
 
-      final List data = response.data['data'];
-
-      final normalizedData = data
-          .map((item) => _normalizeJsonData(item as Map<String, dynamic>))
-          .toList();
-
-      try {
-        return normalizedData.map((e) => OrderModel.fromJson(e)).toList();
-      } catch (parseError) {
-        throw ApiException(
-          message: 'Failed to parse order data: $parseError',
-          statusCode: 500,
-        );
-      }
+      final body = response.data;
+            final List data = body['data'] as List? ?? [];
+            final meta = body['meta'] as Map<String, dynamic>? ?? {};
+            final normalizedData = data
+                .map((item) => _normalizeJsonData(item as Map<String, dynamic>))
+                .toList();
+            try {
+              final items = normalizedData.map((e) => OrderModel.fromJson(e)).toList();
+              return PaginatedData<OrderModel>.fromMeta(
+                items: items,
+                meta: meta,
+                requestedPage: page,
+                requestedPerPage: perPage,
+              );
+            } catch (parseError) {
+              throw ApiException(
+                message: 'Failed to parse order data: $parseError',
+                statusCode: 500,
+              );
+            }
     } catch (e) {
       throw _handleError(e);
     }

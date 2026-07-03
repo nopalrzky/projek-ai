@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 import '../bloc/order_cubit.dart';
 import '../bloc/order_state.dart';
-import 'order_item_card.dart';
+import 'order_grid_list.dart';
 
 class OrderInProgressTab extends StatelessWidget {
   const OrderInProgressTab({super.key});
@@ -44,7 +44,11 @@ class OrderInProgressTab extends StatelessWidget {
             );
           }
 
-          return RefreshIndicator(
+          final isTablet = !AppBreakpoints.isCompact(context);
+
+          Widget listWidget = OrderGridList(
+            orders: state.orders,
+            showProcessButton: false,
             onRefresh: () async {
               context.read<OrderCubit>().getAll(
                 status: 'in_progress',
@@ -52,22 +56,44 @@ class OrderInProgressTab extends StatelessWidget {
                 perPage: 15,
               );
             },
-            child: ListView.separated(
-              padding: EdgeInsets.all(context.space.md),
-              itemCount: state.orders.length,
-              separatorBuilder: (context, index) =>
-                  SizedBox(height: context.space.md),
-              itemBuilder: (context, index) {
-                final order = state.orders[index];
-                return OrderItemCard(
-                  order: order,
-                  onDetail: () {
-                    context.push('/orders/${order.id}');
-                  },
-                );
-              },
-            ),
+            onDetail: (order) {
+              context.push('/orders/${order.id}');
+            },
           );
+
+          if (isTablet) {
+            return Column(
+              children: [
+                Expanded(child: listWidget),
+                Container(
+                  decoration: BoxDecoration(
+                    color: context.colors.surface,
+                    border: Border(
+                      top: BorderSide(
+                        color: context.colors.outlineVariant.withValues(alpha: 0.85),
+                      ),
+                    ),
+                  ),
+                  child: AppPagination(
+                    currentPage: state.currentPage,
+                    lastPage: state.lastPage,
+                    total: state.total,
+                    from: state.from,
+                    to: state.to,
+                    isLoading: state.isPageLoading,
+                    onPageChanged: (page) {
+                      context.read<OrderCubit>().changePage(
+                        page,
+                        status: 'in_progress',
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          }
+
+          return listWidget;
         }
 
         return const SizedBox.shrink();

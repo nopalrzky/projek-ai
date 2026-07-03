@@ -1,5 +1,5 @@
 import { Outlet, Position } from "@/types";
-import { PermissionCatalogItem } from "@/types/permission";
+import { PermissionCatalogGroup } from "@/types/permission";
 
 export interface OutletPositionIndexProps {
     outlet: Outlet;
@@ -16,11 +16,11 @@ export interface PositionEditProps {
 }
 
 export interface PositionCreatePropsExtended extends PositionCreateProps {
-    permissionCatalog: PermissionCatalogItem[];
+    permissionCatalog: PermissionCatalogGroup[];
 }
 
 export interface PositionEditPropsExtended extends PositionEditProps {
-    permissionCatalog: PermissionCatalogItem[];
+    permissionCatalog: PermissionCatalogGroup[];
 }
 
 export interface DeletePositionModalProps {

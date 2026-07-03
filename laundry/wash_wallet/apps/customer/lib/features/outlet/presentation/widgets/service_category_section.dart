@@ -54,13 +54,15 @@ class ServiceCategorySection extends StatelessWidget {
               separatorBuilder: (_, _) => SizedBox(height: context.space.sm),
               itemBuilder: (context, index) {
                 final service = services[index];
-                final isSelected = cartState.activeOutletId == outletId 
-                                   && cartState.activeServices.contains(service.id);
+                final isSelected =
+                    cartState.activeOutletId == outletId &&
+                    cartState.activeServices.contains(service.id);
                 return ServiceCard(
                   service: service,
                   isSelected: isSelected,
                   onTap: () => onServiceTap(service),
-                  onRemove: () => context.read<CartCubit>().removeFromCart(service.id),
+                  onRemove: () =>
+                      context.read<CartCubit>().removeFromCart(service.id),
                 );
               },
             );

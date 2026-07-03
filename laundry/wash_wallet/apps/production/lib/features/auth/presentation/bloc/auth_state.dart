@@ -38,3 +38,40 @@ class AuthFailureState extends AuthState {
   @override
   List<Object?> get props => [failure];
 }
+
+class AuthPinSetupPrompt extends AuthState {
+  final AuthEmployee employee;
+
+  const AuthPinSetupPrompt(this.employee);
+
+  @override
+  List<Object?> get props => [employee];
+}
+
+class ProfileUpdating extends AuthState {
+  const ProfileUpdating();
+}
+
+class ProfileUpdateFailure extends AuthState {
+  final String message;
+  const ProfileUpdateFailure(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class PasswordChanging extends AuthState {
+  const PasswordChanging();
+}
+
+class PasswordChangeSuccess extends AuthState {
+  const PasswordChangeSuccess();
+}
+
+class PasswordChangeFailure extends AuthState {
+  final String message;
+  const PasswordChangeFailure(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}

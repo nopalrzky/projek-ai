@@ -22,7 +22,7 @@ class PositionPolicy
         if (!$user instanceof User) {
             return false;
         }
-        return $user->hasRole('super_admin') || $position->outlet->owner_id === $user->id;
+        return $user->hasRole('super_admin') || $position->outlet->isOwner($user);
     }
 
     public function destroy(Authenticatable $user, Position $position): bool
@@ -30,7 +30,7 @@ class PositionPolicy
         if (!$user instanceof User) {
             return false;
         }
-        return $user->hasRole('super_admin') || $position->outlet->owner_id === $user->id;
+        return $user->hasRole('super_admin') || $position->outlet->isOwner($user);
     }
 
     public function restore(Authenticatable $user, Position $position): bool
@@ -38,7 +38,7 @@ class PositionPolicy
         if (!$user instanceof User) {
             return false;
         }
-        return $user->hasRole('super_admin') || $position->outlet->owner_id === $user->id;
+        return $user->hasRole('super_admin') || $position->outlet->isOwner($user);
     }
 
     public function forceDestroy(Authenticatable $user, Position $position): bool
@@ -46,7 +46,7 @@ class PositionPolicy
         if (!$user instanceof User) {
             return false;
         }
-        return $user->hasRole('super_admin') || $position->outlet->owner_id === $user->id;
+        return $user->hasRole('super_admin') || $position->outlet->isOwner($user);
     }
 
     public function updatePermissions(Authenticatable $user, Position $position): bool
@@ -54,6 +54,6 @@ class PositionPolicy
         if (!$user instanceof User) {
             return false;
         }
-        return $user->hasRole('super_admin') || $position->outlet->owner_id === $user->id;
+        return $user->hasRole('super_admin') || $position->outlet->isOwner($user);
     }
 }

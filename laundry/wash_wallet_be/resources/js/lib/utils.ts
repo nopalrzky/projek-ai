@@ -101,7 +101,6 @@ export const formatDateTime = (
     try {
         const date = new Date(dateString);
 
-        // Check if date is valid
         if (isNaN(date.getTime())) return "-";
 
         switch (format) {
@@ -369,7 +368,6 @@ export const formatDateRange = (
             return formatDate(startDate);
         }
 
-        // Same month and year
         if (
             start.getMonth() === end.getMonth() &&
             start.getFullYear() === end.getFullYear()
@@ -377,12 +375,10 @@ export const formatDateRange = (
             return `${start.getDate()} - ${formatDate(endDate)}`;
         }
 
-        // Same year
         if (start.getFullYear() === end.getFullYear()) {
             return `${formatDate(startDate, "short")} - ${formatDate(endDate)}`;
         }
 
-        // Different years
         return `${formatDate(startDate)} - ${formatDate(endDate)}`;
     } catch (error) {
         console.error("Error formatting date range:", error);

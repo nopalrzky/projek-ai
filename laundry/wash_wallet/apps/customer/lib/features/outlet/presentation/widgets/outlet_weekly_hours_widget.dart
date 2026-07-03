@@ -5,10 +5,7 @@ import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 class OutletWeeklyHoursWidget extends StatelessWidget {
   final List<WeeklyHours> weeklyHours;
 
-  const OutletWeeklyHoursWidget({
-    super.key,
-    required this.weeklyHours,
-  });
+  const OutletWeeklyHoursWidget({super.key, required this.weeklyHours});
 
   @override
   Widget build(BuildContext context) {
@@ -39,9 +36,7 @@ class OutletWeeklyHoursWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              Expanded(
-                child: _buildHoursText(context, dayHour),
-              ),
+              Expanded(child: _buildHoursText(context, dayHour)),
             ],
           ),
         );

@@ -72,7 +72,8 @@ class _ReviewOrderScreenState extends State<ReviewOrderScreen> {
   void initState() {
     super.initState();
     _priceResult = _calculatePrice();
-    _clientRequestId = widget.draft?.clientRequestId ?? IdempotencyKey.generate();
+    _clientRequestId =
+        widget.draft?.clientRequestId ?? IdempotencyKey.generate();
 
     if (widget.draft != null) {
       if (widget.draft!.notes != null) {
@@ -88,10 +89,13 @@ class _ReviewOrderScreenState extends State<ReviewOrderScreen> {
         _estimatedDate = widget.draft!.estimatedCompletion!;
       }
       if (widget.draft!.paidAmount != null && widget.draft!.paidAmount! > 0) {
-        _paidAmountController.text = widget.draft!.paidAmount!.toInt().toString();
+        _paidAmountController.text = widget.draft!.paidAmount!
+            .toInt()
+            .toString();
       }
-      if (widget.draft!.paymentAccountId != null && (_paymentMethod == 'transfer' || _paymentMethod == 'qris')) {
-         context.read<AccountCubit>().loadTransferAccounts(widget.outletId);
+      if (widget.draft!.paymentAccountId != null &&
+          (_paymentMethod == 'transfer' || _paymentMethod == 'qris')) {
+        context.read<AccountCubit>().loadTransferAccounts(widget.outletId);
       }
     }
 
@@ -188,7 +192,9 @@ class _ReviewOrderScreenState extends State<ReviewOrderScreen> {
       items: widget.items,
       notes: _notesController.text.isNotEmpty ? _notesController.text : null,
       estimatedCompletion: _estimatedDate,
-      paymentStatus: _isFullyCoveredByPackage ? 'paid_by_package' : _paymentStatus,
+      paymentStatus: _isFullyCoveredByPackage
+          ? 'paid_by_package'
+          : _paymentStatus,
       paymentMethod: _paymentMethod,
       paymentAccountId: _selectedAccount?.id,
       paidAmount: double.tryParse(_paidAmountController.text) ?? 0,
@@ -528,7 +534,8 @@ class _ReviewOrderScreenState extends State<ReviewOrderScreen> {
 
     OnlineGuard.requireOnline(
       actionName: 'Membuat Order',
-      action: () async => context.read<OrderCubit>().store(params, outletId: widget.outletId),
+      action: () async =>
+          context.read<OrderCubit>().store(params, outletId: widget.outletId),
       onOffline: (message) => AppSnackbar.error(context, message: message),
     );
   }
@@ -591,9 +598,12 @@ class _ReviewOrderScreenState extends State<ReviewOrderScreen> {
           ),
           BlocListener<AccountCubit, AccountState>(
             listener: (context, state) {
-              if (state is AccountsLoaded && widget.draft?.paymentAccountId != null) {
+              if (state is AccountsLoaded &&
+                  widget.draft?.paymentAccountId != null) {
                 try {
-                  final account = state.accounts.firstWhere((a) => a.id == widget.draft!.paymentAccountId);
+                  final account = state.accounts.firstWhere(
+                    (a) => a.id == widget.draft!.paymentAccountId,
+                  );
                   setState(() {
                     _selectedAccount = account;
                   });
@@ -648,147 +658,148 @@ class _ReviewOrderScreenState extends State<ReviewOrderScreen> {
             : ContentConstraint(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.all(context.space.md),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      OrderReviewCustomerCard(
-                        customer: widget.customer,
-                        isMember: _priceResult.hasMembershipDiscount,
-                      ),
-                      SizedBox(height: context.space.md),
-                      OrderReviewItemsList(priceResult: _priceResult),
-                      SizedBox(height: context.space.md),
-                      if (_priceResult.hasAnyDiscount) ...[
-                        OrderReviewContextInfo(priceResult: _priceResult),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        OrderReviewCustomerCard(
+                          customer: widget.customer,
+                          isMember: _priceResult.hasMembershipDiscount,
+                        ),
                         SizedBox(height: context.space.md),
-                      ],
-                      if (_paymentStatus != 'unpaid')
-                        (_isFullyCoveredByPackage)
-                            ? Container(
-                                width: double.infinity,
-                                padding: EdgeInsets.all(context.space.md),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.shade50,
-                                  borderRadius: BorderRadius.circular(
-                                    context.radius.md,
-                                  ),
-                                  border: Border.all(
-                                    color: Colors.green.shade300,
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.inventory_2_rounded,
-                                      color: Colors.green.shade700,
+                        OrderReviewItemsList(priceResult: _priceResult),
+                        SizedBox(height: context.space.md),
+                        if (_priceResult.hasAnyDiscount) ...[
+                          OrderReviewContextInfo(priceResult: _priceResult),
+                          SizedBox(height: context.space.md),
+                        ],
+                        if (_paymentStatus != 'unpaid')
+                          (_isFullyCoveredByPackage)
+                              ? Container(
+                                  width: double.infinity,
+                                  padding: EdgeInsets.all(context.space.md),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.shade50,
+                                    borderRadius: BorderRadius.circular(
+                                      context.radius.md,
                                     ),
-                                    SizedBox(width: context.space.sm),
-                                    Expanded(
-                                      child: Text(
-                                        'Pembayaran Ditanggung Paket',
-                                        style: context.typography.bodyMedium
-                                            .copyWith(
-                                              color: Colors.green.shade800,
-                                              fontWeight: FontWeight.w700,
-                                            ),
+                                    border: Border.all(
+                                      color: Colors.green.shade300,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.inventory_2_rounded,
+                                        color: Colors.green.shade700,
                                       ),
+                                      SizedBox(width: context.space.sm),
+                                      Expanded(
+                                        child: Text(
+                                          'Pembayaran Ditanggung Paket',
+                                          style: context.typography.bodyMedium
+                                              .copyWith(
+                                                color: Colors.green.shade800,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : Column(
+                                  children: [
+                                    OrderReviewPaymentSection(
+                                      paymentMethod: _paymentMethod ?? 'cash',
+                                      paymentStatus: _paymentStatus,
+                                      paidAmountController:
+                                          _paidAmountController,
+                                      onPaymentMethodChanged:
+                                          _handlePaymentMethodChanged,
+                                      onPaymentStatusChanged:
+                                          _handlePaymentStatusChanged,
+                                      transferAccountField:
+                                          (_paymentMethod == 'transfer' ||
+                                              _paymentMethod == 'qris')
+                                          ? OrderReviewTransferAccountField(
+                                              selectedAccount: _selectedAccount,
+                                              onTap: _showTransferAccountPicker,
+                                            )
+                                          : null,
                                     ),
+                                    SizedBox(height: context.space.md),
                                   ],
+                                )
+                        else
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Pembayaran',
+                                style: context.typography.labelSmall.copyWith(
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              )
-                            : Column(
-                                children: [
-                                  OrderReviewPaymentSection(
-                                    paymentMethod: _paymentMethod ?? 'cash',
-                                    paymentStatus: _paymentStatus,
-                                    paidAmountController: _paidAmountController,
-                                    onPaymentMethodChanged:
-                                        _handlePaymentMethodChanged,
-                                    onPaymentStatusChanged:
-                                        _handlePaymentStatusChanged,
-                                    transferAccountField:
-                                        (_paymentMethod == 'transfer' ||
-                                            _paymentMethod == 'qris')
-                                        ? OrderReviewTransferAccountField(
-                                            selectedAccount: _selectedAccount,
-                                            onTap: _showTransferAccountPicker,
-                                          )
-                                        : null,
+                              ),
+                              SizedBox(height: context.space.sm),
+                              DropdownButtonFormField<String>(
+                                initialValue: _paymentStatus,
+                                decoration: InputDecoration(
+                                  labelText: 'Status Bayar',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      context.radius.md,
+                                    ),
                                   ),
-                                  SizedBox(height: context.space.md),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 12,
+                                  ),
+                                ),
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: 'unpaid',
+                                    child: Text('Belum Bayar'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'paid',
+                                    child: Text('Lunas'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'partial',
+                                    child: Text('DP / Sebagian'),
+                                  ),
                                 ],
-                              )
-                      else
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Pembayaran',
-                              style: context.typography.labelSmall.copyWith(
-                                fontWeight: FontWeight.bold,
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    _handlePaymentStatusChanged(val);
+                                  }
+                                },
                               ),
-                            ),
-                            SizedBox(height: context.space.sm),
-                            DropdownButtonFormField<String>(
-                              initialValue: _paymentStatus,
-                              decoration: InputDecoration(
-                                labelText: 'Status Bayar',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    context.radius.md,
-                                  ),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 12,
-                                ),
-                              ),
-                              items: const [
-                                DropdownMenuItem(
-                                  value: 'unpaid',
-                                  child: Text('Belum Bayar'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'paid',
-                                  child: Text('Lunas'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'partial',
-                                  child: Text('DP / Sebagian'),
-                                ),
-                              ],
-                              onChanged: (val) {
-                                if (val != null) {
-                                  _handlePaymentStatusChanged(val);
-                                }
-                              },
-                            ),
-                            SizedBox(height: context.space.md),
-                          ],
+                              SizedBox(height: context.space.md),
+                            ],
+                          ),
+                        Text(
+                          'Informasi Lain',
+                          style: context.typography.labelSmall.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      Text(
-                        'Informasi Lain',
-                        style: context.typography.labelSmall.copyWith(
-                          fontWeight: FontWeight.bold,
+                        SizedBox(height: context.space.sm),
+                        OrderReviewDateSection(
+                          selectedDate: _estimatedDate,
+                          onTap: _selectDate,
                         ),
-                      ),
-                      SizedBox(height: context.space.sm),
-                      OrderReviewDateSection(
-                        selectedDate: _estimatedDate,
-                        onTap: _selectDate,
-                      ),
-                      SizedBox(height: context.space.md),
-                      OrderReviewNotesField(controller: _notesController),
-                      SizedBox(height: context.space.lg),
-                      OrderReviewSummarySection(priceResult: _priceResult),
-                      SizedBox(height: context.space.xxl),
-                    ],
+                        SizedBox(height: context.space.md),
+                        OrderReviewNotesField(controller: _notesController),
+                        SizedBox(height: context.space.lg),
+                        OrderReviewSummarySection(priceResult: _priceResult),
+                        SizedBox(height: context.space.xxl),
+                      ],
+                    ),
                   ),
                 ),
               ),
-      ),
       ),
     );
   }

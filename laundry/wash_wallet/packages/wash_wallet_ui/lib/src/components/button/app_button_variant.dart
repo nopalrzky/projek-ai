@@ -1,1 +1,9 @@
-enum AppButtonVariant { primary, secondary, tonal, outline, ghost, danger, success }
+enum AppButtonVariant {
+  primary,
+  secondary,
+  tonal,
+  outline,
+  ghost,
+  danger,
+  success,
+}

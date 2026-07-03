@@ -5,11 +5,12 @@ version: 0.1.0
 resolution: workspace
 
 environment:
-  sdk: ^3.8.0
+  sdk: ^3.9.2
 
 dependencies:
   flutter:
     sdk: flutter
+  flutter_bloc: ^9.1.1
   dio: ^5.9.0
   dartz: ^0.10.1
   equatable: ^2.0.8

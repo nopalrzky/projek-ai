@@ -3,7 +3,7 @@ import 'package:wash_wallet_core/wash_wallet_core.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 
 abstract class MembershipPlanRemoteDatasource {
-  Future<List<MembershipPlanModel>> getAll({
+  Future<PaginatedData<MembershipPlanModel>> getAll({
     int page,
     int perPage,
     String? search,
@@ -29,7 +29,7 @@ class MembershipPlanRemoteDatasourceImpl
   MembershipPlanRemoteDatasourceImpl(this._dio, this._endpoints);
 
   @override
-  Future<List<MembershipPlanModel>> getAll({
+  Future<PaginatedData<MembershipPlanModel>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -78,14 +78,21 @@ class MembershipPlanRemoteDatasourceImpl
       _validateResponse(response);
 
       final List data = response.data['data'];
+      final meta = response.data['meta'] as Map<String, dynamic>? ?? {};
       final normalizedData = data
           .map((item) => _normalizeJsonData(item as Map<String, dynamic>))
           .toList();
 
       try {
-        return normalizedData
+        final items = normalizedData
             .map((e) => MembershipPlanModel.fromJson(e))
             .toList();
+        return PaginatedData<MembershipPlanModel>.fromMeta(
+          items: items,
+          meta: meta,
+          requestedPage: page,
+          requestedPerPage: perPage,
+        );
       } catch (parseError) {
         throw ApiException(
           message: 'Failed to parse membership plan data: $parseError',

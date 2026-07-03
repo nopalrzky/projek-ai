@@ -48,9 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }
 
         if (state is HomeDashboardLoading || state is HomeDashboardInitial) {
-          return const Scaffold(
-            body: Center(child: AppLoadingIndicator()),
-          );
+          return const Scaffold(body: Center(child: AppLoadingIndicator()));
         }
 
         return Scaffold(
@@ -64,7 +62,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   addressValue: addressValue,
                   cartItemCount: 0, // Managed by CartCubit inside the widget
                   onAddressTap: () async {
-                    final homeDashboardCubit = context.read<HomeDashboardCubit>();
+                    final homeDashboardCubit = context
+                        .read<HomeDashboardCubit>();
                     await context.push('/customer-addresses');
 
                     if (!mounted) return;

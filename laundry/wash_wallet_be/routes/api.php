@@ -45,9 +45,9 @@ Route::prefix('orders/{orderId}/print')
     ->controller(PrintController::class)
     ->middleware('auth:sanctum')
     ->group(function () {
-        Route::get('info', 'info')->name('info')->middleware('position.permission:order.view');
-        Route::post('receipt', 'processReceipt')->name('receipt')->middleware(['position.permission:order.manage', 'idempotent']);
-        Route::post('label', 'processLabel')->name('label')->middleware(['position.permission:order.manage', 'idempotent']);
+        Route::get('info', 'info')->name('info')->middleware('position.permission:order.print');
+        Route::post('receipt', 'processReceipt')->name('receipt')->middleware(['position.permission:order.print', 'idempotent']);
+        Route::post('label', 'processLabel')->name('label')->middleware(['position.permission:order.print', 'idempotent']);
     })->whereNumber('orderId');
 
 require __DIR__ . '/api_mobile_cashier.php';

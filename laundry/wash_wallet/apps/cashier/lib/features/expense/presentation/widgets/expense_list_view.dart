@@ -36,9 +36,14 @@ class ExpenseListView extends StatelessWidget {
             crossAxisSpacing: context.space.md,
             mainAxisSpacing: context.space.md,
             childAspectRatio: 3.0,
-            children: expenses.map((expense) => 
-              ExpenseCard(expense: expense, onTap: () => onTap(expense))
-            ).toList(),
+            children: expenses
+                .map(
+                  (expense) => ExpenseCard(
+                    expense: expense,
+                    onTap: () => onTap(expense),
+                  ),
+                )
+                .toList(),
           ),
         ),
       ),

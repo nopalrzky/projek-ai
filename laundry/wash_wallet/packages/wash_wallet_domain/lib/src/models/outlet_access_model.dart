@@ -24,9 +24,12 @@ class OutletAccessModel with _$OutletAccessModel {
     positions: positions.map((p) => p.toEntity()).toList(),
   );
 
-  factory OutletAccessModel.fromEntity(OutletAccess entity) => OutletAccessModel(
-    outletId: entity.outletId,
-    outletName: entity.outletName,
-    positions: entity.positions.map((p) => PositionAccessModel.fromEntity(p)).toList(),
-  );
+  factory OutletAccessModel.fromEntity(OutletAccess entity) =>
+      OutletAccessModel(
+        outletId: entity.outletId,
+        outletName: entity.outletName,
+        positions: entity.positions
+            .map((p) => PositionAccessModel.fromEntity(p))
+            .toList(),
+      );
 }

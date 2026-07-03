@@ -194,7 +194,8 @@ class _TopupHistoryList extends StatelessWidget {
           );
         }
 
-        if (state.history.isEmpty && state.status == TopupStatus.historyLoaded) {
+        if (state.history.isEmpty &&
+            state.status == TopupStatus.historyLoaded) {
           return const SliverToBoxAdapter(
             child: AppEmptyState(
               title: 'Belum ada transaksi',
@@ -205,7 +206,9 @@ class _TopupHistoryList extends StatelessWidget {
 
         if (state.status == TopupStatus.error && state.history.isEmpty) {
           return SliverToBoxAdapter(
-            child: Center(child: Text(state.errorMessage ?? 'Terjadi kesalahan')),
+            child: Center(
+              child: Text(state.errorMessage ?? 'Terjadi kesalahan'),
+            ),
           );
         }
 

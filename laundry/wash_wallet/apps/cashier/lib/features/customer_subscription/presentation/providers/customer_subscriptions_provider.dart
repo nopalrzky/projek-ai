@@ -13,7 +13,10 @@ import '../bloc/customer_subscription_cubit.dart';
 class CustomerSubscriptionProvider {
   CustomerSubscriptionProvider._();
 
-  static CustomerSubscriptionRemoteDatasource createRemoteDatasource(Dio dio, ApiEndpoints endpoints) {
+  static CustomerSubscriptionRemoteDatasource createRemoteDatasource(
+    Dio dio,
+    ApiEndpoints endpoints,
+  ) {
     return CustomerSubscriptionRemoteDatasourceImpl(dio, endpoints);
   }
 
@@ -53,7 +56,10 @@ class CustomerSubscriptionProvider {
     return DestroyUsecase(repository);
   }
 
-  static CustomerSubscriptionCubit createCubit(Dio dio, ApiEndpoints endpoints) {
+  static CustomerSubscriptionCubit createCubit(
+    Dio dio,
+    ApiEndpoints endpoints,
+  ) {
     final remoteDatasource = createRemoteDatasource(dio, endpoints);
     final repository = createRepository(remoteDatasource);
 

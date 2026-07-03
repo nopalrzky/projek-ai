@@ -169,13 +169,13 @@ class _OnboardingPageView extends StatelessWidget {
                 end: Alignment.bottomRight,
                 colors: [
                   context.colors.primary,
-                  context.colors.primary.withOpacity(0.7),
+                  context.colors.primary.withValues(alpha: 0.7),
                 ],
               ),
               borderRadius: context.radius.all.xxl,
               boxShadow: [
                 BoxShadow(
-                  color: context.colors.primary.withOpacity(0.3),
+                  color: context.colors.primary.withValues(alpha: 0.3),
                   blurRadius: 30,
                   offset: const Offset(0, 15),
                 ),
@@ -244,4 +244,3 @@ class OnboardingPage {
     required this.description,
   });
 }
-

@@ -11,7 +11,10 @@ import '../bloc/employee_cubit.dart';
 class EmployeeProvider {
   EmployeeProvider._();
 
-  static EmployeeRemoteDatasource createRemoteDatasource(Dio dio, ApiEndpoints endpoints) {
+  static EmployeeRemoteDatasource createRemoteDatasource(
+    Dio dio,
+    ApiEndpoints endpoints,
+  ) {
     return EmployeeRemoteDatasourceImpl(dio, endpoints);
   }
 

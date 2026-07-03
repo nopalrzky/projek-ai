@@ -309,7 +309,7 @@ class MembershipContractService extends BaseService
             return true;
         }
 
-        if ($user->hasRole('owner') && $contract->outlet->owner_id === $user->id) {
+        if ($user->hasRole('owner') && (int) $contract->outlet->owner_id === (int) $user->id) {
             return true;
         }
 

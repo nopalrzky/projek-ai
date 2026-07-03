@@ -39,8 +39,11 @@ class MembershipContract extends Model
     protected function casts(): array
     {
         return [
-            'start_at'   => 'datetime',
-            'expired_at' => 'datetime',
+            'customer_id'              => 'integer',
+            'outlet_id'                => 'integer',
+            'membership_plan_id'       => 'integer',
+            'start_at'                 => 'datetime',
+            'expired_at'               => 'datetime',
             'total_paid'               => 'decimal:2',
             'free_shipping_used'       => 'integer',
             'free_shipping_expires_at' => 'datetime',

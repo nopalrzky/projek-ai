@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wash_wallet_core/wash_wallet_core.dart';
 import 'package:wash_wallet_data/wash_wallet_data.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
+import '../../../../core/permissions/cashier_permission_checker.dart';
 import '../../domain/usecases/register_fcm_token_usecase.dart';
 import '../../domain/usecases/remove_fcm_token_usecase.dart';
 import 'auth_state.dart';
@@ -18,12 +19,15 @@ class AuthCubit extends Cubit<AuthState> {
   final SetupPinUseCase _setupPinUseCase;
   final VerifyPinUseCase _verifyPinUseCase;
   final ResetPinUseCase _resetPinUseCase;
+  final UpdateProfileUseCase _updateProfileUseCase;
+  final ChangePasswordUseCase _changePasswordUseCase;
   final SaveRememberedAccountUsecase _saveRememberedAccountUsecase;
   final RegisterFcmTokenUsecase _registerFcmTokenUsecase;
   final RemoveFcmTokenUsecase _removeFcmTokenUsecase;
   final NotificationService _notificationService;
   String? _registeredFcmToken;
-  
+  bool _pinPromptSkippedThisSession = false;
+
   static const _lastActivityKey = 'last_activity_at';
   DateTime? _lastActivityAt;
   static const _staleThreshold = Duration(hours: 4);
@@ -37,6 +41,8 @@ class AuthCubit extends Cubit<AuthState> {
     required SetupPinUseCase setupPinUseCase,
     required VerifyPinUseCase verifyPinUseCase,
     required ResetPinUseCase resetPinUseCase,
+    required UpdateProfileUseCase updateProfileUseCase,
+    required ChangePasswordUseCase changePasswordUseCase,
     required SaveRememberedAccountUsecase saveRememberedAccountUsecase,
     required RegisterFcmTokenUsecase registerFcmTokenUsecase,
     required RemoveFcmTokenUsecase removeFcmTokenUsecase,
@@ -49,6 +55,8 @@ class AuthCubit extends Cubit<AuthState> {
        _setupPinUseCase = setupPinUseCase,
        _verifyPinUseCase = verifyPinUseCase,
        _resetPinUseCase = resetPinUseCase,
+       _updateProfileUseCase = updateProfileUseCase,
+       _changePasswordUseCase = changePasswordUseCase,
        _saveRememberedAccountUsecase = saveRememberedAccountUsecase,
        _registerFcmTokenUsecase = registerFcmTokenUsecase,
        _removeFcmTokenUsecase = removeFcmTokenUsecase,
@@ -56,14 +64,17 @@ class AuthCubit extends Cubit<AuthState> {
        _getCurrentTime = getCurrentTime ?? (() => DateTime.now()),
        super(const AuthInitial());
 
-  void _handleAuthSuccess(AuthEmployee employee, {bool checkRemember = false, bool isStale = false}) async {
-    if (!employee.hasOrderViewPermission) {
+  void _handleAuthSuccess(
+    AuthEmployee employee, {
+    bool checkRemember = false,
+    bool isStale = false,
+  }) async {
+    if (!CashierPermissionChecker.hasAnyCashierAccess(employee)) {
       emit(AuthAccessDenied(employee));
       return;
     }
-    
-    if (!employee.hasPin) {
-      emit(AuthSetupPinRequired(employee));
+    if (!employee.hasPin && !_pinPromptSkippedThisSession) {
+      emit(AuthPinSetupPrompt(employee));
       return;
     }
 
@@ -81,6 +92,17 @@ class AuthCubit extends Cubit<AuthState> {
       emit(Authenticated(employee, shouldPromptRemember: shouldPrompt));
       unawaited(_startNotificationSession(employee));
     }
+  }
+
+  void skipPinSetup() {
+    final currentState = state;
+    if (currentState is! AuthPinSetupPrompt) return;
+
+    _pinPromptSkippedThisSession = true;
+    final employee = currentState.employee;
+
+    emit(Authenticated(employee));
+    unawaited(_startNotificationSession(employee));
   }
 
   Future<void> checkAuthStatus() async {
@@ -117,6 +139,7 @@ class AuthCubit extends Cubit<AuthState> {
       },
     );
   }
+
   Future<void> completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
     final onboardingService = OnboardingService(prefs);
@@ -149,7 +172,7 @@ class AuthCubit extends Cubit<AuthState> {
   void checkIfStale() async {
     final currentState = state;
     if (currentState is! Authenticated) return;
-    
+
     await _loadLastActivity();
     if (_lastActivityAt == null) return;
 
@@ -246,18 +269,28 @@ class AuthCubit extends Cubit<AuthState> {
         : null;
 
     if (currentEmployee == null) {
-      await verifyPin(employeeId: targetEmployeeId, username: targetUsername, pin: pin);
+      await verifyPin(
+        employeeId: targetEmployeeId,
+        username: targetUsername,
+        pin: pin,
+      );
       return;
     }
 
-    emit(SwitchPinVerifying(
-      previousEmployee: currentEmployee,
-      targetEmployeeId: targetEmployeeId,
-      targetUsername: targetUsername,
-    ));
+    emit(
+      SwitchPinVerifying(
+        previousEmployee: currentEmployee,
+        targetEmployeeId: targetEmployeeId,
+        targetUsername: targetUsername,
+      ),
+    );
 
     final result = await _verifyPinUseCase(
-      VerifyPinParams(employeeId: targetEmployeeId, username: targetUsername, pin: pin),
+      VerifyPinParams(
+        employeeId: targetEmployeeId,
+        username: targetUsername,
+        pin: pin,
+      ),
     );
 
     result.when(
@@ -270,14 +303,14 @@ class AuthCubit extends Cubit<AuthState> {
           _handleAuthSuccess(employee);
         }
       },
-      failure: (failure) => emit(SwitchPinFailure(
-        previousEmployee: currentEmployee,
-        failure: failure,
-      )),
+      failure: (failure) => emit(
+        SwitchPinFailure(previousEmployee: currentEmployee, failure: failure),
+      ),
     );
   }
 
   Future<void> logout() async {
+    _pinPromptSkippedThisSession = false;
     emit(const AuthLoading());
 
     await _stopNotificationSession();
@@ -308,6 +341,44 @@ class AuthCubit extends Cubit<AuthState> {
     await _saveRememberedAccountUsecase(currentState.employee);
     // Emit ulang state dengan shouldPromptRemember: false agar prompt hilang
     emit(Authenticated(currentState.employee, shouldPromptRemember: false));
+  }
+
+  Future<void> updateProfile({
+    required String name,
+    String? email,
+    String? phone,
+    String? gender,
+    String? address,
+  }) async {
+    emit(const ProfileUpdating());
+    final result = await _updateProfileUseCase(
+      name: name,
+      email: email,
+      phone: phone,
+      gender: gender,
+      address: address,
+    );
+    result.when(
+      success: (employee) => emit(Authenticated(employee)),
+      failure: (failure) => emit(ProfileUpdateFailure(failure.message)),
+    );
+  }
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String newPasswordConfirmation,
+  }) async {
+    emit(const PasswordChanging());
+    final result = await _changePasswordUseCase(
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+      newPasswordConfirmation: newPasswordConfirmation,
+    );
+    result.when(
+      success: (_) => emit(const PasswordChangeSuccess()),
+      failure: (failure) => emit(PasswordChangeFailure(failure.message)),
+    );
   }
 
   Future<void> _startNotificationSession(AuthEmployee employee) async {

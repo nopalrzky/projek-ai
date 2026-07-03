@@ -30,17 +30,21 @@ class DiscoveryPaymentFilterWidget extends StatelessWidget {
             AppChip.primary(
               label: 'Wallet',
               selected: selectedMethod == 'wallet',
-              onTap: () => onChanged(selectedMethod == 'wallet' ? null : 'wallet'),
+              onTap: () =>
+                  onChanged(selectedMethod == 'wallet' ? null : 'wallet'),
             ),
             AppChip.primary(
               label: 'Transfer',
               selected: selectedMethod == 'transfer',
-              onTap: () => onChanged(selectedMethod == 'transfer' ? null : 'transfer'),
+              onTap: () =>
+                  onChanged(selectedMethod == 'transfer' ? null : 'transfer'),
             ),
             AppChip.primary(
               label: 'Bayar di outlet',
               selected: selectedMethod == 'pay_at_outlet',
-              onTap: () => onChanged(selectedMethod == 'pay_at_outlet' ? null : 'pay_at_outlet'),
+              onTap: () => onChanged(
+                selectedMethod == 'pay_at_outlet' ? null : 'pay_at_outlet',
+              ),
             ),
           ],
         ),

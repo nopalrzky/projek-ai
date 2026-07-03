@@ -143,7 +143,8 @@ class OrderDraftItemModel {
 
   factory OrderDraftItemModel.fromJson(Map<String, dynamic> json) {
     return OrderDraftItemModel(
-      laundryServiceId: json['laundryServiceId'] as int? ?? json['serviceId'] as int,
+      laundryServiceId:
+          json['laundryServiceId'] as int? ?? json['serviceId'] as int,
       priceId: json['priceId'] as int?,
       serviceName: json['serviceName'] as String?,
       quantity: (json['quantity'] as num).toDouble(),

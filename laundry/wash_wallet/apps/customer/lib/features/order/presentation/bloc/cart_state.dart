@@ -42,19 +42,16 @@ class CartState extends Equatable {
 
   @override
   List<Object?> get props => [
-        activeOutletId,
-        activeOutletName,
-        activeServices,
-        nonCourierServiceIds,
-      ];
+    activeOutletId,
+    activeOutletName,
+    activeServices,
+    nonCourierServiceIds,
+  ];
 }
 
 class CartInitial extends CartState {
   const CartInitial()
-      : super(
-          activeServices: const {},
-          nonCourierServiceIds: const {},
-        );
+    : super(activeServices: const {}, nonCourierServiceIds: const {});
 }
 
 class CartLoaded extends CartState {

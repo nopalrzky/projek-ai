@@ -1553,7 +1553,7 @@ class AccountService extends BaseService
             return true;
         }
 
-        if ($user->hasRole('owner') && $account->owner_id === $user->id) {
+        if ($user->hasRole('owner') && (int) $account->owner_id === (int) $user->id) {
             return true;
         }
 

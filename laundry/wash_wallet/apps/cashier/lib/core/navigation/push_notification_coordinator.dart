@@ -18,8 +18,7 @@ class PushNotificationCoordinator {
     });
   }
 
-  Future<void> checkInitialMessage() async {
-  }
+  Future<void> checkInitialMessage() async {}
 
   void onAuthReady({required int outletId}) {
     _authenticatedOutletId = outletId;
@@ -29,8 +28,6 @@ class PushNotificationCoordinator {
   void onLogout() {
     _authenticatedOutletId = null;
   }
-
-
 
   void _flushPendingPush() {
     final payload = _pendingPushPayload;

@@ -1,5 +1,5 @@
 import React from "react";
-import { MapPin, Phone, Mail, Edit, Trash2, Building2 } from "lucide-react";
+import { MapPin, Phone, Edit, Trash2, Building2, KeyRound } from "lucide-react";
 import { Card } from "@/Components/Card";
 import { Button } from "@/Components/Button";
 import { Badge } from "@/Components/Badge";
@@ -9,6 +9,7 @@ import { EmployeePageHeaderProps } from "../types";
 const EmployeePageHeader: React.FC<EmployeePageHeaderProps> = ({
     employee,
     onEdit,
+    onChangePassword,
     onDelete,
     isLoading = false,
 }) => {
@@ -191,6 +192,24 @@ const EmployeePageHeader: React.FC<EmployeePageHeaderProps> = ({
 
                     {/* Secondary Actions */}
                     <div className="flex gap-2 lg:flex-col lg:gap-3">
+                        {onChangePassword && (
+                            <Button
+                                variant="outline"
+                                size="md"
+                                leftIcon={<KeyRound className="w-4 h-4" />}
+                                onClick={onChangePassword}
+                                disabled={isLoading || !employee.isActive}
+                                className="flex-1 lg:w-full"
+                                tooltip={
+                                    !employee.isActive
+                                        ? "Karyawan tidak aktif"
+                                        : undefined
+                                }
+                            >
+                                Ganti Password
+                            </Button>
+                        )}
+
                         {onDelete && (
                             <Button
                                 variant="danger"

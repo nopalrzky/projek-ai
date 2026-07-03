@@ -17,12 +17,12 @@ class WeighingDraftItem extends Equatable {
 
   @override
   List<Object?> get props => [
-        laundryServiceId,
-        serviceName,
-        qty,
-        price,
-        itemNotes,
-      ];
+    laundryServiceId,
+    serviceName,
+    qty,
+    price,
+    itemNotes,
+  ];
 }
 
 class WeighingDraft extends Equatable {
@@ -110,23 +110,23 @@ class WeighingDraft extends Equatable {
 
   @override
   List<Object?> get props => [
-        outletId,
-        orderId,
-        employeeId,
-        weight,
-        additionalItems,
-        paymentMethod,
-        paymentStatus,
-        paymentAccountId,
-        paidAmount,
-        orderNotes,
-        internalNotes,
-        photoLocalPath,
-        photoUploadStatus,
-        clientRequestId,
-        status,
-        lastError,
-        updatedAt,
-        version,
-      ];
+    outletId,
+    orderId,
+    employeeId,
+    weight,
+    additionalItems,
+    paymentMethod,
+    paymentStatus,
+    paymentAccountId,
+    paidAmount,
+    orderNotes,
+    internalNotes,
+    photoLocalPath,
+    photoUploadStatus,
+    clientRequestId,
+    status,
+    lastError,
+    updatedAt,
+    version,
+  ];
 }

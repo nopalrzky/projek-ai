@@ -2,7 +2,7 @@ import 'package:wash_wallet_core/wash_wallet_core.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 
 abstract class OrderRepository {
-  Future<Result<List<Order>>> getAll({
+  Future<Result<PaginatedData<Order>>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,

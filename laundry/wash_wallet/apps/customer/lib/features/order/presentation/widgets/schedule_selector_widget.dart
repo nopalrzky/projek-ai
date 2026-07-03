@@ -46,7 +46,11 @@ class ScheduleSelectorWidget extends StatelessWidget {
                 padding: EdgeInsets.all(context.space.sm),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, color: context.colors.primary, size: 20),
+                    Icon(
+                      Icons.info_outline,
+                      color: context.colors.primary,
+                      size: 20,
+                    ),
                     SizedBox(width: context.space.sm),
                     Expanded(
                       child: Text(
@@ -96,10 +100,15 @@ class ScheduleSelectorWidget extends StatelessWidget {
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: scheduleData!.schedules.where((s) => s.type == 'pickup').length,
-            separatorBuilder: (context, index) => SizedBox(height: context.space.sm),
+            itemCount: scheduleData!.schedules
+                .where((s) => s.type == 'pickup')
+                .length,
+            separatorBuilder: (context, index) =>
+                SizedBox(height: context.space.sm),
             itemBuilder: (context, index) {
-              final schedule = scheduleData!.schedules.where((s) => s.type == 'pickup').elementAt(index);
+              final schedule = scheduleData!.schedules
+                  .where((s) => s.type == 'pickup')
+                  .elementAt(index);
               final isSelected = selectedSchedule?.id == schedule.id;
 
               return ScheduleTimeSlotCardWidget(

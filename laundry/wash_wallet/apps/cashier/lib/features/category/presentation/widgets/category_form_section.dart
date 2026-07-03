@@ -33,7 +33,9 @@ class CategoryFormSection extends StatelessWidget {
           _buildSectionTitle(context, 'Detail Kategori'),
           Text(
             'Kategori digunakan untuk mengelompokkan layanan laundry agar lebih mudah ditemukan di menu kasir.',
-            style: context.typography.bodySmall.copyWith(color: context.colors.onSurfaceVariant),
+            style: context.typography.bodySmall.copyWith(
+              color: context.colors.onSurfaceVariant,
+            ),
           ),
           SizedBox(height: context.space.md),
           _buildNameField(context),
@@ -205,4 +207,3 @@ class CategoryFormSection extends StatelessWidget {
     );
   }
 }
-

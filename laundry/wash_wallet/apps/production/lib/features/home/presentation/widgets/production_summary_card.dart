@@ -17,7 +17,7 @@ class ProductionSummaryCard extends StatelessWidget {
             Container(
               padding: context.space.insetsAll.sm,
               decoration: BoxDecoration(
-                color: context.colors.primary.withOpacity(0.1),
+                color: context.colors.primary.withValues(alpha: 0.1),
                 borderRadius: context.radius.all.md,
               ),
               child: Icon(
@@ -37,13 +37,10 @@ class ProductionSummaryCard extends StatelessWidget {
           ],
         ),
         SizedBox(height: context.space.lg),
-        GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 2,
+        ResponsiveGrid(
+          maxColumns: 4,
           mainAxisSpacing: context.space.md,
           crossAxisSpacing: context.space.md,
-          childAspectRatio: 1.65,
           children: [
             _SummaryItem(
               icon: Icons.receipt_long_rounded,
@@ -51,7 +48,7 @@ class ProductionSummaryCard extends StatelessWidget {
               value: summary.ordersToday.toString(),
               gradientColors: [
                 AppColors.info500,
-                AppColors.info500.withOpacity(0.7),
+                AppColors.info500.withValues(alpha: 0.7),
               ],
             ),
             _SummaryItem(
@@ -60,7 +57,7 @@ class ProductionSummaryCard extends StatelessWidget {
               value: summary.ordersInProgress.toString(),
               gradientColors: [
                 AppColors.warning500,
-                AppColors.warning500.withOpacity(0.7),
+                AppColors.warning500.withValues(alpha: 0.7),
               ],
             ),
             _SummaryItem(
@@ -69,7 +66,7 @@ class ProductionSummaryCard extends StatelessWidget {
               value: summary.ordersReadyForPickup.toString(),
               gradientColors: [
                 AppColors.success500,
-                AppColors.success500.withOpacity(0.7),
+                AppColors.success500.withValues(alpha: 0.7),
               ],
             ),
             _SummaryItem(
@@ -78,7 +75,7 @@ class ProductionSummaryCard extends StatelessWidget {
               value: summary.ordersCompleted.toString(),
               gradientColors: [
                 AppColors.teal600,
-                AppColors.teal600.withOpacity(0.7),
+                AppColors.teal600.withValues(alpha: 0.7),
               ],
             ),
           ],
@@ -107,10 +104,10 @@ class _SummaryItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: context.radius.all.lg,
-        border: Border.all(color: gradientColors[0].withOpacity(0.1), width: 1),
+        border: Border.all(color: gradientColors[0].withValues(alpha: 0.1), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -136,7 +133,7 @@ class _SummaryItem extends StatelessWidget {
                     borderRadius: context.radius.all.md,
                     boxShadow: [
                       BoxShadow(
-                        color: gradientColors[0].withOpacity(0.3),
+                        color: gradientColors[0].withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -171,4 +168,3 @@ class _SummaryItem extends StatelessWidget {
     );
   }
 }
-

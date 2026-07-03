@@ -272,7 +272,6 @@ const CustomerOrders: React.FC<CustomerOrdersIndexProps> = ({ customer }) => {
         []
     );
 
-    // Calculate summary statistics
     const summary = useMemo(() => {
         const totalOrders = customer.orders.length;
         const totalAmount = customer.orders.reduce(

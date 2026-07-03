@@ -15,10 +15,7 @@ import '../../../outlet/presentation/widgets/outlet_order_button_widget.dart';
 class OrderBottomActionWidget extends StatelessWidget {
   final int outletId;
 
-  const OrderBottomActionWidget({
-    super.key,
-    required this.outletId,
-  });
+  const OrderBottomActionWidget({super.key, required this.outletId});
 
   @override
   Widget build(BuildContext context) {
@@ -44,8 +41,11 @@ class OrderBottomActionWidget extends StatelessWidget {
           child: SafeArea(
             child: BlocBuilder<CourierPricingCubit, CourierPricingState>(
               builder: (context, pricingState) {
-                final effectivelyCourierEnabled = isCourierEnabled && context.read<CartCubit>().state.canUseCourier;
-                final isCourierError = effectivelyCourierEnabled &&
+                final effectivelyCourierEnabled =
+                    isCourierEnabled &&
+                    context.read<CartCubit>().state.canUseCourier;
+                final isCourierError =
+                    effectivelyCourierEnabled &&
                     state.pickupType == 'courier' &&
                     (pricingState.pricingResult?.isServiceable == false ||
                         pricingState.errorMessage != null);
@@ -53,33 +53,36 @@ class OrderBottomActionWidget extends StatelessWidget {
                 if (outletState is! OutletDetailLoaded) {
                   return AppButton.primary(
                     label: 'Buat Pesanan',
-                    isLoading: state.isSubmittingOrder || pricingState.isCalculating,
+                    isLoading:
+                        state.isSubmittingOrder || pricingState.isCalculating,
                     onPressed: null,
                   );
                 }
 
                 return OutletOrderButtonWidget(
                   outlet: outletState.outlet,
-                  isLoading: state.isSubmittingOrder || pricingState.isCalculating,
+                  isLoading:
+                      state.isSubmittingOrder || pricingState.isCalculating,
                   onPressed: isCourierError
                       ? null
                       : () {
                           final cartState = context.read<CartCubit>().state;
                           final outletCart =
                               cartState.activeOutletId == outletId
-                                  ? cartState.activeServices
-                                  : <int>{};
+                              ? cartState.activeServices
+                              : <int>{};
 
-                          final authState =
-                              context.read<CustomerAuthCubit>().state;
+                          final authState = context
+                              .read<CustomerAuthCubit>()
+                              .state;
                           if (authState is CustomerAuthAuthenticated) {
                             context.read<OrderCubit>().createOrder(
-                                  customerAccountId: authState.customer.id,
-                                  outletId: outletId,
-                                  serviceIds: outletCart,
-                                  isCourierEnabled: isCourierEnabled,
-                                  canUseCourier: cartState.canUseCourier,
-                                );
+                              customerAccountId: authState.customer.id,
+                              outletId: outletId,
+                              serviceIds: outletCart,
+                              isCourierEnabled: isCourierEnabled,
+                              canUseCourier: cartState.canUseCourier,
+                            );
                           }
                         },
                 );

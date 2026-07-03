@@ -17,10 +17,10 @@ class PrintOrderItem extends Equatable {
 
   @override
   List<Object?> get props => [
-        laundryServiceName,
-        quantity,
-        unitName,
-        unitPrice,
-        totalAmount,
-      ];
+    laundryServiceName,
+    quantity,
+    unitName,
+    unitPrice,
+    totalAmount,
+  ];
 }

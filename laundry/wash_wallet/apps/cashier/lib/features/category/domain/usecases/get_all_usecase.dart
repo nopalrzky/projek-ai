@@ -7,7 +7,7 @@ class GetAllUsecase {
 
   GetAllUsecase(this._repository);
 
-  Future<Result<List<Category>>> call({
+  Future<Result<PaginatedData<Category>>> call({
     int? outletId,
     int page = 1,
     int perPage = 15,

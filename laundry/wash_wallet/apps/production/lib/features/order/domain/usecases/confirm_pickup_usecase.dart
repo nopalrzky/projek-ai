@@ -7,7 +7,10 @@ class ConfirmPickupUsecase {
 
   ConfirmPickupUsecase(this._repository);
 
-  Future<Result<Order>> call({required int id, required String photoPath}) async {
+  Future<Result<Order>> call({
+    required int id,
+    required String photoPath,
+  }) async {
     return await _repository.confirmPickup(id, photoPath);
   }
 }

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../theme/density/app_density.dart';
+import '../../theme/extensions/theme_context_extension.dart';
+import '../../theme/responsive/app_breakpoints.dart';
 import 'app_data_table.dart';
 import 'index_toolbar.dart';
 import '../layout/page_content_header/page_content_header.dart';
@@ -25,6 +28,7 @@ class AppDataView<T> extends StatelessWidget {
   final void Function(ActiveFilter)? onFilterApply;
   final void Function(String filterId)? onFilterRemove;
   final VoidCallback? onFilterReset;
+  final void Function(List<ActiveFilter> filters)? onFiltersChanged;
   final String? primaryActionLabel;
   final IconData? primaryActionIcon;
   final VoidCallback? onPrimaryAction;
@@ -38,11 +42,19 @@ class AppDataView<T> extends StatelessWidget {
   final String emptyMessage;
   final List<DataTableRowAction<T>>? rowActions;
   final void Function(T row)? onRowTap;
+  final bool Function(T row)? isRowHighlighted;
+  final double? rowHeight;
+  final double? columnGap;
+  final AppDensityMode? densityMode;
+  final bool twoLineRows;
 
   // Pagination
   final int? totalCount;
   final int? currentPage;
   final int? pageSize;
+  final int? lastPage;
+  final int? from;
+  final int? to;
   final void Function(int page)? onPageChanged;
 
   const AppDataView({
@@ -60,6 +72,7 @@ class AppDataView<T> extends StatelessWidget {
     this.onFilterApply,
     this.onFilterRemove,
     this.onFilterReset,
+    this.onFiltersChanged,
     this.primaryActionLabel,
     this.primaryActionIcon,
     this.onPrimaryAction,
@@ -71,14 +84,32 @@ class AppDataView<T> extends StatelessWidget {
     required this.emptyMessage,
     this.rowActions,
     this.onRowTap,
+    this.isRowHighlighted,
+    this.rowHeight,
+    this.columnGap,
+    this.densityMode,
+    this.twoLineRows = false,
     this.totalCount,
     this.currentPage,
     this.pageSize,
+    this.lastPage,
+    this.from,
+    this.to,
     this.onPageChanged,
   });
 
   @override
   Widget build(BuildContext context) {
+    final resolvedMode =
+        densityMode ?? AppDensity.modeForSizeClass(AppBreakpoints.of(context));
+    final resolvedRowHeight =
+        rowHeight ??
+        (twoLineRows
+            ? AppDensity.tableTwoLineRowHeight(resolvedMode)
+            : AppDensity.tableRowHeight(resolvedMode));
+    final resolvedColumnGap =
+        columnGap ?? AppDensity.tableColumnGap(resolvedMode);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -89,7 +120,7 @@ class AppDataView<T> extends StatelessWidget {
             subtitle: pageSubtitle,
             actions: pageActions,
           ),
-          
+
         IndexToolbar(
           searchController: searchController,
           searchHint: searchHint,
@@ -100,16 +131,17 @@ class AppDataView<T> extends StatelessWidget {
           onFilterApply: onFilterApply,
           onFilterRemove: onFilterRemove,
           onFilterReset: onFilterReset,
+          onFiltersChanged: onFiltersChanged,
           primaryActionLabel: primaryActionLabel,
           primaryActionIcon: primaryActionIcon,
           onPrimaryAction: onPrimaryAction,
           secondaryActions: secondaryToolbarActions,
           sticky: true,
         ),
-        
+
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: EdgeInsets.all(context.space.lg),
             child: AppDataTable<T>(
               columns: columns,
               rows: rows,
@@ -118,9 +150,16 @@ class AppDataView<T> extends StatelessWidget {
               emptyMessage: emptyMessage,
               rowActions: rowActions,
               onRowTap: onRowTap,
+              isRowHighlighted: isRowHighlighted,
+              rowHeight: resolvedRowHeight,
+              densityMode: resolvedMode,
+              columnGap: resolvedColumnGap,
               totalCount: totalCount,
               currentPage: currentPage,
               pageSize: pageSize,
+              lastPage: lastPage,
+              from: from,
+              to: to,
               onPageChanged: onPageChanged,
             ),
           ),

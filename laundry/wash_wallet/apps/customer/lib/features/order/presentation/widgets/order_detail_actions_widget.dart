@@ -12,7 +12,8 @@ class OrderDetailActionsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canCancel = order.status == 'requested' ||
+    final canCancel =
+        order.status == 'requested' ||
         order.status == 'pending' ||
         order.status == 'pending_dropoff';
     final canPay = order.canPay && order.status != 'cancelled';

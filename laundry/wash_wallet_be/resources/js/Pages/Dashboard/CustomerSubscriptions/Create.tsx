@@ -29,6 +29,7 @@ import { useState, useEffect, useMemo } from "react";
 import { formatCurrency } from "@/lib/utils";
 import { customerService } from "@/Services/customer.service";
 import { servicePackageService } from "@/Services/service_package.service";
+import { useLatestAsync } from "@/Hooks/useLatestAsync";
 
 const CustomerSubscriptionCreate = ({
     outlets,
@@ -52,6 +53,8 @@ const CustomerSubscriptionCreate = ({
     >([]);
     const [isLoadingLookups, setIsLoadingLookups] = useState(false);
     const [lookupError, setLookupError] = useState<string | null>(null);
+
+    const { runLatest: runLatestLookups } = useLatestAsync();
 
     const outletOptions = useMemo(
         () => [
@@ -130,24 +133,29 @@ const CustomerSubscriptionCreate = ({
             pricePaid: 0,
         }));
 
-        Promise.all([
-            customerService.getAll(outletId),
-            servicePackageService.getAll(outletId),
-        ])
-            .then(([customersResponse, servicePackagesResponse]) => {
-                setAvailableCustomers(customersResponse || []);
-                setAvailableServicePackages(servicePackagesResponse || []);
-            })
-            .catch((error) => {
-                console.error("Failed to load outlet lookup data:", error);
-                setLookupError(
-                    "Gagal memuat customer dan paket layanan untuk outlet ini.",
-                );
-            })
-            .finally(() => {
-                setIsLoadingLookups(false);
-            });
-    }, [selectedOutletId]);
+        runLatestLookups(
+            outletId,
+            async () => await Promise.all([
+                customerService.getAll(outletId),
+                servicePackageService.getAll(outletId),
+            ]),
+            {
+                onSuccess: ([customersResponse, servicePackagesResponse]) => {
+                    setAvailableCustomers(customersResponse || []);
+                    setAvailableServicePackages(servicePackagesResponse || []);
+                },
+                onError: (error) => {
+                    console.error("Failed to load outlet lookup data:", error);
+                    setLookupError(
+                        "Gagal memuat customer dan paket layanan untuk outlet ini.",
+                    );
+                },
+                onFinally: () => {
+                    setIsLoadingLookups(false);
+                }
+            }
+        );
+    }, [selectedOutletId, runLatestLookups]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

@@ -47,7 +47,6 @@ const Radio = forwardRef<HTMLInputElement, RadioProps>(
             ? "warning"
             : status;
 
-        // Handle radio change
         const handleChange = useCallback(
             (optionValue: string | number) => {
                 if (disabled || readOnly) return;
@@ -56,7 +55,6 @@ const Radio = forwardRef<HTMLInputElement, RadioProps>(
             [disabled, readOnly, onChange]
         );
 
-        // Size classes
         const sizeClasses = {
             xs: {
                 radio: "w-3 h-3",
@@ -85,79 +83,73 @@ const Radio = forwardRef<HTMLInputElement, RadioProps>(
             },
         };
 
-        // Color scheme classes
         const colorSchemeClasses = {
-            gray: "text-gray-600 focus:ring-gray-500",
-            blue: "text-blue-600 focus:ring-blue-500",
-            green: "text-green-600 focus:ring-green-500",
-            red: "text-red-600 focus:ring-red-500",
-            yellow: "text-yellow-600 focus:ring-yellow-500",
-            purple: "text-purple-600 focus:ring-purple-500",
-            pink: "text-pink-600 focus:ring-pink-500",
+            gray: "text-[var(--color-gray-600)] focus:ring-[var(--color-gray-500)]",
+            blue: "text-[var(--color-info-600)] focus:ring-[var(--color-info-500)]",
+            green: "text-[var(--color-success-600)] focus:ring-[var(--color-success-500)]",
+            red: "text-[var(--color-error-600)] focus:ring-[var(--color-error-500)]",
+            yellow: "text-[var(--color-warning-600)] focus:ring-[var(--color-warning-500)]",
+            purple: "text-[var(--color-purple-600)] focus:ring-[var(--color-purple-500)]",
+            pink: "text-[var(--color-rose-600)] focus:ring-[var(--color-rose-500)]",
         };
 
-        // Spacing classes
         const spacingClasses = {
             tight: direction === "row" ? "gap-3" : "gap-1",
             normal: direction === "row" ? "gap-4" : "gap-2",
             loose: direction === "row" ? "gap-6" : "gap-4",
         };
 
-        // Direction classes
         const directionClasses = {
             row: "flex flex-row flex-wrap",
             column: "flex flex-col",
         };
 
-        // Radio input classes
         const radioClasses = cn(
-            "border-gray-300 focus:ring-2 focus:ring-offset-0",
+            "border-[var(--color-gray-300)] focus:ring-2 focus:ring-offset-0",
             sizeClasses[size].radio,
             colorSchemeClasses[colorScheme],
             actualStatus === "error" &&
-                "border-red-500 text-red-600 focus:ring-red-500",
+                "border-[var(--color-error-500)] text-[var(--color-error-600)] focus:ring-[var(--color-error-500)]",
             actualStatus === "success" &&
-                "border-green-500 text-green-600 focus:ring-green-500",
+                "border-[var(--color-success-500)] text-[var(--color-success-600)] focus:ring-[var(--color-success-500)]",
             actualStatus === "warning" &&
-                "border-yellow-500 text-yellow-600 focus:ring-yellow-500",
+                "border-[var(--color-warning-500)] text-[var(--color-warning-600)] focus:ring-[var(--color-warning-500)]",
             disabled && "opacity-50 cursor-not-allowed",
             readOnly && "cursor-default"
         );
 
         return (
             <div className={cn("flex flex-col", containerClassName)}>
-                {/* Group Label */}
                 {label && (
                     <legend
                         className={cn(
                             "block font-medium mb-1.5",
                             sizeClasses[size].text,
                             actualStatus === "error"
-                                ? "text-red-700"
-                                : "text-gray-700",
-                            disabled && "text-gray-400",
-                            labelClassName
+                                ? "text-[var(--color-error-700)]"
+                                : "text-[var(--color-gray-700)]",
+                            disabled && "text-[var(--color-gray-400)]",
+                            labelClassName,
                         )}
                     >
                         {label}
                         {required && showRequiredIndicator && (
-                            <span className="text-red-500 ml-1">*</span>
+                            <span className="text-[var(--color-error-500)] ml-1">*</span>
                         )}
                         {optional && showOptionalText && !required && (
-                            <span className="text-gray-400 text-sm ml-1">
+                            <span className="text-[var(--color-gray-400)] text-sm ml-1">
                                 (optional)
                             </span>
                         )}
                     </legend>
                 )}
 
-                {/* Radio Options */}
                 <fieldset
                     className={cn(
                         directionClasses[direction],
                         spacingClasses[spacing],
                         fullWidth && "w-full",
-                        className
+                        className,
                     )}
                     disabled={disabled}
                 >
@@ -178,10 +170,9 @@ const Radio = forwardRef<HTMLInputElement, RadioProps>(
                                     sizeClasses[size].spacing,
                                     isDisabled &&
                                         "cursor-not-allowed opacity-50",
-                                    readOnly && "cursor-default"
+                                    readOnly && "cursor-default",
                                 )}
                             >
-                                {/* Radio Input */}
                                 <input
                                     ref={
                                         index === 0
@@ -202,46 +193,42 @@ const Radio = forwardRef<HTMLInputElement, RadioProps>(
                                         helperText && `${groupId}-helper`,
                                         hint && `${groupId}-hint`,
                                         option.description &&
-                                            `${optionId}-description`
+                                            `${optionId}-description`,
                                     )}
                                     {...props}
                                 />
 
-                                {/* Option Content */}
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
-                                        {/* Option Icon */}
                                         {option.icon && (
-                                            <div className="text-gray-500 flex-shrink-0">
+                                            <div className="text-[var(--color-gray-500)] flex-shrink-0">
                                                 {option.icon}
                                             </div>
                                         )}
 
-                                        {/* Option Label */}
                                         <span
                                             className={cn(
                                                 "font-medium",
                                                 sizeClasses[size].text,
                                                 isSelected
-                                                    ? "text-gray-900"
-                                                    : "text-gray-700",
-                                                isDisabled && "text-gray-400"
+                                                    ? "text-[var(--color-gray-900)]"
+                                                    : "text-[var(--color-gray-700)]",
+                                                isDisabled && "text-[var(--color-gray-400)]",
                                             )}
                                         >
                                             {option.label}
                                         </span>
                                     </div>
 
-                                    {/* Option Description */}
                                     {option.description && (
                                         <p
                                             id={`${optionId}-description`}
                                             className={cn(
-                                                "mt-1 text-gray-500",
+                                                "mt-1 text-[var(--color-gray-500)]",
                                                 size === "xs"
                                                     ? "text-xs"
                                                     : "text-sm",
-                                                isDisabled && "text-gray-400"
+                                                isDisabled && "text-[var(--color-gray-400)]",
                                             )}
                                         >
                                             {option.description}
@@ -253,46 +240,40 @@ const Radio = forwardRef<HTMLInputElement, RadioProps>(
                     })}
                 </fieldset>
 
-                {/* Helper Messages */}
                 <div className="mt-1 space-y-1">
-                    {/* Error Message */}
                     {error && (
                         <p
                             id={`${groupId}-error`}
                             className={cn(
-                                "text-sm text-red-600",
-                                errorClassName
+                                "text-sm text-[var(--color-error-600)]",
+                                errorClassName,
                             )}
                         >
                             {Array.isArray(error) ? error[0] : error}
                         </p>
                     )}
 
-                    {/* Success Message */}
                     {success && !error && (
-                        <p className="text-sm text-green-600">{success}</p>
+                        <p className="text-sm text-[var(--color-success-600)]">{success}</p>
                     )}
 
-                    {/* Warning Message */}
                     {warning && !error && !success && (
-                        <p className="text-sm text-yellow-600">{warning}</p>
+                        <p className="text-sm text-[var(--color-warning-600)]">{warning}</p>
                     )}
 
-                    {/* Helper Text */}
                     {helperText && !error && !success && !warning && (
                         <p
                             id={`${groupId}-helper`}
-                            className="text-sm text-gray-500"
+                            className="text-sm text-[var(--color-gray-500)]"
                         >
                             {helperText}
                         </p>
                     )}
 
-                    {/* Hint */}
                     {hint && (
                         <p
                             id={`${groupId}-hint`}
-                            className="text-xs text-gray-400"
+                            className="text-xs text-[var(--color-gray-400)]"
                         >
                             {hint}
                         </p>

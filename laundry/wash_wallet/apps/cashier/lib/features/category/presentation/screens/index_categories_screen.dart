@@ -10,7 +10,7 @@ import '../bloc/category_cubit.dart';
 import '../bloc/category_state.dart';
 import '../widgets/category_search_bar.dart';
 import '../widgets/category_list_view.dart';
-
+import 'show_category_screen.dart';
 
 class IndexCategoriesScreen extends StatefulWidget {
   final int outletId;
@@ -23,6 +23,7 @@ class IndexCategoriesScreen extends StatefulWidget {
 
 class _IndexCategoriesScreenState extends State<IndexCategoriesScreen> {
   final TextEditingController _searchController = TextEditingController();
+  int? _selectedCategoryId;
 
   @override
   void initState() {
@@ -56,22 +57,29 @@ class _IndexCategoriesScreenState extends State<IndexCategoriesScreen> {
     return AppLayout(
       userName: authState is Authenticated ? authState.employee.name : null,
       onLogout: () => context.read<AuthCubit>().logout(),
-      header: isCompact ? AppHeader(
-        title: 'Daftar Kategori',
-        type: AppHeaderType.standard,
-        backgroundColor: context.colors.surface,
-        onBackPressed: () => context.pop(),
-      ) : null,
-      floatingActionButton: isCompact ? FloatingActionButton.extended(
-        onPressed: () => _navigateToCreateScreen(),
-        backgroundColor: context.colors.primary,
-        elevation: 4,
-        icon: const Icon(Icons.add_rounded, color: Colors.white),
-        label: const Text(
-          'Tambah',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-        ),
-      ) : null,
+      header: isCompact
+          ? AppHeader(
+              title: 'Daftar Kategori',
+              type: AppHeaderType.standard,
+              backgroundColor: context.colors.surface,
+              onBackPressed: () => context.pop(),
+            )
+          : null,
+      floatingActionButton: isCompact
+          ? FloatingActionButton.extended(
+              onPressed: () => _navigateToCreateScreen(),
+              backgroundColor: context.colors.primary,
+              elevation: 4,
+              icon: const Icon(Icons.add_rounded, color: Colors.white),
+              label: const Text(
+                'Tambah',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            )
+          : null,
       body: BlocConsumer<CategoryCubit, CategoryState>(
         listener: (context, state) {
           if (state is CategoryActionSuccess) {
@@ -134,9 +142,7 @@ class _IndexCategoriesScreenState extends State<IndexCategoriesScreen> {
             setState(() {});
           },
         ),
-        Expanded(
-          child: _buildMobileContent(context, state),
-        ),
+        Expanded(child: _buildMobileContent(context, state)),
       ],
     );
   }
@@ -181,50 +187,92 @@ class _IndexCategoriesScreenState extends State<IndexCategoriesScreen> {
   }
 
   Widget _buildTabletTable(BuildContext context, CategoryState state) {
-    return AppDataView<Category>(
-      breadcrumbs: const [
-        BreadcrumbItem(label: 'Home'),
-        BreadcrumbItem(label: 'Kategori'),
+    final loadedState = state is CategoriesLoaded ? state : null;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          flex: 2,
+          child: AppDataView<Category>(
+            breadcrumbs: const [
+              BreadcrumbItem(label: 'Home'),
+              BreadcrumbItem(label: 'Kategori'),
+            ],
+            pageTitle: 'Daftar Kategori',
+            searchController: _searchController,
+            searchHint: 'Cari kategori...',
+            onSearch: _loadData,
+            onSearchClear: () {
+              _searchController.clear();
+              _loadData();
+            },
+            primaryActionLabel: 'Tambah',
+            primaryActionIcon: Icons.add,
+            onPrimaryAction: _navigateToCreateScreen,
+            columns: _buildTabletColumnDefs(context),
+            rows: loadedState?.categories ?? [],
+            isLoading:
+                state is CategoryLoading ||
+                (state is CategoriesLoaded && state.isPageLoading),
+            errorMessage: state is CategoryFailure
+                ? state.failure.message
+                : null,
+            emptyMessage: 'Belum ada kategori',
+            totalCount: loadedState?.total,
+            currentPage: loadedState?.currentPage,
+            lastPage: loadedState?.lastPage,
+            from: loadedState?.from,
+            to: loadedState?.to,
+            onPageChanged: loadedState != null
+                ? (page) => context.read<CategoryCubit>().changePage(
+                    page,
+                    outletId: widget.outletId,
+                    search: _searchController.text.isEmpty
+                        ? null
+                        : _searchController.text,
+                  )
+                : null,
+            rowActions: [
+              DataTableRowAction<Category>(
+                icon: Icons.visibility_outlined,
+                tooltip: 'Lihat',
+                onTap: (category) => _handleTap(category.id),
+              ),
+              DataTableRowAction<Category>(
+                icon: Icons.edit_outlined,
+                tooltip: 'Edit',
+                onTap: _handleEdit,
+              ),
+              DataTableRowAction<Category>(
+                icon: Icons.delete_outline,
+                tooltip: 'Hapus',
+                color: context.colors.error,
+                onTap: (category) => _handleDelete(category.id),
+              ),
+            ],
+            onRowTap: (category) => _handleTap(category.id),
+            isRowHighlighted: (category) => category.id == _selectedCategoryId,
+          ),
+        ),
+        if (_selectedCategoryId != null) ...[
+          VerticalDivider(width: 1, color: context.colors.outlineVariant),
+          Expanded(
+            flex: 1,
+            child: ShowCategoryScreen(
+              key: ValueKey(_selectedCategoryId),
+              categoryId: _selectedCategoryId!,
+              isEmbedded: true,
+              onClose: () => setState(() => _selectedCategoryId = null),
+            ),
+          ),
+        ],
       ],
-      pageTitle: 'Daftar Kategori',
-      searchController: _searchController,
-      searchHint: 'Cari kategori...',
-      onSearch: _loadData,
-      onSearchClear: () {
-        _searchController.clear();
-        _loadData();
-      },
-      primaryActionLabel: 'Tambah',
-      primaryActionIcon: Icons.add,
-      onPrimaryAction: _navigateToCreateScreen,
-      columns: _buildTabletColumnDefs(context),
-      rows: state is CategoriesLoaded ? state.categories : [],
-      isLoading: state is CategoryLoading,
-      errorMessage: state is CategoryFailure ? state.failure.message : null,
-      emptyMessage: 'Belum ada kategori',
-      rowActions: [
-        DataTableRowAction<Category>(
-          icon: Icons.visibility_outlined,
-          tooltip: 'Lihat',
-          onTap: (category) => _handleTap(category.id),
-        ),
-        DataTableRowAction<Category>(
-          icon: Icons.edit_outlined,
-          tooltip: 'Edit',
-          onTap: _handleEdit,
-        ),
-        DataTableRowAction<Category>(
-          icon: Icons.delete_outline,
-          tooltip: 'Hapus',
-          color: context.colors.error,
-          onTap: (category) => _handleDelete(category.id),
-        ),
-      ],
-      onRowTap: (category) => _handleTap(category.id),
     );
   }
 
-  List<DataTableColumnDef<Category>> _buildTabletColumnDefs(BuildContext context) {
+  List<DataTableColumnDef<Category>> _buildTabletColumnDefs(
+    BuildContext context,
+  ) {
     return [
       DataTableColumnDef<Category>(
         id: 'name',
@@ -236,7 +284,8 @@ class _IndexCategoriesScreenState extends State<IndexCategoriesScreen> {
         id: 'laundryServicesCount',
         header: 'Jumlah Layanan',
         width: 150,
-        cellBuilder: (context, category) => Text(category.laundryServicesCount.toString()),
+        cellBuilder: (context, category) =>
+            Text(category.laundryServicesCount.toString()),
       ),
       DataTableColumnDef<Category>(
         id: 'status',
@@ -244,7 +293,9 @@ class _IndexCategoriesScreenState extends State<IndexCategoriesScreen> {
         width: 100,
         cellBuilder: (context, category) => StatusChip(
           label: category.isActive ? 'Aktif' : 'Nonaktif',
-          color: category.isActive ? context.colors.success : context.colors.error,
+          color: category.isActive
+              ? context.colors.success
+              : context.colors.error,
         ),
       ),
     ];
@@ -252,67 +303,40 @@ class _IndexCategoriesScreenState extends State<IndexCategoriesScreen> {
 
   void _navigateToCreateScreen() {
     context
-        .push('/settings/setup-outlet/categories/create')
+        .push('/categories/create')
         .then((_) => _handleRefresh());
   }
 
   void _handleTap(int id) {
-    context
-        .push('/settings/setup-outlet/categories/$id')
-        .then((_) => _handleRefresh());
+    if (AppBreakpoints.of(context) == WindowSizeClass.compact) {
+      context.push('/categories/$id').then((_) => _handleRefresh());
+    } else {
+      setState(() => _selectedCategoryId = id);
+    }
   }
 
   void _handleEdit(Category category) {
     context
         .push(
-          '/settings/setup-outlet/categories/${category.id}/edit',
+          '/categories/${category.id}/edit',
           extra: category,
         )
         .then((_) => _handleRefresh());
   }
 
-  void _handleDelete(int id) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(context.radius.lg),
-        ),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: context.colors.error.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(Icons.delete_rounded, color: context.colors.error),
-            ),
-            SizedBox(width: context.space.sm),
-            const Text('Hapus Kategori'),
-          ],
-        ),
-        content: const Text(
+  void _handleDelete(int id) async {
+    final result = await AppDialog.destructive(
+      context,
+      title: 'Hapus Kategori',
+      message:
           'Apakah Anda yakin ingin menghapus kategori ini? Tindakan ini tidak dapat dibatalkan.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<CategoryCubit>().destroy(id);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: context.colors.error,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Hapus'),
-          ),
-        ],
-      ),
+      confirmLabel: 'Hapus',
     );
+    if (result == true && mounted) {
+      if (_selectedCategoryId == id) {
+        setState(() => _selectedCategoryId = null);
+      }
+      context.read<CategoryCubit>().destroy(id);
+    }
   }
 }

@@ -9,10 +9,7 @@ class AccountCubit extends Cubit<AccountState> {
     : _getAllUsecase = getAllUsecase,
       super(const AccountInitial());
 
-  Future<void> getAll({
-    required int outletId,
-    required String type,
-  }) async {
+  Future<void> getAll({required int outletId, required String type}) async {
     emit(const AccountLoading());
     final result = await _getAllUsecase(
       GetAllParams(outletId: outletId, type: type),

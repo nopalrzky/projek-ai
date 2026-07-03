@@ -12,7 +12,10 @@ import '../bloc/petty_cash_cubit.dart';
 class PettyCashProvider {
   PettyCashProvider._();
 
-  static PettyCashRemoteDatasource createRemoteDatasource(Dio dio, ApiEndpoints endpoints) {
+  static PettyCashRemoteDatasource createRemoteDatasource(
+    Dio dio,
+    ApiEndpoints endpoints,
+  ) {
     return PettyCashRemoteDatasourceImpl(dio, endpoints);
   }
 

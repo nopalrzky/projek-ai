@@ -23,10 +23,11 @@ import { Button } from "@/Components/Button";
 import { Alert } from "@/Components/Alert";
 import { Card } from "@/Components/Card";
 import { Account, Employee, LoanFormData, Outlet } from "@/types";
-import loanService from "@/Services/loan.service";
 import { LoanCreateProps } from "./types";
 import employeeService from "@/Services/employee.service";
 import accountService from "@/Services/account.service";
+import { useLatestAsync } from "@/Hooks/useLatestAsync";
+import loanService from "@/Services/loan.service";
 
 const LoansCreate = ({ outlets }: LoanCreateProps) => {
     const { data, setData, processing, errors, clearErrors, setError, post } =
@@ -51,6 +52,9 @@ const LoansCreate = ({ outlets }: LoanCreateProps) => {
     const [loadingFundingAccounts, setLoadingFundingAccounts] = useState(false);
     const [loadError, setLoadError] = useState<string | null>(null);
     const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
+
+    const { runLatest: runLatestEmployees } = useLatestAsync();
+    const { runLatest: runLatestFundingAccounts } = useLatestAsync();
 
     const repaymentTypes: Record<
         string,
@@ -77,6 +81,9 @@ const LoansCreate = ({ outlets }: LoanCreateProps) => {
             return;
         }
 
+        setData("employeeId", "");
+        setData("sourceAccountId", "");
+
         fetchEmployees(outletId);
         fetchFundingAccounts(outletId);
     }, [data.outletId]);
@@ -85,35 +92,46 @@ const LoansCreate = ({ outlets }: LoanCreateProps) => {
         setLoadingEmployees(true);
         setLoadError(null);
 
-        try {
-            const employeesData = await employeeService.getAll(outletId);
-            setEmployees(employeesData);
-            setData("employeeId", "");
-        } catch (error) {
-            console.error("Error fetching employees:", error);
-            setLoadError("Gagal memuat data karyawan untuk outlet ini");
-            setEmployees([]);
-        } finally {
-            setLoadingEmployees(false);
-        }
+        runLatestEmployees(
+            outletId,
+            async () => await employeeService.getAll(outletId),
+            {
+                onSuccess: (employeesData) => {
+                    setEmployees(employeesData);
+                },
+                onError: (error) => {
+                    console.error("Error fetching employees:", error);
+                    setLoadError("Gagal memuat data karyawan untuk outlet ini");
+                    setEmployees([]);
+                },
+                onFinally: () => {
+                    setLoadingEmployees(false);
+                }
+            }
+        );
     };
 
     const fetchFundingAccounts = async (outletId: number) => {
         setLoadingFundingAccounts(true);
         setLoadError(null);
 
-        try {
-            const accounts =
-                await accountService.getFundingAccountsByOutlet(outletId);
-            setFundingAccounts(accounts);
-            setData("sourceAccountId", "");
-        } catch (error) {
-            console.error("Error fetching funding accounts:", error);
-            setLoadError("Gagal memuat data sumber dana untuk outlet ini");
-            setFundingAccounts([]);
-        } finally {
-            setLoadingFundingAccounts(false);
-        }
+        runLatestFundingAccounts(
+            outletId,
+            async () => await accountService.getFundingAccountsByOutlet(outletId),
+            {
+                onSuccess: (accounts) => {
+                    setFundingAccounts(accounts);
+                },
+                onError: (error) => {
+                    console.error("Error fetching funding accounts:", error);
+                    setLoadError("Gagal memuat data sumber dana untuk outlet ini");
+                    setFundingAccounts([]);
+                },
+                onFinally: () => {
+                    setLoadingFundingAccounts(false);
+                }
+            }
+        );
     };
 
     const outletOptions = useMemo(() => {
@@ -319,7 +337,6 @@ const LoansCreate = ({ outlets }: LoanCreateProps) => {
         handleDataChange("installmentSchedule", newSchedule);
     };
 
-    // Auto-generate schedule when parameters change
     useEffect(() => {
         if (data.repaymentType !== "installment") return;
 

@@ -5,10 +5,7 @@ import '../../../courier_schedule/domain/entities/courier_schedule.dart';
 class ScheduleAvailabilityBadgeWidget extends StatelessWidget {
   final CourierSchedule schedule;
 
-  const ScheduleAvailabilityBadgeWidget({
-    super.key,
-    required this.schedule,
-  });
+  const ScheduleAvailabilityBadgeWidget({super.key, required this.schedule});
 
   @override
   Widget build(BuildContext context) {

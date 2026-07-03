@@ -216,7 +216,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 vertical: context.space.xs,
                               ),
                               decoration: BoxDecoration(
-                                color: context.colors.success.withValues(alpha: 0.12),
+                                color: context.colors.success.withValues(
+                                  alpha: 0.12,
+                                ),
                                 borderRadius: BorderRadius.circular(
                                   context.radius.lg,
                                 ),

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 
 /// Menu outlet section displaying outlet management shortcuts
@@ -166,4 +166,3 @@ class _MenuCard extends StatelessWidget {
     );
   }
 }
-

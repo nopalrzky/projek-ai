@@ -45,10 +45,10 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             onBlur,
             id,
             textareaRef,
-            leftIcon, // Destructure leftIcon untuk mencegah passing ke DOM
+            leftIcon,
             ...props
         },
-        ref
+        ref,
     ) => {
         const [isFocused, setIsFocused] = useState(false);
         const [currentValue, setCurrentValue] = useState(value || "");
@@ -61,12 +61,11 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         const actualStatus = error
             ? "error"
             : success
-            ? "success"
-            : warning
-            ? "warning"
-            : status;
+              ? "success"
+              : warning
+                ? "warning"
+                : status;
 
-        // Auto-resize functionality
         const adjustHeight = useCallback(() => {
             if (!autoResize || !actualRef.current) return;
 
@@ -80,17 +79,15 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 
             const newHeight = Math.min(
                 Math.max(scrollHeight, minHeight),
-                maxHeight
+                maxHeight,
             );
             textarea.style.height = `${newHeight}px`;
         }, [autoResize, minRows, maxRows, actualRef]);
 
-        // Handle value change
         const handleChange = useCallback(
             (e: React.ChangeEvent<HTMLTextAreaElement>) => {
                 const newValue = e.target.value;
 
-                // Apply maxLength if specified
                 if (maxLength && newValue.length > maxLength) {
                     return;
                 }
@@ -98,33 +95,29 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
                 setCurrentValue(newValue);
                 onChange?.(e);
 
-                // Auto-resize if enabled
                 if (autoResize) {
                     setTimeout(adjustHeight, 0);
                 }
             },
-            [maxLength, onChange, autoResize, adjustHeight]
+            [maxLength, onChange, autoResize, adjustHeight],
         );
 
-        // Handle focus
         const handleFocus = useCallback(
             (e: React.FocusEvent<HTMLTextAreaElement>) => {
                 setIsFocused(true);
                 onFocus?.(e);
             },
-            [onFocus]
+            [onFocus],
         );
 
-        // Handle blur
         const handleBlur = useCallback(
             (e: React.FocusEvent<HTMLTextAreaElement>) => {
                 setIsFocused(false);
                 onBlur?.(e);
             },
-            [onBlur]
+            [onBlur],
         );
 
-        // Update current value when value prop changes
         useEffect(() => {
             if (value !== undefined && value !== currentValue) {
                 setCurrentValue(value);
@@ -134,109 +127,101 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             }
         }, [value, currentValue, autoResize, adjustHeight]);
 
-        // Initial auto-resize
         useEffect(() => {
             if (autoResize && actualRef.current) {
                 adjustHeight();
             }
         }, [autoResize, adjustHeight]);
 
-        // Character count
         const characterCount = String(currentValue).length;
         const isOverLimit = maxLength ? characterCount > maxLength : false;
 
         const baseClasses = cn(
             "transition-all duration-200 ease-in-out",
             "focus:outline-none focus:ring-2 focus:ring-offset-0",
-            "placeholder:text-gray-400 dark:placeholder:text-gray-500",
-            "text-gray-900 dark:text-gray-100",
+            "placeholder-[var(--color-text-tertiary)]",
+            "text-[var(--color-text-primary)]",
             disabled && "cursor-not-allowed opacity-60",
             readOnly && "cursor-default",
-            fullWidth ? "w-full" : "w-auto"
+            fullWidth ? "w-full" : "w-auto",
         );
 
         const variantClasses = {
             default: cn(
                 "border rounded-lg",
-                "bg-white dark:bg-gray-800",
-                "border-gray-300 dark:border-gray-600",
-                // Focus states
-                "focus:border-blue-500 dark:focus:border-blue-400",
-                "focus:ring-blue-500/20 dark:focus:ring-blue-400/20",
-                // Status states - Error
+                "bg-[var(--color-surface)]",
+                "border-[var(--color-border)]",
+                "focus:border-[var(--color-primary-500)]",
+                "focus:ring-[var(--color-primary-500)]/20",
                 actualStatus === "error" && [
-                    "border-red-500 dark:border-red-400",
-                    "focus:border-red-500 dark:focus:border-red-400",
-                    "focus:ring-red-500/20 dark:focus:ring-red-400/20",
-                    "bg-red-50/50 dark:bg-red-900/10",
+                    "border-[var(--color-error-500)]",
+                    "focus:border-[var(--color-error-500)]",
+                    "focus:ring-[var(--color-error-500)]/20",
+                    "bg-[var(--color-error-500)]/5",
                 ],
-                // Status states - Success
                 actualStatus === "success" && [
-                    "border-green-500 dark:border-green-400",
-                    "focus:border-green-500 dark:focus:border-green-400",
-                    "focus:ring-green-500/20 dark:focus:ring-green-400/20",
-                    "bg-green-50/50 dark:bg-green-900/10",
+                    "border-[var(--color-success-500)]",
+                    "focus:border-[var(--color-success-500)]",
+                    "focus:ring-[var(--color-success-500)]/20",
+                    "bg-[var(--color-success-500)]/5",
                 ],
-                // Status states - Warning
                 actualStatus === "warning" && [
-                    "border-yellow-500 dark:border-yellow-400",
-                    "focus:border-yellow-500 dark:focus:border-yellow-400",
-                    "focus:ring-yellow-500/20 dark:focus:ring-yellow-400/20",
-                    "bg-yellow-50/50 dark:bg-yellow-900/10",
+                    "border-[var(--color-warning-500)]",
+                    "focus:border-[var(--color-warning-500)]",
+                    "focus:ring-[var(--color-warning-500)]/20",
+                    "bg-[var(--color-warning-500)]/5",
                 ],
-                // Disabled state
                 disabled && [
-                    "bg-gray-50 dark:bg-gray-900/50",
-                    "border-gray-200 dark:border-gray-700",
-                    "text-gray-400 dark:text-gray-500",
-                ]
+                    "bg-[var(--color-gray-100)]",
+                    "border-[var(--color-border-light)]",
+                    "text-[var(--color-text-tertiary)]",
+                ],
             ),
             outline: cn(
                 "border-2 rounded-lg bg-transparent",
-                "border-gray-300 dark:border-gray-600",
-                "focus:border-blue-500 dark:focus:border-blue-400",
-                "focus:ring-blue-500/20 dark:focus:ring-blue-400/20",
+                "border-[var(--color-border)]",
+                "focus:border-[var(--color-primary-500)]",
+                "focus:ring-[var(--color-primary-500)]/20",
                 actualStatus === "error" && [
-                    "border-red-500 dark:border-red-400",
-                    "focus:border-red-500 dark:focus:border-red-400",
-                    "focus:ring-red-500/20 dark:focus:ring-red-400/20",
+                    "border-[var(--color-error-500)]",
+                    "focus:border-[var(--color-error-500)]",
+                    "focus:ring-[var(--color-error-500)]/20",
                 ],
-                disabled && "border-gray-200 dark:border-gray-700"
+                disabled && "border-[var(--color-border-light)]",
             ),
             filled: cn(
                 "border border-transparent rounded-lg",
-                "bg-gray-100 dark:bg-gray-800",
-                "focus:bg-white dark:focus:bg-gray-700",
-                "focus:border-blue-500 dark:focus:border-blue-400",
-                "focus:ring-blue-500/20 dark:focus:ring-blue-400/20",
+                "bg-[var(--color-gray-100)]",
+                "focus:bg-[var(--color-surface)]",
+                "focus:border-[var(--color-primary-500)]",
+                "focus:ring-[var(--color-primary-500)]/20",
                 actualStatus === "error" && [
-                    "bg-red-50 dark:bg-red-900/20",
-                    "focus:border-red-500 dark:focus:border-red-400",
-                    "focus:ring-red-500/20 dark:focus:ring-red-400/20",
+                    "bg-[var(--color-error-500)]/5",
+                    "focus:border-[var(--color-error-500)]",
+                    "focus:ring-[var(--color-error-500)]/20",
                 ],
-                disabled && "bg-gray-50 dark:bg-gray-900/50"
+                disabled && "bg-[var(--color-gray-100)]/50",
             ),
             underline: cn(
                 "border-0 border-b-2 rounded-none bg-transparent",
-                "border-gray-300 dark:border-gray-600",
-                "focus:border-blue-500 dark:focus:border-blue-400 focus:ring-0",
+                "border-[var(--color-border)]",
+                "focus:border-[var(--color-primary-500)] focus:ring-0",
                 actualStatus === "error" && [
-                    "border-red-500 dark:border-red-400",
-                    "focus:border-red-500 dark:focus:border-red-400",
+                    "border-[var(--color-error-500)]",
+                    "focus:border-[var(--color-error-500)]",
                 ],
-                disabled && "border-gray-200 dark:border-gray-700"
+                disabled && "border-[var(--color-border-light)]",
             ),
             ghost: cn(
                 "border border-transparent rounded-lg bg-transparent",
-                "hover:bg-gray-50 dark:hover:bg-gray-800",
-                "focus:bg-white dark:focus:bg-gray-700",
-                "focus:border-gray-300 dark:focus:border-gray-600",
-                "focus:ring-gray-300/20 dark:focus:ring-gray-600/20",
-                disabled && "hover:bg-transparent dark:hover:bg-transparent"
+                "hover:bg-[var(--color-gray-100)]",
+                "focus:bg-[var(--color-surface)]",
+                "focus:border-[var(--color-border)]",
+                "focus:ring-[var(--color-border)]/20",
+                disabled && "hover:bg-transparent dark:hover:bg-transparent",
             ),
         };
 
-        // Size classes
         const sizeClasses = {
             xs: leftIcon ? "pl-8 pr-2 py-1 text-xs" : "px-2 py-1 text-xs",
             sm: leftIcon ? "pl-9 pr-3 py-1.5 text-sm" : "px-3 py-1.5 text-sm",
@@ -245,7 +230,6 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             xl: leftIcon ? "pl-12 pr-5 py-3 text-xl" : "px-5 py-3 text-xl",
         };
 
-        // Resize classes
         const resizeClasses = {
             none: "resize-none",
             both: "resize",
@@ -253,7 +237,6 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             vertical: "resize-y",
         };
 
-        // Label size classes
         const labelSizeClasses = {
             xs: "text-xs",
             sm: "text-sm",
@@ -267,10 +250,9 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             variantClasses[variant],
             sizeClasses[size],
             !autoResize && resizeClasses[resize],
-            className
+            className,
         );
 
-        // Icon positioning classes based on size
         const iconPositionClasses = {
             xs: "left-2 top-2",
             sm: "left-3 top-2.5",
@@ -281,7 +263,6 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 
         return (
             <div className={cn("flex flex-col", containerClassName)}>
-                {/* Label */}
                 {label && (
                     <label
                         htmlFor={textareaId}
@@ -289,53 +270,50 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
                             "block font-medium mb-1.5",
                             labelSizeClasses[size],
                             actualStatus === "error"
-                                ? "text-red-700 dark:text-red-400"
-                                : "text-gray-700 dark:text-gray-300",
-                            disabled && "text-gray-400 dark:text-gray-500",
-                            labelClassName
+                                ? "text-[var(--color-error-600)]"
+                                : "text-[var(--color-text-secondary)]",
+                            disabled && "text-[var(--color-text-tertiary)]",
+                            labelClassName,
                         )}
                     >
                         {label}
                         {required && showRequiredIndicator && (
-                            <span className="text-red-500 dark:text-red-400 ml-1">
+                            <span className="text-[var(--color-error-500)] ml-1">
                                 *
                             </span>
                         )}
                         {optional && showOptionalText && !required && (
-                            <span className="text-gray-400 dark:text-gray-500 text-sm ml-1">
+                            <span className="text-[var(--color-text-tertiary)] text-sm ml-1">
                                 (optional)
                             </span>
                         )}
                     </label>
                 )}
 
-                {/* Textarea Container */}
                 <div className="relative">
-                    {/* Left Icon */}
                     {leftIcon && (
                         <div
                             className={cn(
                                 "absolute z-10 flex items-start pointer-events-none",
-                                iconPositionClasses[size]
+                                iconPositionClasses[size],
                             )}
                             style={{
                                 color: disabled
-                                    ? "var(--color-text-quaternary)"
+                                    ? "var(--color-text-tertiary)"
                                     : isFocused
-                                    ? actualStatus === "error"
-                                        ? "var(--color-error-500)"
-                                        : "var(--color-primary-500)"
-                                    : "var(--color-text-tertiary)",
+                                      ? actualStatus === "error"
+                                          ? "var(--color-error-500)"
+                                          : "var(--color-primary-500)"
+                                      : "var(--color-text-tertiary)",
                             }}
                         >
                             {leftIcon}
                         </div>
                     )}
 
-                    {/* Loading Overlay */}
                     {loading && (
-                        <div className="absolute inset-0 bg-white/50 dark:bg-gray-800/50 flex items-center justify-center z-20 rounded-lg">
-                            <div className="animate-spin text-gray-400 dark:text-gray-500">
+                        <div className="absolute inset-0 bg-[var(--color-surface)]/50 flex items-center justify-center z-20 rounded-lg">
+                            <div className="animate-spin text-[var(--color-text-tertiary)]">
                                 <svg
                                     width={20}
                                     height={20}
@@ -360,7 +338,6 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
                         </div>
                     )}
 
-                    {/* Textarea - Remove leftIcon from props spread */}
                     <textarea
                         ref={actualRef || ref}
                         id={textareaId}
@@ -382,10 +359,10 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
                                 ? actualStatus === "error"
                                     ? "var(--color-error-500)"
                                     : actualStatus === "success"
-                                    ? "var(--color-success-500)"
-                                    : actualStatus === "warning"
-                                    ? "var(--color-warning-500)"
-                                    : "var(--color-primary-500)"
+                                      ? "var(--color-success-500)"
+                                      : actualStatus === "warning"
+                                        ? "var(--color-warning-500)"
+                                        : "var(--color-primary-500)"
                                 : "var(--color-border)",
                             color: "var(--color-text-primary)",
                         }}
@@ -394,14 +371,12 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
                             error && `${textareaId}-error`,
                             helperText && `${textareaId}-helper`,
                             hint && `${textareaId}-hint`,
-                            showCharacterCount && `${textareaId}-count`
+                            showCharacterCount && `${textareaId}-count`,
                         )}
-                        // Clean props to exclude leftIcon and other custom props
                         {...(({ leftIcon: _, ...rest }) => rest)(props as any)}
                     />
                 </div>
 
-                {/* Character Count */}
                 {showCharacterCount && (
                     <div className="flex justify-end mt-1">
                         <span
@@ -409,13 +384,13 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
                             className={cn(
                                 "text-xs transition-colors duration-200",
                                 isOverLimit
-                                    ? "text-red-600 dark:text-red-400"
-                                    : "text-gray-400 dark:text-gray-500"
+                                    ? "text-[var(--color-error-600)]"
+                                    : "text-[var(--color-text-tertiary)]",
                             )}
                             style={{
                                 color: isOverLimit
                                     ? "var(--color-error-600)"
-                                    : "var(--color-text-quaternary)",
+                                    : "var(--color-text-tertiary)",
                             }}
                         >
                             {characterCount}
@@ -424,15 +399,13 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
                     </div>
                 )}
 
-                {/* Helper Messages */}
                 <div className="mt-1 space-y-1">
-                    {/* Error Message */}
                     {error && (
                         <p
                             id={`${textareaId}-error`}
                             className={cn(
                                 "text-sm flex items-start gap-1",
-                                errorClassName
+                                errorClassName,
                             )}
                             style={{ color: "var(--color-error-600)" }}
                         >
@@ -453,7 +426,6 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
                         </p>
                     )}
 
-                    {/* Success Message */}
                     {success && !error && (
                         <p
                             className="text-sm flex items-start gap-1"
@@ -474,7 +446,6 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
                         </p>
                     )}
 
-                    {/* Warning Message */}
                     {warning && !error && !success && (
                         <p
                             className="text-sm flex items-start gap-1"
@@ -495,7 +466,6 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
                         </p>
                     )}
 
-                    {/* Helper Text */}
                     {helperText && !error && !success && !warning && (
                         <p
                             id={`${textareaId}-helper`}
@@ -506,7 +476,6 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
                         </p>
                     )}
 
-                    {/* Hint */}
                     {hint && (
                         <p
                             id={`${textareaId}-hint`}
@@ -519,7 +488,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
                 </div>
             </div>
         );
-    }
+    },
 );
 
 Textarea.displayName = "Textarea";

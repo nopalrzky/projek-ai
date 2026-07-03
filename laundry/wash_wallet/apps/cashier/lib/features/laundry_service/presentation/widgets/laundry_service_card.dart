@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 import 'package:wash_wallet_domain/wash_wallet_domain.dart';
@@ -84,7 +84,9 @@ class LaundryServiceCard extends StatelessWidget {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: context.colors.disabled.withValues(alpha: 0.2),
+                              color: context.colors.disabled.withValues(
+                                alpha: 0.2,
+                              ),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(

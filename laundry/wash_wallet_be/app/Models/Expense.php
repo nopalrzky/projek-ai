@@ -45,12 +45,19 @@ class Expense extends Model
     protected function casts(): array
     {
         return [
-            'amount'      => 'decimal:2',
-            'date'        => 'date',
-            'approved_at' => 'datetime',
-            'created_at'  => 'datetime',
-            'updated_at'  => 'datetime',
-            'deleted_at'  => 'datetime',
+            'outlet_id'          => 'integer',
+            'user_id'            => 'integer',
+            'employee_id'        => 'integer',
+            'expense_account_id' => 'integer',
+            'source_account_id'  => 'integer',
+            'approved_by'        => 'integer',
+            'journal_entry_id'   => 'integer',
+            'amount'             => 'decimal:2',
+            'date'               => 'date',
+            'approved_at'        => 'datetime',
+            'created_at'         => 'datetime',
+            'updated_at'         => 'datetime',
+            'deleted_at'         => 'datetime',
         ];
     }
 

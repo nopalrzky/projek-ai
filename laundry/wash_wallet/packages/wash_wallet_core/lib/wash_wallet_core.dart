@@ -39,6 +39,9 @@ export 'src/network/interceptors/logging_interceptor.dart';
 export 'src/result/result.dart';
 export 'src/models/paginated_data.dart';
 
+// Pagination
+export 'src/pagination/table_pagination_cubit_mixin.dart';
+
 // Storage
 export 'src/storage/secure_storage_provider.dart';
 

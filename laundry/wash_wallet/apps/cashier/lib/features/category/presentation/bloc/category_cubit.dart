@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wash_wallet_core/wash_wallet_core.dart';
+import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 
 import '../../domain/usecases/get_all_usecase.dart';
 import '../../domain/usecases/get_by_id_usecase.dart';
@@ -8,7 +10,8 @@ import '../../domain/usecases/destroy_usecase.dart';
 
 import 'category_state.dart';
 
-class CategoryCubit extends Cubit<CategoryState> {
+class CategoryCubit extends Cubit<CategoryState>
+    with TablePaginationCubitMixin<CategoryState> {
   final GetAllUsecase _getAllUsecase;
   final GetByIdUsecase _getByIdUsecase;
   final StoreUsecase _storeUsecase;
@@ -52,13 +55,18 @@ class CategoryCubit extends Cubit<CategoryState> {
     );
 
     result.when(
-      success: (categories) {
+      success: (data) {
         if (page == 1) {
           emit(
             CategoriesLoaded(
-              categories: categories,
-              hasReachedMax: categories.length < 15,
-              currentPage: page,
+              categories: data.items,
+              hasReachedMax: data.hasReachedMax,
+              currentPage: data.currentPage,
+              lastPage: data.lastPage,
+              total: data.total,
+              from: data.from,
+              to: data.to,
+              perPage: data.perPage,
             ),
           );
         } else {
@@ -66,9 +74,14 @@ class CategoryCubit extends Cubit<CategoryState> {
           if (currentState is CategoriesLoaded) {
             emit(
               currentState.copyWith(
-                categories: currentState.categories + categories,
-                hasReachedMax: categories.isEmpty || categories.length < 15,
-                currentPage: page,
+                categories: currentState.categories + data.items,
+                hasReachedMax: data.hasReachedMax,
+                currentPage: data.currentPage,
+                lastPage: data.lastPage,
+                total: data.total,
+                from: data.from,
+                to: data.to,
+                perPage: data.perPage,
               ),
             );
           }
@@ -78,10 +91,7 @@ class CategoryCubit extends Cubit<CategoryState> {
     );
   }
 
-  Future<void> getById({
-    required int id,
-    bool forceRefresh = false,
-  }) async {
+  Future<void> getById({required int id, bool forceRefresh = false}) async {
     emit(const CategoryLoading());
 
     final result = await _getByIdUsecase(id: id, forceRefresh: forceRefresh);
@@ -90,6 +100,14 @@ class CategoryCubit extends Cubit<CategoryState> {
       success: (category) => emit(CategoryDetailLoaded(category)),
       failure: (failure) => emit(CategoryFailure(failure)),
     );
+  }
+
+  Future<Category?> fetchCategorySilently({
+    required int id,
+    bool forceRefresh = false,
+  }) async {
+    final result = await _getByIdUsecase(id: id, forceRefresh: forceRefresh);
+    return result.when(success: (category) => category, failure: (_) => null);
   }
 
   Future<void> store({
@@ -154,6 +172,47 @@ class CategoryCubit extends Cubit<CategoryState> {
       success: (_) =>
           emit(const CategoryActionSuccess('Kategori berhasil dihapus')),
       failure: (failure) => emit(CategoryFailure(failure)),
+    );
+  }
+
+  /// Called exclusively by [AppPagination.onPageChanged] on tablet.
+  /// Always REPLACES categories — never appends.
+  Future<void> changePage(
+    int page, {
+    int? outletId,
+    String? search,
+    bool? isActive,
+    String sortBy = 'created_at',
+    String sortDirection = 'desc',
+  }) {
+    final current = state;
+    if (current is! CategoriesLoaded) return Future.value();
+    return changePageGeneric<Category>(
+      page: page,
+      currentPage: current.currentPage,
+      lastPage: current.lastPage,
+      request: () => _getAllUsecase(
+        page: page,
+        perPage: current.perPage,
+        outletId: outletId,
+        search: search,
+        isActive: isActive,
+        sortBy: sortBy,
+        sortDirection: sortDirection,
+      ),
+      markPageLoading: () => current.copyWith(isPageLoading: true),
+      buildLoaded: (data) => CategoriesLoaded(
+        categories: data.items,
+        hasReachedMax: data.hasReachedMax,
+        currentPage: data.currentPage,
+        lastPage: data.lastPage,
+        total: data.total,
+        from: data.from,
+        to: data.to,
+        perPage: data.perPage,
+        isPageLoading: false,
+      ),
+      buildError: (f) => CategoryFailure(ServerFailure(message: f.message)),
     );
   }
 }

@@ -12,7 +12,8 @@ class OutletOperationalStatusModel with _$OutletOperationalStatusModel {
     @Default(false) bool isOpenNow,
     @Default('hours_not_set') String operationalStatus,
     @Default('Jam operasional belum tersedia') String operationalStatusLabel,
-    @Default('Outlet belum dapat menerima order saat ini.') String operationalStatusMessage,
+    @Default('Outlet belum dapat menerima order saat ini.')
+    String operationalStatusMessage,
     @Default([]) List<TimeRangeModel> todayHours,
     @Default([]) List<WeeklyHoursModel> weeklyHours,
     String? nextOpenAt,

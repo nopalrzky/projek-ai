@@ -84,4 +84,3 @@ class EmployeeProfileCard extends StatelessWidget {
     );
   }
 }
-

@@ -7,11 +7,7 @@ class VerifyPinParams {
   final String? username;
   final String pin;
 
-  VerifyPinParams({
-    this.employeeId,
-    this.username,
-    required this.pin,
-  });
+  VerifyPinParams({this.employeeId, this.username, required this.pin});
 }
 
 class VerifyPinUseCase {

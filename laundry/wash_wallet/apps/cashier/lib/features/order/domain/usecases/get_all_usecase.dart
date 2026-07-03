@@ -8,7 +8,7 @@ class GetAllUsecase {
 
   GetAllUsecase(this._repository);
 
-  Future<Result<List<Order>>> call({
+  Future<Result<PaginatedData<Order>>> call({
     int page = 1,
     int perPage = 15,
     String? search,

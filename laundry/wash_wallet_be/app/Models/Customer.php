@@ -41,10 +41,12 @@ class Customer extends Model
     protected function casts(): array
     {
         return [
-            'is_active'  => 'boolean',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-            'deleted_at' => 'datetime',
+            'outlet_id'           => 'integer',
+            'customer_account_id' => 'integer',
+            'is_active'           => 'boolean',
+            'created_at'          => 'datetime',
+            'updated_at'          => 'datetime',
+            'deleted_at'          => 'datetime',
         ];
     }
 

@@ -66,11 +66,7 @@ class PaymentConfirmSheet extends StatelessWidget {
             SizedBox(height: context.space.md),
             Row(
               children: [
-                Icon(
-                  icon,
-                  color: context.colors.primary,
-                  size: 28,
-                ),
+                Icon(icon, color: context.colors.primary, size: 28),
                 SizedBox(width: context.space.sm),
                 Text(
                   'Konfirmasi Pembayaran',

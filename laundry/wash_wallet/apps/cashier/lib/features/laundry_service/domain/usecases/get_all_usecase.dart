@@ -32,9 +32,7 @@ class GetAllUsecase {
 
   GetAllUsecase(this._repository);
 
-  Future<Result<List<LaundryService>>> call(
-    GetAllParams params,
-  ) async {
+  Future<Result<PaginatedData<LaundryService>>> call(GetAllParams params) async {
     return await _repository.getAll(
       page: params.page,
       perPage: params.perPage,

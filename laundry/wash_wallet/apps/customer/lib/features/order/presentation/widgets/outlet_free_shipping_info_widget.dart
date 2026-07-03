@@ -19,7 +19,7 @@ class OutletFreeShippingInfoWidget extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: context.colors.successSurface,
-        border: Border.all(color: context.colors.success.withOpacity(0.3)),
+        border: Border.all(color: context.colors.success.withValues(alpha: 0.3)),
         borderRadius: BorderRadius.circular(context.radius.md),
       ),
       child: Row(

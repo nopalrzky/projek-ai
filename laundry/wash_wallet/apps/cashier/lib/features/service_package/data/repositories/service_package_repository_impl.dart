@@ -9,7 +9,7 @@ class ServicePackageRepositoryImpl implements ServicePackageRepository {
   ServicePackageRepositoryImpl(this._remoteDatasource);
 
   @override
-  Future<Result<List<ServicePackage>>> getAll({
+  Future<Result<PaginatedData<ServicePackage>>> getAll({
     int page = 1,
     int perPage = 15,
     String? search,
@@ -23,7 +23,7 @@ class ServicePackageRepositoryImpl implements ServicePackageRepository {
     String sortDirection = 'desc',
   }) async {
     try {
-      final models = await _remoteDatasource.getAll(
+      final paginatedData = await _remoteDatasource.getAll(
         page: page,
         perPage: perPage,
         search: search,
@@ -37,8 +37,15 @@ class ServicePackageRepositoryImpl implements ServicePackageRepository {
         sortDirection: sortDirection,
       );
 
-      final entities = models.map((model) => model.toEntity()).toList();
-      return Result.success(entities);
+      return Result.success(PaginatedData<ServicePackage>(
+        items: paginatedData.items.map((model) => model.toEntity()).toList(),
+        currentPage: paginatedData.currentPage,
+        lastPage: paginatedData.lastPage,
+        perPage: paginatedData.perPage,
+        total: paginatedData.total,
+        from: paginatedData.from,
+        to: paginatedData.to,
+      ));
     } on NetworkException catch (e) {
       return Result.failure(NetworkFailure(message: e.message));
     } on ApiException catch (e) {

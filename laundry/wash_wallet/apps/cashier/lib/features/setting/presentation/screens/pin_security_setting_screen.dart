@@ -89,11 +89,16 @@ class PinSecuritySettingScreen extends StatelessWidget {
                         padding: const EdgeInsets.all(16.0),
                         decoration: BoxDecoration(
                           color: context.colors.error.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(context.radius.md),
+                          borderRadius: BorderRadius.circular(
+                            context.radius.md,
+                          ),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.warning_amber, color: context.colors.error),
+                            Icon(
+                              Icons.warning_amber,
+                              color: context.colors.error,
+                            ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
@@ -115,7 +120,9 @@ class PinSecuritySettingScreen extends StatelessWidget {
                           foregroundColor: context.colors.onPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(context.radius.md),
+                            borderRadius: BorderRadius.circular(
+                              context.radius.md,
+                            ),
                           ),
                         ),
                         child: const Text('Buat PIN Sekarang'),

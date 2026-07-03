@@ -48,7 +48,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
-  Future<Result<List<Category>>> getAll({
+  Future<Result<PaginatedData<Category>>> getAll({
     int? outletId,
     int page = 1,
     int perPage = 15,
@@ -72,14 +72,23 @@ class CategoryRepositoryImpl implements CategoryRepository {
           );
 
           if (cachedModels.isNotEmpty) {
+            final entities = cachedModels.map((e) => e.toEntity()).toList();
             return Result.success(
-              cachedModels.map((e) => e.toEntity()).toList(),
+              PaginatedData<Category>(
+                items: entities,
+                currentPage: 1,
+                lastPage: 1,
+                perPage: entities.length,
+                total: entities.length,
+                from: entities.isEmpty ? null : 1,
+                to: entities.isEmpty ? null : entities.length,
+              ),
             );
           }
         } catch (_) {}
       }
 
-      final models = await _remoteDatasource.getAll(
+      final paginatedData = await _remoteDatasource.getAll(
         outletId: outletId,
         page: page,
         perPage: perPage,
@@ -96,11 +105,21 @@ class CategoryRepositoryImpl implements CategoryRepository {
           sortBy == 'created_at' &&
           sortDirection == 'desc') {
         try {
-          await _localDatasource.cacheCategories(models, outletId);
+          await _localDatasource.cacheCategories(paginatedData.items, outletId);
         } catch (_) {}
       }
 
-      return Result.success(models.map((e) => e.toEntity()).toList());
+      return Result.success(
+        PaginatedData<Category>(
+          items: paginatedData.items.map((m) => m.toEntity()).toList(),
+          currentPage: paginatedData.currentPage,
+          lastPage: paginatedData.lastPage,
+          perPage: paginatedData.perPage,
+          total: paginatedData.total,
+          from: paginatedData.from,
+          to: paginatedData.to,
+        ),
+      );
     } catch (e) {
       if (e is NetworkException &&
           outletId != null &&
@@ -114,8 +133,17 @@ class CategoryRepositoryImpl implements CategoryRepository {
             outletId,
           );
           if (cachedModels.isNotEmpty) {
+            final entities = cachedModels.map((e) => e.toEntity()).toList();
             return Result.success(
-              cachedModels.map((e) => e.toEntity()).toList(),
+              PaginatedData<Category>(
+                items: entities,
+                currentPage: 1,
+                lastPage: 1,
+                perPage: entities.length,
+                total: entities.length,
+                from: entities.isEmpty ? null : 1,
+                to: entities.isEmpty ? null : entities.length,
+              ),
             );
           }
         } catch (_) {}

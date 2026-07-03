@@ -52,12 +52,14 @@ class _IndexServicePackagesScreenState
     return AppLayout(
       userName: authState is Authenticated ? authState.employee.name : null,
       onLogout: () => context.read<AuthCubit>().logout(),
-      header: isCompact ? AppHeader(
-        title: 'Paket Layanan',
-        type: AppHeaderType.standard,
-        backgroundColor: context.colors.surface,
-        onBackPressed: () => context.pop(),
-      ) : null,
+      header: isCompact
+          ? AppHeader(
+              title: 'Paket Layanan',
+              type: AppHeaderType.standard,
+              backgroundColor: context.colors.surface,
+              onBackPressed: () => context.pop(),
+            )
+          : null,
       body: BlocConsumer<ServicePackageCubit, ServicePackageState>(
         listener: (context, state) {
           if (state is ServicePackageFailure) {
@@ -101,9 +103,7 @@ class _IndexServicePackagesScreenState
             setState(() {});
           },
         ),
-        Expanded(
-          child: _buildMobileContent(context, state),
-        ),
+        Expanded(child: _buildMobileContent(context, state)),
       ],
     );
   }
@@ -113,10 +113,7 @@ class _IndexServicePackagesScreenState
       return const AppLoadingIndicator();
     }
     if (state is ServicePackageFailure) {
-      return AppErrorState(
-        message: state.failure.message,
-        onRetry: _loadData,
-      );
+      return AppErrorState(message: state.failure.message, onRetry: _loadData);
     }
     if (state is ServicePackagesLoaded) {
       if (state.packages.isEmpty) {
@@ -152,9 +149,26 @@ class _IndexServicePackagesScreenState
       },
       columns: _buildTabletColumnDefs(context),
       rows: state is ServicePackagesLoaded ? state.packages : [],
-      isLoading: state is ServicePackageLoading,
-      errorMessage: state is ServicePackageFailure ? state.failure.message : null,
+      isLoading: state is ServicePackageLoading ||
+          (state is ServicePackagesLoaded && state.isPageLoading),
+      errorMessage: state is ServicePackageFailure
+          ? state.failure.message
+          : null,
       emptyMessage: 'Belum ada paket layanan',
+      totalCount: state is ServicePackagesLoaded ? state.total : null,
+      currentPage: state is ServicePackagesLoaded ? state.currentPage : null,
+      lastPage: state is ServicePackagesLoaded ? state.lastPage : null,
+      from: state is ServicePackagesLoaded ? state.from : null,
+      to: state is ServicePackagesLoaded ? state.to : null,
+      onPageChanged: state is ServicePackagesLoaded
+          ? (page) => context.read<ServicePackageCubit>().changePage(
+                page,
+                outletId: widget.outletId,
+                search: _searchController.text.isEmpty
+                    ? null
+                    : _searchController.text,
+              )
+          : null,
       rowActions: [
         DataTableRowAction<ServicePackage>(
           icon: Icons.visibility_outlined,
@@ -166,7 +180,9 @@ class _IndexServicePackagesScreenState
     );
   }
 
-  List<DataTableColumnDef<ServicePackage>> _buildTabletColumnDefs(BuildContext context) {
+  List<DataTableColumnDef<ServicePackage>> _buildTabletColumnDefs(
+    BuildContext context,
+  ) {
     final currencyFormat = NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp ',
@@ -183,13 +199,18 @@ class _IndexServicePackagesScreenState
         id: 'price',
         header: 'Harga',
         width: 150,
-        cellBuilder: (context, package) => Text(currencyFormat.format(package.price)),
+        cellBuilder: (context, package) =>
+            Text(currencyFormat.format(package.price)),
       ),
       DataTableColumnDef<ServicePackage>(
         id: 'validityDays',
         header: 'Masa Berlaku',
         width: 150,
-        cellBuilder: (context, package) => Text(package.validityDays != null ? '${package.validityDays} hari' : 'Unlimited'),
+        cellBuilder: (context, package) => Text(
+          package.validityDays != null
+              ? '${package.validityDays} hari'
+              : 'Unlimited',
+        ),
       ),
       DataTableColumnDef<ServicePackage>(
         id: 'status',
@@ -197,13 +218,17 @@ class _IndexServicePackagesScreenState
         width: 100,
         cellBuilder: (context, package) => StatusChip(
           label: package.isActive ? 'Aktif' : 'Nonaktif',
-          color: package.isActive ? context.colors.success : context.colors.error,
+          color: package.isActive
+              ? context.colors.success
+              : context.colors.error,
         ),
       ),
     ];
   }
 
   void _handleTap(ServicePackage package) {
-    context.push('/settings/setup-outlet/service-packages/${package.id}').then((_) => _loadData());
+    context
+        .push('/service-packages/${package.id}')
+        .then((_) => _loadData());
   }
 }

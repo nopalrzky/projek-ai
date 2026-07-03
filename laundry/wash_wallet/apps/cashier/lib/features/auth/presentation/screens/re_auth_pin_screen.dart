@@ -129,7 +129,10 @@ class _ReAuthPinScreenState extends State<ReAuthPinScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text('Verifikasi', style: TextStyle(fontSize: 16)),
+                        : const Text(
+                            'Verifikasi',
+                            style: TextStyle(fontSize: 16),
+                          ),
                   ),
                 ),
               ],

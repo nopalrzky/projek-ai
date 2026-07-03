@@ -59,7 +59,9 @@ class LaundryServiceListView extends StatelessWidget {
                 child: ResponsiveGrid(
                   crossAxisSpacing: context.space.md,
                   mainAxisSpacing: context.space.md,
-                  children: filteredServices.map((service) => _buildItem(context, service)).toList(),
+                  children: filteredServices
+                      .map((service) => _buildItem(context, service))
+                      .toList(),
                 ),
               ),
             ),
@@ -76,18 +78,14 @@ class LaundryServiceListView extends StatelessWidget {
       (item) => item.laundryServiceId == service.id,
     );
     final isInCart = cartItemIndex != -1;
-    final quantity = isInCart
-        ? cartItems[cartItemIndex].quantity
-        : 0.0;
+    final quantity = isInCart ? cartItems[cartItemIndex].quantity : 0.0;
 
     return LaundryServiceTileCard(
       service: service,
       quantity: quantity.toDouble(),
       isInCart: isInCart,
-      onTap: () => onServiceTap(
-        service,
-        isInCart ? cartItems[cartItemIndex] : null,
-      ),
+      onTap: () =>
+          onServiceTap(service, isInCart ? cartItems[cartItemIndex] : null),
     );
   }
 

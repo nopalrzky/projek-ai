@@ -34,6 +34,7 @@ import { Outlet, Category, LaundryServiceFormData, Process } from "@/types";
 import { formatCurrency } from "@/lib/utils";
 import PageHeader from "@/Components/Page/PageHeader";
 import { categoryService } from "@/Services/category.service";
+import { useLatestAsync } from "@/Hooks/useLatestAsync";
 
 function LaundryServiceCreate({
     outlets,
@@ -58,31 +59,39 @@ function LaundryServiceCreate({
     const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
     const [selectedProcessIds, setSelectedProcessIds] = useState<number[]>([]);
 
+    const { runLatest: runLatestCategories } = useLatestAsync();
+
     const loadCategories = useCallback(
         async (outletId: number) => {
             if (!outletId) {
                 setCategories([]);
+                setData("categoryId", 0);
                 return;
             }
 
-            try {
-                setLoadingCategories(true);
-                setCategoriesError(null);
+            setData("categoryId", 0);
+            setLoadingCategories(true);
+            setCategoriesError(null);
 
-                const fetchedCategories =
-                    await categoryService.getAll(outletId);
-                setCategories(fetchedCategories);
-
-                setData("categoryId", 0);
-            } catch (error: any) {
-                console.error("Error loading categories:", error);
-                setCategoriesError(error.message || "Gagal memuat kategori");
-                setCategories([]);
-            } finally {
-                setLoadingCategories(false);
-            }
+            runLatestCategories(
+                outletId,
+                async () => await categoryService.getAll(outletId),
+                {
+                    onSuccess: (fetchedCategories) => {
+                        setCategories(fetchedCategories);
+                    },
+                    onError: (error: any) => {
+                        console.error("Error loading categories:", error);
+                        setCategoriesError(error.message || "Gagal memuat kategori");
+                        setCategories([]);
+                    },
+                    onFinally: () => {
+                        setLoadingCategories(false);
+                    }
+                }
+            );
         },
-        [setData],
+        [setData, runLatestCategories],
     );
 
     useEffect(() => {

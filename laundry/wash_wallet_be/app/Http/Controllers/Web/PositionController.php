@@ -10,11 +10,13 @@ use App\Http\Requests\Position\StorePositionRequest;
 use App\Http\Requests\Position\UpdatePositionRequest;
 use App\Http\Resources\Outlet\OutletResource;
 use App\Http\Resources\Position\PositionResource;
+use App\Models\Position;
 use App\Services\OutletService;
 use App\Services\PositionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -80,14 +82,10 @@ class PositionController extends Controller
     {
         try {
             $outlets = $this->outletService->getAll();
-            $availablePermissions = collect(\App\Enums\Permission::cases())->map(fn($p) => [
-                'key' => $p->value,
-                'label' => $p->label(),
-            ])->toArray();
 
             return Inertia::render('Dashboard/Positions/Create', [
                 'outlets' => OutletResource::collection($outlets)->resolve(),
-                'availablePermissions' => $availablePermissions,
+                'permissionCatalog' => $this->positionService->getPermissionCatalog(),
             ]);
         } catch (Throwable $e) {
             Log::error('[PositionController] Failed to load position create form', [
@@ -107,6 +105,7 @@ class PositionController extends Controller
     public function store(StorePositionRequest $request): RedirectResponse
     {
         try {
+            Gate::authorize('store', Position::class);
             $validated = $request->validated();
             $position = $this->positionService->store($validated);
 
@@ -165,15 +164,11 @@ class PositionController extends Controller
         try {
             $position = $this->positionService->getById($id, ['permissions']);
             $outlets = $this->outletService->getAll();
-            $availablePermissions = collect(\App\Enums\Permission::cases())->map(fn($p) => [
-                'key' => $p->value,
-                'label' => $p->label(),
-            ])->toArray();
 
             return Inertia::render('Dashboard/Positions/Edit', [
                 'position' => (new PositionResource($position))->resolve(),
                 'outlets'  => OutletResource::collection($outlets)->resolve(),
-                'availablePermissions' => $availablePermissions,
+                'permissionCatalog' => $this->positionService->getPermissionCatalog(),
             ]);
         } catch (Throwable $e) {
             Log::error('[PositionController] Failed to load position edit form', [

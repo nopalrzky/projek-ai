@@ -55,26 +55,32 @@ class OrderReviewState extends Equatable {
       isLoadingReviews: isLoadingReviews ?? this.isLoadingReviews,
       currentPage: currentPage ?? this.currentPage,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-      selectedReview: clearSelectedReview ? null : (selectedReview ?? this.selectedReview),
+      selectedReview: clearSelectedReview
+          ? null
+          : (selectedReview ?? this.selectedReview),
       isLoadingDetail: isLoadingDetail ?? this.isLoadingDetail,
       summary: summary ?? this.summary,
       isLoadingSummary: isLoadingSummary ?? this.isLoadingSummary,
-      ratingFilter: clearRatingFilter ? null : (ratingFilter ?? this.ratingFilter),
-      errorMessage: clearErrorMessage ? null : (errorMessage ?? this.errorMessage),
+      ratingFilter: clearRatingFilter
+          ? null
+          : (ratingFilter ?? this.ratingFilter),
+      errorMessage: clearErrorMessage
+          ? null
+          : (errorMessage ?? this.errorMessage),
     );
   }
 
   @override
   List<Object?> get props => [
-        reviews,
-        isLoadingReviews,
-        currentPage,
-        hasReachedMax,
-        selectedReview,
-        isLoadingDetail,
-        summary,
-        isLoadingSummary,
-        ratingFilter,
-        errorMessage,
-      ];
+    reviews,
+    isLoadingReviews,
+    currentPage,
+    hasReachedMax,
+    selectedReview,
+    isLoadingDetail,
+    summary,
+    isLoadingSummary,
+    ratingFilter,
+    errorMessage,
+  ];
 }

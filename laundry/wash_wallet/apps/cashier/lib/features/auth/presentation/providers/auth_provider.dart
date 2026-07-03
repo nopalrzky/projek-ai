@@ -20,7 +20,10 @@ class AuthProvider {
     return AuthLocalDatasourceImpl(storage, prefs);
   }
 
-  static AuthRemoteDatasource createRemoteDatasource(Dio dio, ApiEndpoints endpoints) {
+  static AuthRemoteDatasource createRemoteDatasource(
+    Dio dio,
+    ApiEndpoints endpoints,
+  ) {
     return AuthRemoteDatasourceImpl(dio, endpoints);
   }
 
@@ -60,17 +63,29 @@ class AuthProvider {
   ) {
     return CheckAuthStatusUsecase(repository);
   }
-  
+
   static SetupPinUseCase createSetupPinUseCase(AuthRepository repository) {
     return SetupPinUseCase(repository);
   }
-  
+
   static VerifyPinUseCase createVerifyPinUseCase(AuthRepository repository) {
     return VerifyPinUseCase(repository);
   }
 
   static ResetPinUseCase createResetPinUseCase(AuthRepository repository) {
     return ResetPinUseCase(repository);
+  }
+
+  static UpdateProfileUseCase createUpdateProfileUseCase(
+    AuthRepository repository,
+  ) {
+    return UpdateProfileUseCase(repository);
+  }
+
+  static ChangePasswordUseCase createChangePasswordUseCase(
+    AuthRepository repository,
+  ) {
+    return ChangePasswordUseCase(repository);
   }
 
   static SaveRememberedAccountUsecase createSaveRememberedAccountUsecase(
@@ -87,6 +102,8 @@ class AuthProvider {
     required SetupPinUseCase setupPinUseCase,
     required VerifyPinUseCase verifyPinUseCase,
     required ResetPinUseCase resetPinUseCase,
+    required UpdateProfileUseCase updateProfileUseCase,
+    required ChangePasswordUseCase changePasswordUseCase,
     required SaveRememberedAccountUsecase saveRememberedAccountUsecase,
     required RegisterFcmTokenUsecase registerFcmTokenUsecase,
     required RemoveFcmTokenUsecase removeFcmTokenUsecase,
@@ -100,6 +117,8 @@ class AuthProvider {
       setupPinUseCase: setupPinUseCase,
       verifyPinUseCase: verifyPinUseCase,
       resetPinUseCase: resetPinUseCase,
+      updateProfileUseCase: updateProfileUseCase,
+      changePasswordUseCase: changePasswordUseCase,
       saveRememberedAccountUsecase: saveRememberedAccountUsecase,
       registerFcmTokenUsecase: registerFcmTokenUsecase,
       removeFcmTokenUsecase: removeFcmTokenUsecase,
@@ -135,11 +154,13 @@ class AuthProvider {
     final setupPinUseCase = createSetupPinUseCase(repository);
     final verifyPinUseCase = createVerifyPinUseCase(repository);
     final resetPinUseCase = createResetPinUseCase(repository);
-    final saveRememberedAccountUsecase = createSaveRememberedAccountUsecase(repository);
-
-    final registerFcmTokenUsecase = RegisterFcmTokenUsecase(
-      fcmTokenDatasource,
+    final updateProfileUseCase = createUpdateProfileUseCase(repository);
+    final changePasswordUseCase = createChangePasswordUseCase(repository);
+    final saveRememberedAccountUsecase = createSaveRememberedAccountUsecase(
+      repository,
     );
+
+    final registerFcmTokenUsecase = RegisterFcmTokenUsecase(fcmTokenDatasource);
     final removeFcmTokenUsecase = RemoveFcmTokenUsecase(fcmTokenDatasource);
 
     return createAuthCubit(
@@ -150,6 +171,8 @@ class AuthProvider {
       setupPinUseCase: setupPinUseCase,
       verifyPinUseCase: verifyPinUseCase,
       resetPinUseCase: resetPinUseCase,
+      updateProfileUseCase: updateProfileUseCase,
+      changePasswordUseCase: changePasswordUseCase,
       saveRememberedAccountUsecase: saveRememberedAccountUsecase,
       registerFcmTokenUsecase: registerFcmTokenUsecase,
       removeFcmTokenUsecase: removeFcmTokenUsecase,

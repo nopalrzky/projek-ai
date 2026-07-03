@@ -13,7 +13,12 @@ class SendWaNotificationUsecase {
 
   SendWaNotificationUsecase(this._repository);
 
-  Future<Result<Map<String, dynamic>>> execute(SendWaNotificationParams params) async {
-    return _repository.sendNotification(params.orderId, clientRequestId: params.clientRequestId);
+  Future<Result<Map<String, dynamic>>> execute(
+    SendWaNotificationParams params,
+  ) async {
+    return _repository.sendNotification(
+      params.orderId,
+      clientRequestId: params.clientRequestId,
+    );
   }
 }

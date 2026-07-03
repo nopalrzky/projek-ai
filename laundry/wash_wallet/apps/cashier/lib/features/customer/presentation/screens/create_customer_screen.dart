@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:wash_wallet_ui/wash_wallet_ui.dart';
 import '../bloc/customer_cubit.dart';
 import '../bloc/customer_state.dart';
+
 import '../widgets/customer_form_section.dart';
 
 class CreateCustomerScreen extends StatefulWidget {
@@ -87,101 +88,100 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
     final isCompact = sizeClass == WindowSizeClass.compact;
 
     final content = BlocConsumer<CustomerCubit, CustomerState>(
-        listener: (context, state) {
-          if (state is CustomerActionSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    Icon(Icons.check_circle_rounded, color: Colors.white),
-                    SizedBox(width: context.space.sm),
-                    const Text('Pelanggan berhasil ditambahkan'),
-                  ],
-                ),
-                backgroundColor: context.colors.success,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(context.radius.md),
-                ),
+      listener: (context, state) {
+        if (state is CustomerActionSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.check_circle_rounded, color: Colors.white),
+                  SizedBox(width: context.space.sm),
+                  const Text('Pelanggan berhasil ditambahkan'),
+                ],
               ),
-            );
-            Navigator.pop(context, true);
-          }
-          if (state is CustomerFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    Icon(Icons.error_rounded, color: Colors.white),
-                    SizedBox(width: context.space.sm),
-                    Expanded(child: Text(state.failure.message)),
-                  ],
-                ),
-                backgroundColor: context.colors.error,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(context.radius.md),
-                ),
+              backgroundColor: context.colors.success,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(context.radius.md),
               ),
-            );
-          }
-        },
-        builder: (context, state) {
-          return CustomerFormSection(
-            formKey: _formKey,
-            nameController: _nameController,
-            emailController: _emailController,
-            phoneController: _phoneController,
-            addressController: _addressController,
-            dateOfBirthController: _dobController,
-            selectedGender: _selectedGender,
-            onGenderChanged: (val) => setState(() => _selectedGender = val),
-            onDateTap: _handleDateTap,
-            isLoading: state is CustomerLoading,
-            onSubmit: _handleSubmit,
-            submitLabel: 'Simpan Pelanggan',
+            ),
           );
-        },
+          Navigator.pop(context, true);
+        }
+        if (state is CustomerFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.error_rounded, color: Colors.white),
+                  SizedBox(width: context.space.sm),
+                  Expanded(child: Text(state.failure.message)),
+                ],
+              ),
+              backgroundColor: context.colors.error,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(context.radius.md),
+              ),
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        return CustomerFormSection(
+          formKey: _formKey,
+          nameController: _nameController,
+          emailController: _emailController,
+          phoneController: _phoneController,
+          addressController: _addressController,
+          dateOfBirthController: _dobController,
+          selectedGender: _selectedGender,
+          onGenderChanged: (val) => setState(() => _selectedGender = val),
+          onDateTap: _handleDateTap,
+          isLoading: state is CustomerLoading,
+          onSubmit: _handleSubmit,
+          submitLabel: 'Simpan Pelanggan',
+        );
+      },
     );
 
-    if (isCompact) {
-      return AppLayout(
-        header: AppHeader(
-          title: 'Tambah Pelanggan',
-          backgroundColor: context.colors.surface,
-          onBackPressed: () => Navigator.pop(context),
-        ),
-        scrollable: true,
-        padding: EdgeInsets.symmetric(
-          horizontal: context.space.lg,
-          vertical: context.space.md,
-        ),
-        body: content,
-      );
-    }
-
-    return Column(
-      children: [
-        PageContentHeader(
-          title: 'Tambah Pelanggan',
-          breadcrumbs: [
-            const BreadcrumbItem(label: 'Pelanggan'),
-            BreadcrumbItem(label: 'Daftar Pelanggan', onTap: () => Navigator.pop(context)),
-            const BreadcrumbItem(label: 'Tambah Pelanggan'),
-          ],
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(
-              horizontal: context.space.lg,
-              vertical: context.space.md,
-            ),
-            child: ContentConstraint(
-              child: content,
-            ),
-          ),
-        ),
-      ],
-    );
+    return isCompact
+          ? AppLayout(
+              header: AppHeader(
+                title: 'Tambah Pelanggan',
+                backgroundColor: context.colors.surface,
+                onBackPressed: () => Navigator.pop(context),
+              ),
+              scrollable: true,
+              padding: EdgeInsets.symmetric(
+                horizontal: context.space.lg,
+                vertical: context.space.md,
+              ),
+              body: content,
+            )
+          : Column(
+              children: [
+                PageContentHeader(
+                  title: 'Tambah Pelanggan',
+                  breadcrumbs: [
+                    const BreadcrumbItem(label: 'Pelanggan'),
+                    BreadcrumbItem(
+                      label: 'Daftar Pelanggan',
+                      onTap: () => Navigator.pop(context),
+                    ),
+                    const BreadcrumbItem(label: 'Tambah Pelanggan'),
+                  ],
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: context.space.lg,
+                      vertical: context.space.md,
+                    ),
+                    child: ContentConstraint(child: content),
+                  ),
+                ),
+              ],
+            );
   }
 }

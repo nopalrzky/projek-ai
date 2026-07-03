@@ -6,10 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 class OutletVisitInfoWidget extends StatelessWidget {
   final Outlet outlet;
 
-  const OutletVisitInfoWidget({
-    super.key,
-    required this.outlet,
-  });
+  const OutletVisitInfoWidget({super.key, required this.outlet});
 
   @override
   Widget build(BuildContext context) {
@@ -89,8 +86,12 @@ class _OutletHoursRow extends StatelessWidget {
       if (isOpen) {
         final openTime = schedule!['openTime'] as String? ?? '';
         final closeTime = schedule!['closeTime'] as String? ?? '';
-        final formattedOpen = openTime.length >= 5 ? openTime.substring(0, 5) : openTime;
-        final formattedClose = closeTime.length >= 5 ? closeTime.substring(0, 5) : closeTime;
+        final formattedOpen = openTime.length >= 5
+            ? openTime.substring(0, 5)
+            : openTime;
+        final formattedClose = closeTime.length >= 5
+            ? closeTime.substring(0, 5)
+            : closeTime;
         hoursText = 'Buka Hari Ini: $formattedOpen - $formattedClose';
       } else {
         hoursText = 'Tutup Hari Ini';
@@ -100,11 +101,7 @@ class _OutletHoursRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          Icons.access_time,
-          size: 20,
-          color: context.colors.textSecondary,
-        ),
+        Icon(Icons.access_time, size: 20, color: context.colors.textSecondary),
         SizedBox(width: context.space.xs),
         Expanded(
           child: Text(
@@ -136,11 +133,7 @@ class _OutletContactRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.phone_outlined,
-            size: 20,
-            color: context.colors.primary,
-          ),
+          Icon(Icons.phone_outlined, size: 20, color: context.colors.primary),
           SizedBox(width: context.space.xs),
           Expanded(
             child: Text(
@@ -161,10 +154,7 @@ class _OutletMapsButton extends StatelessWidget {
   final double latitude;
   final double longitude;
 
-  const _OutletMapsButton({
-    required this.latitude,
-    required this.longitude,
-  });
+  const _OutletMapsButton({required this.latitude, required this.longitude});
 
   @override
   Widget build(BuildContext context) {

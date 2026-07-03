@@ -56,7 +56,6 @@ export interface DropdownShortcutProps extends HTMLAttributes<HTMLSpanElement> {
     children: ReactNode;
 }
 
-// Legacy type untuk backward compatibility
 export interface DropdownMenuTriggerProps {
     children: ReactNode;
     onClick: () => void;

@@ -59,14 +59,10 @@ class PickupOutletFilter extends StatelessWidget {
           vertical: context.space.sm,
         ),
         decoration: BoxDecoration(
-          color: isSelected
-              ? context.colors.primary
-              : context.colors.surface,
+          color: isSelected ? context.colors.primary : context.colors.surface,
           borderRadius: BorderRadius.circular(context.radius.full),
           border: Border.all(
-            color: isSelected
-                ? context.colors.primary
-                : context.colors.border,
+            color: isSelected ? context.colors.primary : context.colors.border,
           ),
         ),
         child: Text(

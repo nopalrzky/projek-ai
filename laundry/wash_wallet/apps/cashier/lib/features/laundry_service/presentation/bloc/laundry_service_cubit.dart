@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wash_wallet_core/wash_wallet_core.dart';
+import 'package:wash_wallet_domain/wash_wallet_domain.dart';
 import '../../domain/usecases/get_all_usecase.dart';
 import 'laundry_service_state.dart';
 import '../../domain/usecases/get_by_id_usecase.dart';
@@ -6,7 +8,8 @@ import '../../domain/usecases/store_usecase.dart';
 import '../../domain/usecases/update_usecase.dart';
 import '../../domain/usecases/destroy_usecase.dart';
 
-class LaundryServiceCubit extends Cubit<LaundryServiceState> {
+class LaundryServiceCubit extends Cubit<LaundryServiceState>
+    with TablePaginationCubitMixin<LaundryServiceState> {
   final GetAllUsecase _getAllUsecase;
   final GetByIdUsecase _getByIdUsecase;
   final StoreUsecase _storeUsecase;
@@ -54,13 +57,18 @@ class LaundryServiceCubit extends Cubit<LaundryServiceState> {
     final result = await _getAllUsecase(params);
 
     result.when(
-      success: (services) {
+      success: (paginatedData) {
         if (page == 1) {
           emit(
             LaundryServicesLoaded(
-              services: services,
-              hasReachedMax: services.length < 15,
-              currentPage: page,
+              services: paginatedData.items,
+              hasReachedMax: paginatedData.currentPage >= paginatedData.lastPage,
+              currentPage: paginatedData.currentPage,
+              lastPage: paginatedData.lastPage,
+              total: paginatedData.total,
+              from: paginatedData.from,
+              to: paginatedData.to,
+              perPage: paginatedData.perPage,
             ),
           );
         } else {
@@ -68,15 +76,65 @@ class LaundryServiceCubit extends Cubit<LaundryServiceState> {
           if (currentState is LaundryServicesLoaded) {
             emit(
               currentState.copyWith(
-                services: currentState.services + services,
-                hasReachedMax: services.isEmpty || services.length < 15,
-                currentPage: page,
+                services: currentState.services + paginatedData.items,
+                hasReachedMax: paginatedData.currentPage >= paginatedData.lastPage,
+                currentPage: paginatedData.currentPage,
+                lastPage: paginatedData.lastPage,
+                total: paginatedData.total,
+                from: paginatedData.from,
+                to: paginatedData.to,
+                perPage: paginatedData.perPage,
               ),
             );
           }
         }
       },
       failure: (failure) => emit(LaundryServiceFailure(failure)),
+    );
+  }
+
+  Future<void> changePage(
+    int page, {
+    String? search,
+    int? outletId,
+    int? categoryId,
+    int? unitId,
+    bool? isActive,
+    String sortBy = 'createdAt',
+    String sortDirection = 'desc',
+  }) {
+    final current = state;
+    if (current is! LaundryServicesLoaded) return Future.value();
+    return changePageGeneric<LaundryService>(
+      page: page,
+      currentPage: current.currentPage,
+      lastPage: current.lastPage,
+      request: () => _getAllUsecase(
+        GetAllParams(
+          page: page,
+          perPage: current.perPage,
+          search: search,
+          outletId: outletId,
+          categoryId: categoryId,
+          unitId: unitId,
+          isActive: isActive,
+          sortBy: sortBy,
+          sortDirection: sortDirection,
+        ),
+      ),
+      markPageLoading: () => current.copyWith(isPageLoading: true),
+      buildLoaded: (data) => LaundryServicesLoaded(
+        services: data.items,
+        hasReachedMax: data.hasReachedMax,
+        currentPage: data.currentPage,
+        lastPage: data.lastPage,
+        total: data.total,
+        from: data.from,
+        to: data.to,
+        perPage: data.perPage,
+        isPageLoading: false,
+      ),
+      buildError: (f) => LaundryServiceFailure(ServerFailure(message: f.message)),
     );
   }
 
@@ -89,6 +147,11 @@ class LaundryServiceCubit extends Cubit<LaundryServiceState> {
       success: (service) => emit(LaundryServiceDetailLoaded(service: service)),
       failure: (failure) => emit(LaundryServiceFailure(failure)),
     );
+  }
+
+  Future<LaundryService?> fetchLaundryServiceSilently(int id) async {
+    final result = await _getByIdUsecase(id);
+    return result.when(success: (service) => service, failure: (_) => null);
   }
 
   Future<void> store({

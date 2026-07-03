@@ -21,27 +21,51 @@ class CategoriesLoaded extends CategoryState {
   final List<Category> categories;
   final bool hasReachedMax;
   final int currentPage;
+  final int lastPage;
+  final int total;
+  final int? from;
+  final int? to;
+  final int perPage;
+  final bool isPageLoading;
 
   const CategoriesLoaded({
     required this.categories,
     this.hasReachedMax = false,
     this.currentPage = 1,
+    this.lastPage = 1,
+    this.total = 0,
+    this.from,
+    this.to,
+    this.perPage = 15,
+    this.isPageLoading = false,
   });
 
   CategoriesLoaded copyWith({
     List<Category>? categories,
     bool? hasReachedMax,
     int? currentPage,
+    int? lastPage,
+    int? total,
+    int? from,
+    int? to,
+    int? perPage,
+    bool? isPageLoading,
   }) {
     return CategoriesLoaded(
       categories: categories ?? this.categories,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       currentPage: currentPage ?? this.currentPage,
+      lastPage: lastPage ?? this.lastPage,
+      total: total ?? this.total,
+      from: from ?? this.from,
+      to: to ?? this.to,
+      perPage: perPage ?? this.perPage,
+      isPageLoading: isPageLoading ?? this.isPageLoading,
     );
   }
 
   @override
-  List<Object?> get props => [categories, hasReachedMax, currentPage];
+  List<Object?> get props => [categories, hasReachedMax, currentPage, lastPage, total, from, to, perPage, isPageLoading];
 }
 
 class CategoryDetailLoaded extends CategoryState {
